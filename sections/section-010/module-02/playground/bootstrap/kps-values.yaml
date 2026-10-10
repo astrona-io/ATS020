@@ -1,0 +1,41 @@
+# Trimmed kube-prometheus-stack 92.3.0 for the scraping playground: the
+# Prometheus Operator and one Prometheus only. Alertmanager, Grafana,
+# node-exporter, kube-state-metrics, the default rules and the scrape jobs for
+# Kubernetes components are off to save memory.
+fullnameOverride: kps
+defaultRules:
+  create: false
+alertmanager:
+  enabled: false
+grafana:
+  enabled: false
+kubeStateMetrics:
+  enabled: false
+nodeExporter:
+  enabled: false
+kubeApiServer:
+  enabled: false
+kubelet:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+prometheusOperator:
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+prometheus:
+  prometheusSpec:
+    replicas: 1
+    retention: 6h
+    scrapeInterval: 15s
+    evaluationInterval: 15s
+    resources:
+      requests: {cpu: 100m, memory: 256Mi}
+      limits: {memory: 768Mi}

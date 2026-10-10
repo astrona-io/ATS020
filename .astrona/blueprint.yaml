@@ -1,0 +1,474 @@
+# Curriculum blueprint — written by /astrona-course-domain-plan, consumed by
+# /astrona-course-domain-scaffold and /astrona-course-domain-build.
+#
+# This file is the design record for the course. Commit it. Edit it by hand and
+# re-run scaffold/build; both are idempotent and will not overwrite written prose.
+#
+# Schema: references/blueprint-schema.md in the astrona-course-domain-plan skill.
+
+version: 1
+mode: extend                    # astrona.yaml exists with only module-intro
+
+course:
+  id: ATS020
+  title: Observability and Operations
+  git_url: ssh://git@github.com/astrona-io/ATS020.git
+  description: >
+    Hands-on course for the Observability and Operations domain of the
+    Certified Cloud Native Platform Engineer (CNPE) exam. The reader learns to
+    get workload metrics into Prometheus, query them with PromQL, alert on them
+    through Alertmanager, show them in Grafana, collect pod logs with the
+    OpenTelemetry Collector and turn them into metrics, trace
+    requests with OpenTelemetry and Jaeger, measure delivery and resource
+    efficiency of the platform, and diagnose and fix broken workloads and
+    platform components on a live cluster. Breadth over depth, as the exam
+    expects: each tool is taught to the level of one working task, proved with
+    a query, a trace or a real request.
+  certification:
+    name: Certified Cloud Native Platform Engineer
+    code: CNPE
+    provider: CNCF / Linux Foundation
+    domain: Observability and Operations
+    weight: 20
+  environment:
+    runtime: kind
+    kind: "v0.33.0"
+    kubernetes: "1.35"
+    kind_node_image: "kindest/node:v1.35.8"
+    kube_prometheus_stack_chart: "92.3.0"
+    metrics_server: "0.9.0"
+    grafana: "13.2.3"
+    opentelemetry_operator: "0.160.0"
+    opentelemetry_collector: "0.162.0"
+    jaeger: "2.22.0"
+    cert_manager: "1.21.2"
+    argo_cd: "3.5.4"
+    flux: "2.9.6"
+    gitea: "28.1.0"               # plumbing only (Git server for section 040), never a lesson subject
+    helm: "4.3.0"
+    podinfo: "6.15.0"
+    go_httpbin: "2.25.0"
+
+defaults:
+  playground: true
+  module_lab: false
+  capstone: true
+  section_quiz: true
+  final_quiz: true
+
+existing:
+  schema: v1                    # flat `modules:` manifest; only module-intro so far
+  sections: []
+
+sections:
+
+  # ---------------------------------------------------------------------------
+  - id: section-010
+    title: Metrics And Alerting With Prometheus
+    curriculum_item: "Implementing Monitoring, Alerting, Logging, and Tracing Solutions"
+    description: >
+      Makes the reader able to get any workload's metrics into Prometheus
+      through the Prometheus Operator, query them with PromQL, and turn a query
+      into an alert that reaches a receiver. It comes first because every later
+      section (dashboards, SLOs, DORA metrics, incident triage) reads these
+      metrics.
+    modules:
+      - id: module-01
+        title: Scrape Workloads With ServiceMonitor And PodMonitor
+        objectives:
+          - Read the Prometheus targets page and the `up` metric to say which targets are scraped and which fail
+          - Write a ServiceMonitor that selects a Service by label and scrapes a named port and path
+          - Write a PodMonitor for pods that have no Service
+          - Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
+          - Prove a scrape works with `up == 1` for every endpoint of the workload
+        outline:
+          - What Prometheus scrapes, what a target and the `up` metric are, and where the Prometheus Operator fits
+          - The Prometheus resource's serviceMonitorSelector and namespace selector — which monitors it reads
+          - ServiceMonitor anatomy — selector, namespaceSelector, endpoints[].port and path, and how it maps to the Service
+          - PodMonitor for workloads without a Service, and when to choose it
+          - Debugging a missing target from the Prometheus UI and the operator's generated configuration
+        diagrams:
+          - type: flowchart
+            shows: Prometheus resource selects ServiceMonitor, which selects Service, which selects endpoints Prometheus scrapes
+          - type: sequence
+            shows: One scrape cycle — Prometheus sends GET /metrics, stores samples, sets up to 1 or 0
+        playground_env: >
+          kind cluster with trimmed kube-prometheus-stack 92.3.0 (one Prometheus
+          replica and the Prometheus Operator only; Alertmanager, Grafana,
+          node-exporter, kube-state-metrics, default rules and dashboards off).
+          Namespace `starfleet` with `scout` (podinfo, Service with named port
+          `http` 9898 exposing /metrics) and `shuttle`; namespace `outpost` with
+          a second `scout` Deployment and no Service (for a PodMonitor). No
+          ServiceMonitor or PodMonitor for the Starfleet app exists yet, so the
+          first targets page shows only Prometheus itself.
+      - id: module-02
+        title: Query Metrics With PromQL
+        objectives:
+          - Select time series by metric name and label matchers, including regex matchers
+          - Calculate a per-second request rate from a counter with `rate()` and explain why `rate` is not used on a gauge
+          - Aggregate series with `sum by` and `without` to get one value per namespace or per status code
+          - Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
+          - Run a query from the command line against the Prometheus HTTP API and read the result with jq
+        outline:
+          - Instant vectors, range vectors and labels — reading what the query browser returns
+          - Counters, gauges and histograms in podinfo's own metrics
+          - rate, increase and aggregation operators
+          - Error ratio and latency percentiles — the queries every SLO and alert reuses
+          - The /api/v1/query endpoint for scripts and graders
+        diagrams:
+          - type: flowchart
+            shows: From raw counter samples to rate() to sum by() to one number per label
+        playground_env: >
+          Same trimmed stack as the scraping module, with ServiceMonitors for
+          `scout` in `starfleet` and a second `scout` in `outpost` already
+          applied and targets UP. A traffic loop in `shuttle` sends steady
+          requests, including a share of `/status/500` and `/delay/1` requests
+          to `scout` (podinfo records path and status in its histogram), so
+          error ratio and latency queries return non-zero values. `probe`
+          (go-httpbin) serves no Prometheus metrics, so it is not used here.
+          Port-forward to Prometheus on 9090 documented.
+      - id: module-03
+        title: Alert With PrometheusRule And Alertmanager
+        objectives:
+          - Write an alerting rule in a PrometheusRule with `expr`, `for`, labels and annotations
+          - Write a recording rule and query the new series it creates
+          - Read an alert's state (inactive, pending, firing) in Prometheus and in Alertmanager
+          - Route alerts by label to a receiver with an AlertmanagerConfig or the Alertmanager configuration
+          - Silence an alert for a time window and prove it stops notifying
+        outline:
+          - Recording rules versus alerting rules, and how the operator picks up a PrometheusRule (ruleSelector)
+          - The alert lifecycle — inactive, pending for `for:`, firing, resolved
+          - Alertmanager routing tree, grouping and receivers
+          - Silences and inhibition
+        diagrams:
+          - type: state
+            shows: Alert lifecycle from inactive to pending to firing to resolved
+          - type: flowchart
+            shows: Prometheus evaluates rule, sends alert to Alertmanager, route tree matches labels, receiver gets notification
+        playground_env: >
+          Trimmed kube-prometheus-stack with Prometheus and Alertmanager on,
+          ServiceMonitors for `scout` in `starfleet` and `outpost` applied, and a webhook
+          receiver pod in namespace `monitoring` (a small HTTP echo that logs
+          every POST) so the reader can see notifications arrive. No
+          PrometheusRule for the Starfleet app exists yet. `scout` can be made
+          to fail on demand by pointing the traffic loop at `/status/500`.
+    capstone:
+      title: Metrics And Alerting Capstone
+      objective: >
+        A new namespace `frontier` runs a copy of `scout` that no one
+        monitors. The reader adds a monitor so Prometheus scrapes it, writes a
+        recording rule for its error ratio, an alert that fires when the ratio
+        is above 5% for one minute, and routes alerts with `team: frontier` to
+        the provided webhook receiver. The grader causes errors and checks
+        that the target is up, the recorded series exists, and the alert
+        reaches the receiver.
+
+  # ---------------------------------------------------------------------------
+  - id: section-020
+    title: Dashboards And Logs
+    curriculum_item: "Implementing Monitoring, Alerting, Logging, and Tracing Solutions"
+    description: >
+      Makes the reader able to show metrics on a Grafana dashboard that is
+      stored as code, and to collect pod logs with the OpenTelemetry
+      Collector, enrich and filter them, and turn error lines into a
+      Prometheus metric that a dashboard can draw. It follows metrics because
+      dashboards draw PromQL queries, and logs are the next signal an
+      operator reads.
+    modules:
+      - id: module-01
+        title: Build Grafana Dashboards As Code
+        objectives:
+          - Add a Prometheus data source to Grafana with a provisioning file or a labelled ConfigMap
+          - Build a panel from a PromQL query and choose the right visualisation for a rate, a ratio and a latency
+          - Use a dashboard variable to switch the namespace shown on every panel
+          - Export a dashboard as JSON and load it through the Grafana sidecar ConfigMap so it survives a pod restart
+        outline:
+          - Grafana's parts — data source, dashboard, panel, query, variable
+          - Provisioning — data sources and dashboards from files and ConfigMaps, and why click-built dashboards are lost
+          - Building panels for request rate, error ratio and latency
+          - Variables and templating
+        diagrams:
+          - type: flowchart
+            shows: ConfigMap with dashboard label, Grafana sidecar loads it, panel queries Prometheus data source
+        playground_env: >
+          Trimmed kube-prometheus-stack with Prometheus and Grafana on (default
+          dashboards off, sidecar for dashboards and data sources on, admin
+          password set and shown in the playground guide). ServiceMonitors for
+          `scout` applied, traffic loop running. No Starfleet
+          dashboard exists yet. Port-forward to Grafana on 3000 documented.
+      - id: module-02
+        title: Collect Pod Logs With The OpenTelemetry Collector
+        objectives:
+          - Read a pod's logs, its previous container's logs and its events with `kubectl logs` and `kubectl events`
+          - Deploy an OpenTelemetry Collector as a DaemonSet whose filelog receiver reads the container log files on each node
+          - Add Kubernetes metadata to each log record with the k8sattributes processor and drop unwanted records with the filter processor
+          - Check the logs pipeline end to end with the debug exporter and the Collector's own logs
+          - Turn error log lines into a Prometheus metric with the count connector and query it with PromQL
+        outline:
+          - What Kubernetes keeps on its own — `kubectl logs`, `--previous`, events — and why a cluster still needs a log pipeline
+          - Where container logs live on a node and why a DaemonSet reads them
+          - Collector configuration for logs — filelog receiver, container parser, k8sattributes and filter processors, debug exporter
+          - From log lines to a metric — the count connector and a Prometheus exporter scraped by Prometheus
+        diagrams:
+          - type: flowchart
+            shows: Container stdout to node log file, filelog receiver, k8sattributes and filter processors, debug exporter and count connector to Prometheus
+        playground_env: >
+          kind cluster with cert-manager, the OpenTelemetry Operator 0.160.0 and
+          a trimmed Prometheus (Prometheus Operator and one Prometheus). The
+          OpenTelemetry Collector contrib image 0.162.0 is preloaded, but no
+          Collector is deployed yet. `scout` in `starfleet` and `probe` in
+          `outpost`, with a traffic loop in `shuttle` that makes `probe` log
+          both 200 and 500 responses. No log storage backend: logs are read
+          with the debug exporter and counted into a Prometheus metric.
+        notes: >
+          Official CNPE tool list only: no Loki, no LogQL. Verify the filelog
+          receiver's container parser, the k8sattributes RBAC the operator
+          needs, and the count connector on Collector contrib 0.162.0.
+    capstone:
+      title: Dashboards And Logs Capstone
+      objective: >
+        The on-call team wants one dashboard for the `outpost` namespace. The
+        reader deploys a Collector that reads `outpost` logs and counts the
+        `probe` error lines into a Prometheus metric, and provisions a
+        dashboard as a ConfigMap with a request-rate panel, an error-ratio
+        panel and an error-log-lines panel from that metric. The grader checks
+        the dashboard via the Grafana API, its panel queries, and that the
+        log-derived metric rises when `probe` returns errors.
+
+  # ---------------------------------------------------------------------------
+  - id: section-030
+    title: Distributed Tracing With OpenTelemetry And Jaeger
+    curriculum_item: "Implementing Monitoring, Alerting, Logging, and Tracing Solutions"
+    description: >
+      Makes the reader able to run an OpenTelemetry Collector with the
+      OpenTelemetry Operator, send traces to Jaeger, and add tracing to an
+      application without changing its code. It comes after metrics and logs
+      because tracing reuses the Collector pipeline idea and answers the
+      question metrics cannot — where in a chain of services the time went.
+    modules:
+      - id: module-01
+        title: Run An OpenTelemetry Collector With The Operator
+        objectives:
+          - Install the OpenTelemetry Operator after cert-manager and confirm its webhook is ready
+          - Write an OpenTelemetryCollector resource with an OTLP receiver, a batch processor and an exporter to Jaeger
+          - Choose the Collector mode (deployment, daemonset, sidecar) for a given need
+          - Send a test trace over OTLP and find it in the Jaeger UI and API
+          - Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)
+        outline:
+          - Traces and spans, trace IDs and context propagation through the `traceparent` header
+          - The OpenTelemetry Operator and its OpenTelemetryCollector resource
+          - Receivers, processors, exporters and pipelines for traces
+          - Jaeger 2 as the trace backend, and reading a trace in its UI
+        diagrams:
+          - type: sequence
+            shows: A request crosses two services, each creates a span with the same trace ID and exports it over OTLP
+          - type: flowchart
+            shows: App, OTLP receiver, batch processor, OTLP exporter, Jaeger, UI
+        playground_env: >
+          kind cluster with cert-manager 1.21.2 and Jaeger 2.22.0 (all-in-one,
+          in-memory storage, OTLP on 4317 and 4318, UI on 16686) in namespace
+          `observability`. The OpenTelemetry Operator is not installed yet, so
+          the reader installs it. `scout` in `starfleet` configured to export
+          traces over OTLP to a Collector Service name that does not exist yet,
+          so no traces appear until the Collector is created. No Prometheus
+          stack, to save memory.
+        notes: >
+          Verify the podinfo OTLP tracing flag or environment variable on 6.15.0
+          before writing it down. If podinfo cannot export, use the
+          `telemetrygen` image from the Collector contrib project for test
+          traces.
+      - id: module-02
+        title: Add Tracing Without Code Changes Using Auto-Instrumentation
+        objectives:
+          - Write an Instrumentation resource with the exporter endpoint, propagators and sampler
+          - Annotate a Deployment so the operator injects the language agent, and restart it so the change takes effect
+          - Read the injected init container and environment variables to prove injection happened
+          - Follow one request across two services in Jaeger and name the slowest span
+          - Find why a pod was not instrumented (annotation on the wrong object, Instrumentation in another namespace, pod not restarted)
+        outline:
+          - What auto-instrumentation injects and when (pod creation, mutating webhook)
+          - The Instrumentation resource — exporter, propagators, sampler, language blocks
+          - Annotations and restarts
+          - Reading a two-service trace and finding the slow step
+        diagrams:
+          - type: sequence
+            shows: Pod create request, operator webhook adds init container and env, app starts with agent, spans exported
+        playground_env: >
+          kind cluster with cert-manager, OpenTelemetry Operator 0.160.0, a
+          working Collector exporting to Jaeger 2.22.0. A `relay` Node.js
+          service (node:22-alpine with a small HTTP server script from a
+          ConfigMap) in `starfleet` that calls `scout`; `relay` has no
+          instrumentation and no annotation yet. `scout` exports its own spans,
+          so once `relay` is instrumented the reader sees one trace with spans
+          from both.
+        notes: >
+          Node.js injection is chosen because it needs no eBPF or privileged
+          pods; Go auto-instrumentation in the operator is eBPF-based and not
+          suitable for kind. Confirm the Node.js agent works on node:22-alpine
+          before building.
+    capstone:
+      title: Distributed Tracing Capstone
+      objective: >
+        Requests to `relay` are slow, but no one can say where. The reader
+        deploys a Collector, writes an Instrumentation resource, instruments
+        `relay`, and fixes a broken exporter endpoint on `scout`, then uses
+        Jaeger to name the slow downstream call. The grader reads traces from
+        the Jaeger API and checks for one trace that holds spans from both
+        services.
+
+  # ---------------------------------------------------------------------------
+  - id: section-040
+    title: Measuring Platform Efficiency
+    curriculum_item: "Measuring and Improving Platform Efficiency Using Deployment Metrics and Performance Indicators"
+    description: >
+      Makes the reader able to measure how well the platform delivers and how
+      well it uses resources: the four DORA metrics from GitOps history,
+      service level objectives with error budgets, and the gap between
+      requested and used CPU and memory. It comes after the collection
+      sections because every number here is a Prometheus query on data those
+      sections taught to collect.
+    modules:
+      - id: module-01
+        title: Measure Delivery With DORA Metrics
+        objectives:
+          - Define deployment frequency, lead time for changes, change failure rate and time to restore service
+          - Count deployments over a time window from the GitOps controller's sync metrics in Prometheus
+          - Calculate lead time from a commit time in Git and the sync time recorded by the controller
+          - Calculate change failure rate and time to restore from failed and recovered deployments
+          - Name one change to the delivery process that improves each metric
+        outline:
+          - The four DORA metrics and what each one says about a platform
+          - Where the data comes from — Git history, the GitOps controller's sync history and its Prometheus metrics
+          - Queries for deployment frequency and change failure rate
+          - Lead time and time to restore from timestamps
+        diagrams:
+          - type: timeline
+            shows: Commit, sync, healthy, failure, rollback — the timestamps each DORA metric is measured between
+          - type: flowchart
+            shows: Gitea commit, Argo CD sync, metrics in Prometheus, DORA queries
+        playground_env: >
+          kind cluster with Gitea 28.1.0 holding a `starfleet-deploy`
+          repository, Argo CD 3.5.4 with an Application for `scout` in
+          `starfleet`, and trimmed Prometheus scraping Argo CD's metrics. A
+          seed script makes a history of about ten commits and syncs, two of
+          them deliberately bad (failing image tag) and later rolled back, so
+          the queries have data. Flux is not installed. Heaviest playground in
+          the course; nothing else runs beside it.
+        notes: >
+          Verify which Argo CD 3.5 metric carries sync results
+          (`argocd_app_sync_total` with a phase label) before writing queries.
+          Mention Flux's equivalent (`gotk_reconcile_condition`) in one
+          paragraph, without a playground.
+      - id: module-02
+        title: Measure Service Levels And Resource Efficiency
+        objectives:
+          - Write an SLI as a PromQL ratio of good requests to all requests
+          - Calculate the remaining error budget for a 99% SLO over a window
+          - Write a burn-rate alert that fires when the budget would run out early
+          - Compare container CPU and memory requests with real usage from metrics-server and Prometheus
+          - Name the workload with the biggest gap and change its requests to match usage
+        outline:
+          - SLI, SLO and error budget, with a worked example on `scout`
+          - Burn rate and multi-window alerts
+          - Requests versus usage — `kubectl top`, container metrics and kube-state-metrics
+          - Right-sizing one workload and proving the waste went down
+        diagrams:
+          - type: flowchart
+            shows: Good and total request counters, SLI ratio, SLO target, remaining error budget, burn-rate alert
+        playground_env: >
+          kind cluster with metrics-server 0.9.0 and trimmed kube-prometheus-stack
+          with kube-state-metrics on (needed for requests). The traffic loop
+          sends a fixed share of `/status/500` requests to `scout` so the SLI is below target and the error
+          budget is burning. `scout` requests far more CPU and memory than it
+          uses, and a third Deployment requests too little, so both directions
+          of the gap are visible.
+    capstone:
+      title: Platform Efficiency Capstone
+      objective: >
+        The platform team must report on `starfleet`. The reader writes
+        recording rules for deployment frequency and change failure rate over
+        the seeded history, an SLO error-budget recording rule and burn-rate
+        alert for `scout`, and right-sizes the most over-requested Deployment.
+        The grader queries the recorded series, checks the alert definition,
+        and compares the new requests with measured usage.
+
+  # ---------------------------------------------------------------------------
+  - id: section-050
+    title: Diagnosing And Remediating Incidents
+    curriculum_item: "Diagnosing and Remediating Platform Issue and Incident Scenarios"
+    description: >
+      Makes the reader able to find and fix the cause of a broken workload or
+      a broken platform component, using events, logs, status conditions and
+      metrics, and to prove the fix. It comes last because it uses every tool
+      the earlier sections taught, under the time pressure of an incident.
+    modules:
+      - id: module-01
+        title: Triage And Fix Failing Workloads
+        objectives:
+          - Follow a fixed triage order — status, events, describe, logs, previous logs — to find a pod's failure cause
+          - Fix a Pending pod caused by too-large requests, a missing PersistentVolumeClaim or an unmatched node selector
+          - Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe
+          - Fix an OOMKilled container by reading its usage and setting a fitting memory limit
+          - Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret
+        outline:
+          - A triage order and the commands for each step
+          - Pending — scheduler events and what they say
+          - CrashLoopBackOff and probes — exit codes, previous logs
+          - OOMKilled — last state, memory limits and usage
+          - ImagePullBackOff — image references and pull secrets
+        diagrams:
+          - type: flowchart
+            shows: Decision tree from pod status to the command that shows the cause to the usual fix
+          - type: state
+            shows: Pod and container states — Pending, ContainerCreating, Running, CrashLoopBackOff, Terminated OOMKilled
+        playground_env: >
+          kind cluster with metrics-server, starts broken on purpose: in
+          `starfleet`, one Deployment per failure kind — `scout` Pending
+          (requests more CPU than the node has), `probe` in CrashLoopBackOff
+          (liveness probe on a wrong path), a `cargo` Deployment OOMKilled
+          (memory limit below its working set), and `beacon` in
+          ImagePullBackOff (tag that does not exist). `shuttle` is healthy and
+          used to prove each fix with a request. No monitoring stack needed.
+      - id: module-02
+        title: Diagnose And Fix Broken Platform Components
+        objectives:
+          - Find a failing admission webhook from the API server error message and fix its Service without deleting it
+          - Find an expired webhook serving certificate from the `x509` error text and `openssl`, and replace it
+          - Find a stopped or crashing controller from its Deployment, logs and the resources that stop reconciling
+          - Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git
+          - Prove each fix by the platform behaviour it restores (create succeeds, resource reconciles, sync is Healthy)
+        outline:
+          - How platform components fail differently from workloads — the symptom shows up somewhere else
+          - Admission webhooks — failurePolicy, the error text, and the Service behind it
+          - Controllers — reconcile loops that stop, leader election, status conditions
+          - GitOps sync failures — OutOfSync, Degraded, sync errors
+          - Certificates — the serving certificate behind a webhook, its expiry, and the `caBundle` the API server trusts
+        diagrams:
+          - type: sequence
+            shows: kubectl create, API server calls webhook, webhook Service has no endpoints, request is rejected
+          - type: flowchart
+            shows: Symptom to component to the status field that names the cause
+        playground_env: >
+          kind cluster with Argo CD with an Application backed by an in-cluster
+          Git repository (Gitea as plumbing), a trimmed Prometheus stack, and
+          two small validating webhooks. Starts broken on purpose: one
+          webhook's Service selector matches no pod (creates in `starfleet`
+          fail), the other webhook serves an expired certificate (creates in
+          `outpost` fail with an `x509` error), the Prometheus Operator is
+          scaled to zero so a new PrometheusRule never reaches Prometheus, and
+          the Application points at a path that does not exist so it is
+          stuck. Each fault is independent so the reader can fix them in any
+          order.
+        notes: >
+          Graders must reject the shortcut fixes: deleting the webhook
+          configuration, setting failurePolicy to Ignore, or deleting the
+          Application.
+    capstone:
+      title: Incident Response Capstone
+      objective: >
+        A release went out and `starfleet` is down. The reader finds and fixes
+        four independent faults — an OOMKilled workload, an image tag that does
+        not exist, a webhook that blocks new pods, and a GitOps Application
+        stuck on a bad path — and proves recovery with a 200 from `shuttle`,
+        Healthy sync and pods Running. The grader checks behaviour and rejects
+        the shortcut fixes.

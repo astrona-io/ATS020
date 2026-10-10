@@ -1,0 +1,208 @@
+# Course manifest for ATS020 - Observability and Operations (Certified Cloud Native Platform Engineer).
+#
+# One entry per section under `modules:`. Each section lists, in order: its
+# README, then for each module the landing page (course.md), its parts
+# (course-0N-*.md), and right after the part a lab tests, the lab's
+# question.md reading and the `type: lab` entry. The module's wrap-up page
+# comes last. The section capstone closes the section. Playgrounds are not
+# listed: the landing page's playground marker shows them. solution.md is
+# never listed.
+#
+# Every `path:` is relative to this file.
+
+training:
+  id: ATS020
+  title: "CNPE: Observability and Operations"
+  description: >
+    Training material covering the Certified Cloud Native Platform Engineer
+    (CNPE) Observability and Operations domain: scraping workloads with
+    Prometheus, PromQL, alerting rules and Alertmanager routing, Grafana
+    dashboards, log collection with the OpenTelemetry Collector,
+    distributed tracing with OpenTelemetry and Jaeger, DORA delivery metrics,
+    service level objectives and resource efficiency, and diagnosing and
+    fixing broken workloads and platform components. Each module pairs a
+    layered reader with an ungraded hands-on playground. Each section closes
+    with an integration capstone.
+    Built and verified against Kubernetes 1.35.
+
+  certification:
+    name: Certified Cloud Native Platform Engineer
+    code: CNPE
+    provider: CNCF / Linux Foundation
+    domain: Observability and Operations
+    weight: 20
+    competencies:
+      - "Implementing Monitoring, Alerting, Logging, and Tracing Solutions"
+      - "Measuring and Improving Platform Efficiency Using Deployment Metrics and Performance Indicators"
+      - "Diagnosing and Remediating Platform Issue and Incident Scenarios"
+
+modules:
+
+  - id: module-intro
+    title: "Introduction"
+    description: >
+      Start here. What this course trains you to do, how it is laid out, how
+      to get your machine ready with the astrona command-line tool, how the
+      content is written and checked, who maintains it, and how to report a
+      mistake.
+
+    content:
+      - type: reading
+        title: Introduction
+        path: sections/intro/README.md
+      - type: reading
+        title: "Welcome To The Course"
+        path: sections/intro/course-01-welcome.md
+      - type: reading
+        title: "Get Your Machine Ready"
+        path: sections/intro/course-02-get-your-machine-ready.md
+      - type: reading
+        title: "How This Course Is Made"
+        path: sections/intro/course-03-how-this-course-is-made.md
+
+  - id: module-010
+    title: "Metrics And Alerting With Prometheus"
+    description: >
+      Makes the reader able to get any workload's metrics into
+      Prometheus through the Prometheus Operator, query them with
+      PromQL, and turn a query into an alert that reaches a receiver. It
+      comes first because every later section (dashboards, SLOs, DORA
+      metrics, incident triage) reads these metrics.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-010/README.md
+
+      - type: reading
+        title: "Scrape Workloads With ServiceMonitor And PodMonitor"
+        path: sections/section-010/module-01/course.md
+      - type: reading
+        title: "Targets And The up Metric"
+        path: sections/section-010/module-01/course-01-targets-and-the-up-metric.md
+      - type: reading
+        title: "Select A Service With A ServiceMonitor"
+        path: sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+      - type: reading
+        title: "Scrape Pods Without A Service With A PodMonitor"
+        path: sections/section-010/module-01/course-03-scrape-pods-with-a-podmonitor.md
+      - type: reading
+        title: "Finding A Missing Target"
+        path: sections/section-010/module-01/course-04-finding-a-missing-target.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-010/module-01/course-05-summary.md
+
+      - type: reading
+        title: "Query Metrics With PromQL"
+        path: sections/section-010/module-02/course.md
+      - type: reading
+        title: "Selecting Time Series"
+        path: sections/section-010/module-02/course-01-selecting-time-series.md
+      - type: reading
+        title: "Counters, Gauges And rate()"
+        path: sections/section-010/module-02/course-02-counters-gauges-and-rate.md
+      - type: reading
+        title: "Aggregation, Error Ratio And Latency"
+        path: sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+      - type: reading
+        title: "Running Queries From The Command Line"
+        path: sections/section-010/module-02/course-04-running-queries-from-the-command-line.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-010/module-02/course-05-summary.md
+
+      - type: reading
+        title: "Alert With PrometheusRule And Alertmanager"
+        path: sections/section-010/module-03/course.md
+
+  - id: module-020
+    title: "Dashboards And Logs"
+    description: >
+      Makes the reader able to show metrics on a Grafana dashboard that
+      is stored as code, and to collect pod logs with the OpenTelemetry
+      Collector, enrich and filter them, and turn error lines into a
+      Prometheus metric that a dashboard can draw. It follows metrics
+      because dashboards draw PromQL queries, and logs are the next
+      signal an operator reads.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-020/README.md
+
+      - type: reading
+        title: "Build Grafana Dashboards As Code"
+        path: sections/section-020/module-01/course.md
+
+      - type: reading
+        title: "Collect Pod Logs With The OpenTelemetry Collector"
+        path: sections/section-020/module-02/course.md
+
+  - id: module-030
+    title: "Distributed Tracing With OpenTelemetry And Jaeger"
+    description: >
+      Makes the reader able to run an OpenTelemetry Collector with the
+      OpenTelemetry Operator, send traces to Jaeger, and add tracing to
+      an application without changing its code. It comes after metrics
+      and logs because tracing reuses the Collector pipeline idea and
+      answers the question metrics cannot — where in a chain of services
+      the time went.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-030/README.md
+
+      - type: reading
+        title: "Run An OpenTelemetry Collector With The Operator"
+        path: sections/section-030/module-01/course.md
+
+      - type: reading
+        title: "Add Tracing Without Code Changes Using Auto-Instrumentation"
+        path: sections/section-030/module-02/course.md
+
+  - id: module-040
+    title: "Measuring Platform Efficiency"
+    description: >
+      Makes the reader able to measure how well the platform delivers
+      and how well it uses resources: the four DORA metrics from GitOps
+      history, service level objectives with error budgets, and the gap
+      between requested and used CPU and memory. It comes after the
+      collection sections because every number here is a Prometheus
+      query on data those sections taught to collect.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-040/README.md
+
+      - type: reading
+        title: "Measure Delivery With DORA Metrics"
+        path: sections/section-040/module-01/course.md
+
+      - type: reading
+        title: "Measure Service Levels And Resource Efficiency"
+        path: sections/section-040/module-02/course.md
+
+  - id: module-050
+    title: "Diagnosing And Remediating Incidents"
+    description: >
+      Makes the reader able to find and fix the cause of a broken
+      workload or a broken platform component, using events, logs,
+      status conditions and metrics, and to prove the fix. It comes last
+      because it uses every tool the earlier sections taught, under the
+      time pressure of an incident.
+
+    content:
+      - type: reading
+        title: Section Overview
+        path: sections/section-050/README.md
+
+      - type: reading
+        title: "Triage And Fix Failing Workloads"
+        path: sections/section-050/module-01/course.md
+
+      - type: reading
+        title: "Diagnose And Fix Broken Platform Components"
+        path: sections/section-050/module-02/course.md

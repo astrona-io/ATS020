@@ -1,0 +1,195 @@
+# Starting workloads for the alerting playground: `scout` (podinfo) in
+# `starfleet` with a ServiceMonitor, a `shuttle` pod whose loop sends one
+# normal request per second (no errors), and `alert-receiver` in `monitoring`,
+# a small HTTP server that prints the body of every POST it receives so
+# Alertmanager notifications can be read with `kubectl logs`. No
+# PrometheusRule or AlertmanagerConfig for the Starfleet app exists yet.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    app: scout
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    app: scout
+spec:
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shuttle-traffic
+  namespace: starfleet
+data:
+  traffic.sh: |
+    #!/bin/sh
+    # Steady, healthy traffic: one request per second to scout.
+    while true; do
+      curl -s -o /dev/null http://scout.starfleet:9898/
+      sleep 1
+    done
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command: ["sh", "/traffic/traffic.sh"]
+          volumeMounts:
+            - name: traffic
+              mountPath: /traffic
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}
+      volumes:
+        - name: traffic
+          configMap:
+            name: shuttle-traffic
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-receiver
+  namespace: monitoring
+data:
+  receiver.py: |
+    # Prints a short summary of every Alertmanager webhook notification.
+    import json
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+            msg = json.loads(body)
+            for alert in msg.get("alerts", []):
+                labels = alert.get("labels", {})
+                print(f"{msg.get('receiver')} {alert.get('status')} "
+                      f"{labels.get('alertname')} namespace={labels.get('namespace')} "
+                      f"severity={labels.get('severity')} startsAt={alert.get('startsAt')}",
+                      flush=True)
+            self.send_response(200)
+            self.end_headers()
+
+        def log_message(self, *args):
+            pass
+
+    HTTPServer(("", 8080), Handler).serve_forever()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-receiver
+  namespace: monitoring
+  labels:
+    app: alert-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alert-receiver
+  template:
+    metadata:
+      labels:
+        app: alert-receiver
+    spec:
+      containers:
+        - name: alert-receiver
+          image: python:3.13-alpine
+          command: ["python", "-u", "/app/receiver.py"]
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: app
+              mountPath: /app
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 64Mi}
+      volumes:
+        - name: app
+          configMap:
+            name: alert-receiver
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-receiver
+  namespace: monitoring
+spec:
+  selector:
+    app: alert-receiver
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

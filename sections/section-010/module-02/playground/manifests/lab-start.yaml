@@ -1,0 +1,190 @@
+# Starting workloads for the PromQL playground: `scout` (podinfo) in
+# `starfleet` and in `outpost`, each behind a Service with a ServiceMonitor,
+# and a `shuttle` pod whose loop sends steady traffic to both, including
+# failing (`/status/500`) and slow (`/delay/1`) requests.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    app: scout
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    app: scout
+spec:
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: outpost
+  labels:
+    app: scout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: outpost
+  labels:
+    app: scout
+spec:
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: outpost
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shuttle-traffic
+  namespace: starfleet
+data:
+  traffic.sh: |
+    #!/bin/sh
+    # Steady traffic for the PromQL playground. Every second: one normal
+    # request to each scout. Every 5th second: one /status/500 to the
+    # starfleet scout. Every 10th second: one /delay/1 to the starfleet scout.
+    i=0
+    while true; do
+      i=$((i+1))
+      curl -s -o /dev/null http://scout.starfleet:9898/
+      curl -s -o /dev/null http://scout.outpost:9898/
+      [ $((i % 5)) -eq 0 ] && curl -s -o /dev/null http://scout.starfleet:9898/status/500
+      [ $((i % 10)) -eq 0 ] && curl -s -o /dev/null http://scout.starfleet:9898/delay/1
+      sleep 1
+    done
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command: ["sh", "/traffic/traffic.sh"]
+          volumeMounts:
+            - name: traffic
+              mountPath: /traffic
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}
+      volumes:
+        - name: traffic
+          configMap:
+            name: shuttle-traffic
