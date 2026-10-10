@@ -26,13 +26,13 @@ items:
 - key: section-010/module-03/playground
   kind: playground
   what: 'playground for module 3: Alert With PrometheusRule And Alertmanager'
-  status: pending
-  note: ''
+  status: done
+  note: booted; Alertmanager v0.34.1 + python webhook receiver verified
 - key: section-010/module-03/course
   kind: course
   what: 'chapter for module 3: Alert With PrometheusRule And Alertmanager'
-  status: pending
-  note: ''
+  status: done
+  note: landing + 4 parts + summary; lifecycle, routing, silence captured live
 - key: section-010/quiz
   kind: quiz
   what: 'knowledge check for section-010: Metrics And Alerting With Prometheus'
