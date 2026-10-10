@@ -112,10 +112,6 @@ modules:
         title: "Summary"
         path: sections/section-010/module-02/course-05-summary.md
 
-      - type: reading
-        title: "Alert With PrometheusRule And Alertmanager"
-        path: sections/section-010/module-03/course.md
-
   - id: module-020
     title: "Dashboards And Logs"
     description: >
@@ -130,14 +126,6 @@ modules:
       - type: reading
         title: Section Overview
         path: sections/section-020/README.md
-
-      - type: reading
-        title: "Build Grafana Dashboards As Code"
-        path: sections/section-020/module-01/course.md
-
-      - type: reading
-        title: "Collect Pod Logs With The OpenTelemetry Collector"
-        path: sections/section-020/module-02/course.md
 
   - id: module-030
     title: "Distributed Tracing With OpenTelemetry And Jaeger"
@@ -154,14 +142,6 @@ modules:
         title: Section Overview
         path: sections/section-030/README.md
 
-      - type: reading
-        title: "Run An OpenTelemetry Collector With The Operator"
-        path: sections/section-030/module-01/course.md
-
-      - type: reading
-        title: "Add Tracing Without Code Changes Using Auto-Instrumentation"
-        path: sections/section-030/module-02/course.md
-
   - id: module-040
     title: "Measuring Platform Efficiency"
     description: >
@@ -177,14 +157,6 @@ modules:
         title: Section Overview
         path: sections/section-040/README.md
 
-      - type: reading
-        title: "Measure Delivery With DORA Metrics"
-        path: sections/section-040/module-01/course.md
-
-      - type: reading
-        title: "Measure Service Levels And Resource Efficiency"
-        path: sections/section-040/module-02/course.md
-
   - id: module-050
     title: "Diagnosing And Remediating Incidents"
     description: >
@@ -199,10 +171,3 @@ modules:
         title: Section Overview
         path: sections/section-050/README.md
 
-      - type: reading
-        title: "Triage And Fix Failing Workloads"
-        path: sections/section-050/module-01/course.md
-
-      - type: reading
-        title: "Diagnose And Fix Broken Platform Components"
-        path: sections/section-050/module-02/course.md
