@@ -1,40 +1,37 @@
 # Alert With PrometheusRule And Alertmanager
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-03/playground
-> ```
+A query tells you what is wrong when you ask. An alert tells you without being asked, at three in the morning, and only when it matters. Getting there takes two components that are easy to mix up: Prometheus decides **that** something is wrong, and Alertmanager decides **who hears about it and how often**.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+On a cluster run by the Prometheus Operator, both halves are custom resources. A **PrometheusRule** holds the queries Prometheus evaluates on a schedule, either to store a result as a new series or to raise an alert. An **AlertmanagerConfig** tells Alertmanager which alerts go to which receiver. Each resource is only read if the right selector picks it up, and each change takes effect a little later than you expect.
+
+Keep one sentence in mind for this module: **Prometheus fires alerts, Alertmanager routes, groups and silences them.** When an alert does not arrive, first find out which of the two dropped it.
+
+The module has four parts. **Recording And Alerting Rules** writes a PrometheusRule with a recording rule for the `scout` error ratio and an alert on top of it. **The Alert Lifecycle** causes errors and follows the alert from `inactive` through `pending` to `firing` and back. **Routing Alerts With Alertmanager** sends the alert to a webhook receiver with an AlertmanagerConfig, and shows what the operator adds to every such route. **Silences And Inhibition** mutes the alert for a planned window and proves that no notification goes out.
 
 ## Learning objectives
 
-- Write an alerting rule in a PrometheusRule with `expr`, `for`, labels and annotations
-- Write a recording rule and query the new series it creates
-- Read an alert's state (inactive, pending, firing) in Prometheus and in Alertmanager
-- Route alerts by label to a receiver with an AlertmanagerConfig or the Alertmanager configuration
-- Silence an alert for a time window and prove it stops notifying
+After this module you can:
+
+- Write an alerting rule in a PrometheusRule with `expr`, `for`, labels and annotations.
+- Write a recording rule and query the new series it creates.
+- Read an alert's state (`inactive`, `pending`, `firing`) in Prometheus and in Alertmanager.
+- Route alerts by label to a receiver with an AlertmanagerConfig.
+- Silence an alert for a time window and prove it stops notifying.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need Kubernetes basics and `kubectl port-forward`, `kubectl exec` and `kubectl logs`, and `jq` on your machine. You need to read a PromQL error ratio: the sum of the rates of failed requests divided by the sum of the rates of all requests.
 
-## Outline
+Your playground is a single-node `kind` cluster running Kubernetes 1.35, with a trimmed Prometheus stack in the namespace `monitoring`: the Prometheus Operator, one Prometheus server (version 3.15.0, Service `kps-prometheus` on port `9090`) and one Alertmanager (version 0.34.1, Service `kps-alertmanager` on port `9093`). Alertmanager still has the Helm chart's default configuration, which sends every alert to a receiver called `null` that does nothing.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+| Namespace | Workload | What it is |
+| --- | --- | --- |
+| `starfleet` | `scout` | Two pods of `podinfo` 6.15.0, already scraped by a ServiceMonitor. A request to `/status/500` makes it answer `500` |
+| `starfleet` | `shuttle` | A client pod that sends one normal request per second to `scout`, so there are no errors until you cause them |
+| `monitoring` | `alert-receiver` | A small HTTP server on port `8080` that prints one line for every alert in every notification it receives. It stands in for a chat or paging service |
 
-- Recording rules versus alerting rules, and how the operator picks up a PrometheusRule (ruleSelector)
-- The alert lifecycle — inactive, pending for `for:`, firing, resolved
-- Alertmanager routing tree, grouping and receivers
-- Silences and inhibition
+No PrometheusRule or AlertmanagerConfig for the Starfleet app exists yet. Every command in the parts runs against the playground cluster, and `kubectl` already points at it.
 
-## Diagrams planned
+Launch your playground now, and keep it running next to you while you read the parts:
 
-<!-- TODO(build): mermaid `state` — Alert lifecycle from inactive to pending to firing to resolved -->
-<!-- TODO(build): mermaid `flowchart` — Prometheus evaluates rule, sends alert to Alertmanager, route tree matches labels, receiver gets notification -->
-
-<!-- playground provides: Trimmed kube-prometheus-stack with Prometheus and Alertmanager on, ServiceMonitors for `scout` and `probe` applied, and a webhook receiver pod in namespace `monitoring` (a small HTTP echo that logs every POST) so the reader can see notifications arrive. No PrometheusRule for the Starfleet app exists yet. `probe` can be made to fail on demand by pointing the traffic loop at `/status/500`. -->
-
-<!-- module section-010/module-03 (Module 3) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->

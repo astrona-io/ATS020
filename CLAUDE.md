@@ -379,12 +379,31 @@ apps to a page until a playground actually runs them.
   alerts wait for `for:`, and the Collector batches records before it exports
   them. Commands and graders that read metrics, alerts,
   logs or traces right after a change need a short wait or retry.
-- **Facts to check before writing them down** (not yet verified on the
-  pinned versions): Service names created by the pinned kube-prometheus-stack
-  chart; the podinfo tracing flag; the Jaeger 2.x image and its OTLP ports;
-  the filelog receiver's container parser and the count connector on Collector
-  contrib 0.162.0; which Argo CD and Flux metrics
-  give deployment counts.
+- **Verified on the pinned versions (section 010 builds, 2026-10-10):**
+  - kube-prometheus-stack 92.3.0 with `fullnameOverride: kps` creates the
+    Services `kps-prometheus` (`9090`), `kps-alertmanager` (`9093`),
+    `kps-grafana` (`80`) and `kps-operator`; images: prometheus-operator and
+    config-reloader `v0.94.1`, Prometheus `v3.15.0-distroless`, Alertmanager
+    `v0.34.1`, Grafana `13.2.3-distroless`, k8s-sidecar `2.14.1`,
+    kube-webhook-certgen `1.8.9`.
+  - The Prometheus resource selects ServiceMonitors, PodMonitors and
+    PrometheusRules with `release: kps`, from every namespace. The
+    Alertmanager resource selects every AlertmanagerConfig (empty selectors).
+  - A monitor or rule change reaches the running Prometheus about 60 seconds
+    after `kubectl apply` (mounted Secret / ConfigMap propagation).
+  - The operator uses `role: endpoints` discovery; dropped targets carry
+    `__meta_kubernetes_endpoint_port_name`.
+  - An AlertmanagerConfig gets an injected `namespace="<its namespace>"`
+    matcher, `continue: true`, and the receiver name
+    `<namespace>/<name>/<receiver>`.
+  - `amtool` is in the Alertmanager image; `amtool alert query` hides
+    silenced alerts unless `--silenced` is given.
+  - Prometheus 3.15 returns an `infos` note for `rate()` on a metric whose
+    name does not end in `_total`/`_sum`/`_count`/`_bucket`.
+- **Facts still to check before writing them down:** the Jaeger 2.x image
+  and its OTLP ports; the filelog receiver's container parser and the count
+  connector on Collector contrib 0.162.0; which Argo CD and Flux metrics give
+  deployment counts; the podinfo OTLP endpoint variables.
 - **The proof is a measurement.** A fix is proven with a PromQL query that
   returns the expected value, a target that shows `up == 1`, an alert that
   reaches its receiver, a trace visible in Jaeger with spans from both
