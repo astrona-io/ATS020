@@ -400,6 +400,16 @@ apps to a page until a playground actually runs them.
     silenced alerts unless `--silenced` is given.
   - Prometheus 3.15 returns an `infos` note for `rate()` on a metric whose
     name does not end in `_total`/`_sum`/`_count`/`_bucket`.
+- **Verified on Grafana 13.2.3 (section 020 build, 2026-10-12):**
+  - The playground uses `emptyDir` for Grafana database storage. A container
+    restart retains it; a Deployment rollout replaces the pod and loses it.
+    Database-only dashboards disappear on replacement; labelled ConfigMaps
+    restore provisioned dashboards and data sources. Persistent database
+    storage can retain dashboards created through the web interface.
+  - Provisioned data sources report `readOnly: true` here. Dashboard providers
+    separately control saving edits with `allowUiUpdates`.
+  - `label_values()` is Grafana variable syntax, not a PromQL function.
+    An error ratio with no matching error series returns no data, not zero.
 - **Facts still to check before writing them down:** the Jaeger 2.x image
   and its OTLP ports; the filelog receiver's container parser and the count
   connector on Collector contrib 0.162.0; which Argo CD and Flux metrics give

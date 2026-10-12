@@ -46,13 +46,15 @@ items:
 - key: section-020/module-01/playground
   kind: playground
   what: 'playground for module 1: Build Grafana Dashboards As Code'
-  status: pending
-  note: ''
+  status: done
+  note: Booted Kubernetes 1.35.8; Grafana 13.2.3 and Prometheus 3.15.0; provisioning, traffic, three UP
+    targets and pod replacement verified
 - key: section-020/module-01/course
   kind: course
   what: 'chapter for module 1: Build Grafana Dashboards As Code'
-  status: pending
-  note: ''
+  status: done
+  note: Landing, four parts and summary; all commands run, draft output replaced with live output; export
+    and ConfigMap recovery verified
 - key: section-020/module-02/playground
   kind: playground
   what: 'playground for module 2: Collect And Query Logs With OpenTelemetry And Loki'

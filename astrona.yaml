@@ -145,6 +145,25 @@ modules:
         title: Section Overview
         path: sections/section-020/README.md
 
+      - type: reading
+        title: "Build Grafana Dashboards As Code"
+        path: sections/section-020/module-01/course.md
+      - type: reading
+        title: "Grafana's Parts And A Provisioned Data Source"
+        path: sections/section-020/module-01/course-01-grafana-parts-and-a-provisioned-data-source.md
+      - type: reading
+        title: "Panels For Rate, Error Ratio And Latency"
+        path: sections/section-020/module-01/course-02-panels-for-rate-error-ratio-and-latency.md
+      - type: reading
+        title: "A Namespace Variable For Every Panel"
+        path: sections/section-020/module-01/course-03-a-namespace-variable-for-every-panel.md
+      - type: reading
+        title: "Dashboards That Survive A Restart"
+        path: sections/section-020/module-01/course-04-dashboards-that-survive-a-restart.md
+      - type: reading
+        title: "Summary"
+        path: sections/section-020/module-01/course-05-summary.md
+
   - id: module-030
     title: "Distributed Tracing With OpenTelemetry And Jaeger"
     description: >
