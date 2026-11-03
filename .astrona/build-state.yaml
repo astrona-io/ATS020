@@ -32,7 +32,7 @@ items:
   kind: lab
   what: module lab 02 for section-010 module 02
   status: done
-  note: written; validate-only; not run
+  note: written; validate-only; not run. Manifest entry moved after module-03 part 1 (recording rules), which teaches the rules it tests; lab path unchanged
 - key: section-010/module-03/playground
   kind: playground
   what: 'playground for module 3: Alert With PrometheusRule And Alertmanager'
@@ -205,7 +205,7 @@ items:
   kind: course
   what: 'chapter for module 2: Diagnose And Fix Broken Platform Components'
   status: done
-  note: 'written: landing + 3 parts + summary; playground never booted'
+  note: 'written: landing + 4 parts + summary; playground never booted. Part 4 (GitOps Application OutOfSync or Degraded) added after the build, read-only, no captured output (UNTESTED); the playground has no Argo CD'
 - key: section-050/module-02/lab-01
   kind: lab
   what: module lab 01 for section-050 module 02
@@ -215,7 +215,7 @@ items:
   kind: quiz
   what: 'knowledge check for section-050: Diagnosing And Remediating Incidents'
   status: done
-  note: 'written: quiz.yaml, 15 questions'
+  note: 'written: quiz.yaml, 19 questions (q16-q19 cover the GitOps part; UNTESTED against a real Argo CD)'
 - key: section-050/capstone
   kind: capstone
   what: 'capstone lab: Incident Response Capstone'
@@ -226,4 +226,4 @@ items:
   kind: quiz
   what: final domain quiz across every section
   status: done
-  note: 'written: sections/final-domain-quiz.yaml, 36 single-choice questions drawn from the section quizzes'
+  note: 'written: sections/final-domain-quiz.yaml, 38 single-choice questions drawn from the section quizzes (q37-q38 added for the section-050 GitOps part)'

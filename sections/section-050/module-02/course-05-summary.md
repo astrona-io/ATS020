@@ -8,6 +8,8 @@ An `x509: certificate has expired` error means the connection worked and the API
 
 A controller reconciles objects. If it stops, the API server still stores new objects, and the status of old objects stays as the controller last wrote it. The sign of a stopped controller is an object that exists and has no effect, together with a Deployment at `0/0`. The Prometheus Operator turns a ServiceMonitor and a PrometheusRule into Prometheus configuration, so with the operator stopped, `up{job="scout"}` has no series and the rule is not loaded. Scaling the Deployment to one replica fixes it, and the proof is `up == 1` and the rule in the Prometheus API.
 
+A GitOps Application has two status fields. The sync status says whether the cluster matches Git, and the health status says whether the resources work. A bad `path` or `targetRevision` gives a `ComparisonError` condition and sync status `Unknown`. A failing hook stops the sync and leaves the Application `OutOfSync`, and the reason is in the logs of the hook pod. A `Synced` and `Degraded` Application has a child resource that does not start, and you find it in the resource table and in its own events and logs. `argocd app diff` shows what differs between Git and the cluster. The fix always goes into Git, because Argo CD, or a later sync, undoes a change made on the live object.
+
 The shortcuts do not count as fixes. Setting `failurePolicy: Ignore` or deleting a webhook configuration removes the policy together with the error. A fix keeps the safety and removes the cause.
 
 The key facts to remember are these:
@@ -17,6 +19,7 @@ The key facts to remember are these:
 - `connection refused` on a webhook Service points to an empty EndpointSlice.
 - An `x509` error with a date gives the expiry, and `openssl x509 -noout -enddate` confirms it.
 - A status written by a controller is only as fresh as the controller.
+- An Application can be `Synced` and `Degraded` at once.
 - A fix is proved by the behaviour it restores, not by an object that exists.
 
 <!-- astrona:playground:destroy -->

@@ -371,3 +371,99 @@ questions:
     correct_option: b
     explanation: "Correct. A fix is proved by the behaviour that was lost."
 
+
+  - id: ats020-050-q16
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git"
+    source_readings:
+      - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+    prompt: |-
+      An Argo CD Application shows sync status `Unknown` and a `ComparisonError` condition that says the app path does not exist. What is the most likely cause?
+    options:
+      - id: a
+        text: "The `spec.source.path` names a folder that is not in the repository at the target revision."
+        explanation: "Correct. The repository server cannot find the folder, so Argo CD has nothing to compare."
+      - id: b
+        text: "A Deployment of the Application is `Degraded`."
+        explanation: "A degraded resource gives a health status, not a comparison error."
+      - id: c
+        text: "A `PreSync` hook Job failed."
+        explanation: "A failed hook gives a failed sync operation, not a comparison error."
+      - id: d
+        text: "Someone ran `kubectl edit` on a live resource."
+        explanation: "That makes the Application `OutOfSync`, and Argo CD can still compare."
+    correct_option: a
+    explanation: "Correct. The repository server cannot find the folder, so Argo CD has nothing to compare."
+
+  - id: ats020-050-q17
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git"
+    source_readings:
+      - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+    prompt: |-
+      An Application is `Synced` and `Degraded`. Which step finds the cause?
+    options:
+      - id: a
+        text: "Run `argocd app sync` again, because `Synced` is old."
+        explanation: "Git is already applied, and a second sync changes nothing."
+      - id: b
+        text: "Find the `Degraded` or `Progressing` resource in the resource table, then read its events and pod logs."
+        explanation: "Correct. The Application only reports the worst child, and the reason is in that child's events and logs."
+      - id: c
+        text: "Delete the Application so that Argo CD starts again."
+        explanation: "That removes the evidence and can delete the workload."
+      - id: d
+        text: "Read the `ComparisonError` condition."
+        explanation: "A `Synced` Application compared successfully, so there is no comparison error."
+    correct_option: b
+    explanation: "Correct. The Application only reports the worst child, and the reason is in that child's events and logs."
+
+  - id: ats020-050-q18
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git"
+    source_readings:
+      - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+    prompt: |-
+      A `PreSync` hook Job fails. What happens to the sync, and where is the reason?
+    options:
+      - id: a
+        text: "Argo CD applies the other manifests anyway. The reason is in the Application `spec`."
+        explanation: "A failed `PreSync` hook stops the sync before the manifests are applied."
+      - id: b
+        text: "The sync fails and the Application stays `OutOfSync`. The reason is in the logs of the hook pod."
+        explanation: "Correct. The Application only says that the sync did not complete."
+      - id: c
+        text: "The Application becomes `Synced`. The reason is in `argocd app diff`."
+        explanation: "A failed sync does not give `Synced`."
+      - id: d
+        text: "Argo CD deletes the Job and retries without end. The reason is in the repository server log."
+        explanation: "The failed Job stays so that you can read it."
+    correct_option: b
+    explanation: "Correct. The Application only says that the sync did not complete."
+
+  - id: ats020-050-q19
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git"
+    source_readings:
+      - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+    prompt: |-
+      A Deployment of a GitOps Application has a bad image tag. You fix it with `kubectl set image`, and a minute later the pods fail again. What is the correct fix?
+    options:
+      - id: a
+        text: "Run `kubectl set image` again every minute."
+        explanation: "That treats the symptom and never ends."
+      - id: b
+        text: "Turn on self-heal, so that Argo CD keeps your change."
+        explanation: "Self-heal reverts the live object to match Git, so it removes your change."
+      - id: c
+        text: "Commit the corrected image tag to Git, sync, and check for `Synced` and `Healthy`."
+        explanation: "Correct. Git is the source of truth, and the proof is the status of the Application and ready pods."
+      - id: d
+        text: "Set the Deployment `replicas` to zero."
+        explanation: "That hides the fault and breaks the service."
+    correct_option: c
+    explanation: "Correct. Git is the source of truth, and the proof is the status of the Application and ready pods."

@@ -116,16 +116,6 @@ modules:
         title: "Aggregation, Error Ratio And Latency"
         path: sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
       - type: reading
-        title: Question
-        path: sections/section-010/module-02/labs/lab-02/question.md
-      - type: lab
-        title: "Record The Error Ratio And p95 Latency Lab"
-        path: sections/section-010/module-02/labs/lab-02
-        difficulty: intermediate
-        estimated_duration: 25m
-        topic: metrics-and-alerting
-        task_kind: troubleshooting
-      - type: reading
         title: "Running Queries From The Command Line"
         path: sections/section-010/module-02/course-04-running-queries-from-the-command-line.md
       - type: reading
@@ -138,6 +128,16 @@ modules:
       - type: reading
         title: "Recording And Alerting Rules"
         path: sections/section-010/module-03/course-01-recording-and-alerting-rules.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-02/labs/lab-02/question.md
+      - type: lab
+        title: "Record The Error Ratio And p95 Latency Lab"
+        path: sections/section-010/module-02/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: metrics-and-alerting
+        task_kind: troubleshooting
       - type: reading
         title: "The Alert Lifecycle"
         path: sections/section-010/module-03/course-02-the-alert-lifecycle.md
@@ -506,8 +506,11 @@ modules:
         topic: incident-response
         task_kind: troubleshooting
       - type: reading
+        title: "A GitOps Application Out Of Sync Or Degraded"
+        path: sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+      - type: reading
         title: Summary
-        path: sections/section-050/module-02/course-04-summary.md
+        path: sections/section-050/module-02/course-05-summary.md
 
       - type: reading
         title: Question
