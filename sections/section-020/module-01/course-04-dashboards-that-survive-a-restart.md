@@ -184,27 +184,3 @@ You can now export a dashboard model, store it in a labelled ConfigMap, and prov
 > - **Testing only a container restart.** An `emptyDir` survives that restart. Replace the pod to test recovery from lost temporary storage.
 > - **Keeping the old port-forward.** It points at the deleted pod. Start it again before checking the new instance.
 > - **Editing only Grafana's database.** Provisioning loads the file again; put lasting changes in the ConfigMap.
-
-## Your mission: Fix A Grafana Dashboard That Is Provisioned From A ConfigMap Lab
-
-You can now provision a data source and a dashboard from labelled ConfigMaps and find out why a provisioned dashboard does not load. The mission gives you a dashboard ConfigMap that Grafana never loads and whose panels name a data source that does not exist. You fix both in the ConfigMap, keep all three panels, and prove that every panel returns data.
-
-Pause the playground first:
-
-```sh
-astrona stop ats-020-playground-020-01
-```
-
-Start the lab and, when you are ready, submit it for grading:
-
-```sh
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-01/labs/lab-01
-astrona submit -c sections/section-020/module-01/labs/lab-01
-```
-
-When you are done, remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-020-lab-020-01
-astrona start ats-020-playground-020-01
-```
