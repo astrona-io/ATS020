@@ -1,0 +1,355 @@
+# Starting objects for the capstone. A release went out and starfleet is
+# broken on purpose in four independent ways. Never fix a fault here.
+#
+# Fault 1: cargo is OOMKilled, because the memory limit is 48Mi and the process
+#          holds 150Mi.
+# Fault 2: beacon is in ImagePullBackOff, because the image tag v6.15.0 does not exist.
+# Fault 3: probe is restarted again and again, because the liveness probe uses port 8081.
+# Fault 4: the Service starfleet-policy selects pods with the label
+#          app=starfleet-policy-v2. No pod has it, so the webhook has no endpoints
+#          and every create of a Deployment in starfleet fails.
+#
+# The webhook checks only CREATE of Deployments, and its configuration comes last
+# in this file, so the workloads above it are created before it can reject them.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command: ["sleep", "infinity"]
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  selector:
+    app: probe
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cargo
+  namespace: starfleet
+spec:
+  selector:
+    app: cargo
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: beacon
+  namespace: starfleet
+spec:
+  selector:
+    app: beacon
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+  labels:
+    app: probe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+        - name: probe
+          image: mccutchen/go-httpbin:2.25.0
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /status/200
+              port: 8081
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 2
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cargo
+  namespace: starfleet
+  labels:
+    app: cargo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cargo
+  template:
+    metadata:
+      labels:
+        app: cargo
+    spec:
+      containers:
+        - name: cargo
+          image: node:22-alpine
+          command:
+            - node
+            - -e
+            - |
+              const hold = Buffer.alloc(150 * 1024 * 1024, 1);
+              require("http")
+                .createServer((req, res) => res.end("cargo holds " + hold.length + " bytes\n"))
+                .listen(8080);
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 48Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beacon
+  namespace: starfleet
+  labels:
+    app: beacon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beacon
+  template:
+    metadata:
+      labels:
+        app: beacon
+    spec:
+      containers:
+        - name: beacon
+          image: ghcr.io/stefanprodan/podinfo:v6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webhook-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webhook-server
+  namespace: webhook-system
+data:
+  server.js: |
+    // A validating admission webhook that allows every request.
+    // It listens on HTTPS port 8443 and reads its certificate once, at start.
+    const https = require('https');
+    const fs = require('fs');
+    const options = {
+      cert: fs.readFileSync('/tls/tls.crt'),
+      key: fs.readFileSync('/tls/tls.key'),
+    };
+    https.createServer(options, (req, res) => {
+      let body = '';
+      req.on('data', (chunk) => (body += chunk));
+      req.on('end', () => {
+        let uid = '';
+        try { uid = JSON.parse(body).request.uid; } catch (e) {}
+        console.log(`${req.method} ${req.url} uid=${uid} allowed`);
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          apiVersion: 'admission.k8s.io/v1',
+          kind: 'AdmissionReview',
+          response: { uid, allowed: true },
+        }));
+      });
+    }).listen(8443, () => console.log('listening on 8443'));
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: starfleet-policy-tls
+  namespace: webhook-system
+type: kubernetes.io/tls
+stringData:
+  tls.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIDVzCCAj+gAwIBAgIUWkM6PYifapQ1eb5S3jsspeNXLCAwDQYJKoZIhvcNAQEL
+    BQAwHzEdMBsGA1UEAwwUc3RhcmZsZWV0LXdlYmhvb2stY2EwIBcNMjYxMTAyMjA0
+    NzM5WhgPMjEyNTA1MjcyMDQ3MzlaMC4xLDAqBgNVBAMMI3N0YXJmbGVldC1wb2xp
+    Y3kud2ViaG9vay1zeXN0ZW0uc3ZjMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+    CgKCAQEAoaIzoiJXJaZGoeDfrMp8onp8njLBaHV6DnxNfzeSprmE4iKZ2wP4iWy5
+    HvnDdcirdbCkzjvYzLNfeULY1YeYycdVZB+sNAUnSLhGnanQB+HTAgjPyLBT9bw5
+    4WJt3VqcEGWQ2OLXsfmpv3VFNvaBqXX2+zWf6b6b2XSCCrEUX+dz6HUZys/OjBLf
+    inofpqZk+utoahpFH2DZSMqAV3Zv5JWLeq50zfk5msy3qxELnyjvZeoR4iQTVhjs
+    EljdtLUq0fOhFppBVAT+Bkv3q+Yh5w4n1PMM3VP3pwOXL5+nC192n4SRcmQsoFfG
+    YExZCmxe8EVHf+DVAzmb7Kw2vukSPwIDAQABo3oweDBhBgNVHREEWjBYgiNzdGFy
+    ZmxlZXQtcG9saWN5LndlYmhvb2stc3lzdGVtLnN2Y4Ixc3RhcmZsZWV0LXBvbGlj
+    eS53ZWJob29rLXN5c3RlbS5zdmMuY2x1c3Rlci5sb2NhbDATBgNVHSUEDDAKBggr
+    BgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAgXvimJS8FawbZa4XIS3CaN/X5rB1
+    MjkDjnQnevHhi6FZILhxSxQIZ7LnjCyy7JLfVOzmw2jxwnXSphm9eDZBG9NE+/Cy
+    BLidEo073Lur5pwNJDgWJQdSoZWQl/0flCcLn7hR+x8bv7dFoz8rYFZcra7Bjp4x
+    R+A8u/UiVXeMDZiH9z+1Pevpi02aybCR4H8fDWc+PN3u0mZZ3Ne1s40pzeVu/oTI
+    ltZu5bbAOZwmFTxQmASgz4xee8Lsv6MSDIu1nujfOKdxZtpe7xjreUIzqjDaeuVP
+    F+98Ao2uLQfLPHRyzTkMfttTW/J1K4u7MDJvoogtOglXLYOuPy7/wmmYkw==
+    -----END CERTIFICATE-----
+  tls.key: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQChojOiIlclpkah
+    4N+synyienyeMsFodXoOfE1/N5KmuYTiIpnbA/iJbLke+cN1yKt1sKTOO9jMs195
+    QtjVh5jJx1VkH6w0BSdIuEadqdAH4dMCCM/IsFP1vDnhYm3dWpwQZZDY4tex+am/
+    dUU29oGpdfb7NZ/pvpvZdIIKsRRf53PodRnKz86MEt+Keh+mpmT662hqGkUfYNlI
+    yoBXdm/klYt6rnTN+TmazLerEQufKO9l6hHiJBNWGOwSWN20tSrR86EWmkFUBP4G
+    S/er5iHnDifU8wzdU/enA5cvn6cLX3afhJFyZCygV8ZgTFkKbF7wRUd/4NUDOZvs
+    rDa+6RI/AgMBAAECggEACH4F3yOVbJb7Pbobm8UvyIxNoTTi0I2Lki3vFxthCygo
+    K9whiqOqGp5Ubk+KeNUdnRtg2AJw9ksJCHf9/d9tTvy4Jys62FOE/YnLvAZAtd6k
+    QDEc/wW0rkPreUS7Ularvc4i+XeXBEotJFq8U5JJZxFESW1HL6LM0XS7oxAsFTXL
+    N6WPk5QGJxKqlNoCU5Q7PI6d+k6SZkiPD5Wvxemkx2Y4/75UTS4g3J/pMtq7wh69
+    V0Z8hnRae8kIaArcL5hb+86f9LyQI3eYr7MG3XtF8r7/nbRh8onnoq9HtavqlWId
+    6sPggDuU6haMuVdHTyzCCscR46/pwhjUY8Kbn1420QKBgQDVSETeDl6wORMpUn0O
+    5AadVSaNEbnjNumoeoh6qLn2gZfJtwm7oZ0m4S8OwpjKj/Yn9xo9YTH4+e802vH4
+    4Dk33tRijKEBVSGKnmI18PuovCD7f9lXLsYoREFqzdpPMiPFtMN0DC9RrR1ti5TQ
+    +t1s7d1SG1EyXx+FVeZXdZRiiwKBgQDCAbkKCZf/NyHjKO03ZsoYxn4KBAbRESLh
+    ffUlYk0/9pGtS/IjuT09sOJ34a85nF7IX5vAtQWpJQikWgC5hsa5Md/326qsyYcA
+    eAr49OVcaz19d3LaMR4UPIaeAwgWYGSI2l0mA+oG44GcGRDltCgboOE+GNdlbaLy
+    6IeQ7U1JnQKBgB1JQiOXp4rdG3N2HzP3Pa1G7vc58uNvO+Bliu4E0xw1KUmKd6yr
+    AXBARXzqXZ6a6/sK5DB/cyQz9ZO1aLp614CDeXhaxRTwwp1NKEEt6PB/fKvsH0To
+    aE9JKA5pW8u6H81bB+eccLbvZXYQT4vulo8JjnViyOB4zVQ6ullSDOEHAoGAJhuC
+    hjc2NPpWXLFoTw6QuecbUMpTsHNGP7anFY3GkL7VBI47ZMr4/YomIdghvBY8A+3L
+    wUGNeBj/JpFLPSX9GNl0HdJ3JvN64huyRA6OkuW5sVBqLfOh7eWpp5X+265ZcQw7
+    acExEeNUTR4bVJNboXmrZLAqdxDfBgmov03tdX0CgYAP8Omg9mqBVY+Cf/x4osMx
+    AZBRlXlJnVQyuwclZLQixSeIBmAbJz0gBQHx90LfNmCF4t3GzbS+/9phwIKYoW+Q
+    hsgV8xZe/eEMf9yXFkHR8+2Qul+11oVBrwgQQXtbYpMPa1tE4v2CDl/O1V4jvEYb
+    lspkCruuxwAxcaQWPF2nnA==
+    -----END PRIVATE KEY-----
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: starfleet-policy
+  namespace: webhook-system
+  labels:
+    app: starfleet-policy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: starfleet-policy
+  template:
+    metadata:
+      labels:
+        app: starfleet-policy
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: server
+          image: node:22-alpine
+          command: ["node", "/app/server.js"]
+          ports:
+            - containerPort: 8443
+          readinessProbe:
+            tcpSocket:
+              port: 8443
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 10m, memory: 48Mi}
+            limits: {memory: 128Mi}
+          volumeMounts:
+            - name: app
+              mountPath: /app
+            - name: tls
+              mountPath: /tls
+              readOnly: true
+      volumes:
+        - name: app
+          configMap:
+            name: webhook-server
+        - name: tls
+          secret:
+            secretName: starfleet-policy-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: starfleet-policy
+  namespace: webhook-system
+spec:
+  selector:
+    app: starfleet-policy-v2
+  ports:
+    - port: 443
+      targetPort: 8443
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: starfleet-policy
+webhooks:
+  - name: starfleet-policy.astrona.io
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    failurePolicy: Fail
+    timeoutSeconds: 5
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: starfleet
+    rules:
+      - apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["deployments"]
+    clientConfig:
+      service:
+        namespace: webhook-system
+        name: starfleet-policy
+        path: /validate
+        port: 443
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURBRENDQWVpZ0F3SUJBZ0lVUkV3ZXpoV3ZhNzB6WlpuTWN5UFVISXpsVDdVd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0h6RWRNQnNHQTFVRUF3d1VjM1JoY21ac1pXVjBMWGRsWW1odmIyc3RZMkV3SUJjTk1qWXhNVEF5TWpBMApOek01V2hnUE1qRXlOakV3TURreU1EUTNNemxhTUI4eEhUQWJCZ05WQkFNTUZITjBZWEptYkdWbGRDMTNaV0pvCmIyOXJMV05oTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF2a2V1YjgxSnNQZFMKQzc1WU9UTENmeXdqYjZhVnVSRzhzWFJKVkdoRENlcTV4YzNNaTZaWFBZR0x6SVZCMzBZNDNuTEVCSE80bi90QQpuRXU2V2JuZUJNcDFRTHB3d05pNlJ6SlpyWHFJdmJlYU9HbWVidlBhNUxjWFhFcFh0c093YzB4N2JIZis5SU90CnVVTHRPU0ZWeHZuSFczaWFnV0tpNDczN1NZZWRvVG5YcmlVUW8xd0NnWllsTkhZbUJHeXZPY1pJZWp0RVNUZWYKY0VVUU5RelNyNGkxQ251UnZsRWZuV2ZRTHp0OWdwcElJbHQ3NEYwNmFvT3Jiek5ZVEhaWGtSU0ZNRnhNcnozMQpjaDZIcUpZTGprZjRMMUtRUk9qV1hhQm9IRW9mMHVNUjZJSmJuUGVweFZwZkNqbGpQenlUTVNITDJobnFyWThsCmFQMWM0S0h2L3dJREFRQUJvekl3TURBZEJnTlZIUTRFRmdRVTBUSVRJOElnOGZQaXV6cUlnakM3MlBUcVdMa3cKRHdZRFZSMFRBUUgvQkFVd0F3RUIvekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBZi80cSt1NzZ6U3BFckdvWQoyNE13NXFZNGtEakhncUV1OWZEcjFxQm9VeFRYWmdpWCtCcE1KdVl6NEZzZjdaTElWb214Ty9ZbjR0SFpqWm9iCkY0c053V21DeDMydzRyOFhFZTVRcmYvVzlwWCt1MitTMHhFYjl1KzZ6SUsyU25xQjBHWHVnUUJ2SlFHdk1jTUgKVWIxYmdMM0RuekEyZW5KM1FVUEJZUTJwQUtSaEVVQTN5RDJXWllqOHBSRldJVkpNMWZSa0V5RnViRFhINXNCKwp5aHZqeEtOVklocUt6S2dHbW9TN3hDb3BLUEpzK2VORHNJOFZEcm8vR0sxUnNEQWg1Nzk0MXBDdjRQVXVUYUNuCjRiNk8ybVgyZ3MxbTZQV3VRZU0vdDBjSThiVVJDcTVCb1dobVRmRlQ2Q3RpRW9BcHJPdDQxOXZ5eUp3MlBjUm4KaGxxY3R3PT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=

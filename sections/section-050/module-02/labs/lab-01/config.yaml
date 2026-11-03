@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-050-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+      - quay.io/prometheus/prometheus:v3.15.0-distroless
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - node:22-alpine
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Install Helm if missing and a trimmed kube-prometheus-stack 92.3.0 in `monitoring`, then scale the Prometheus Operator to zero"
+      type: file
+      source: bootstrap/01-prepare.sh
+  manifests:
+    - name: lab-start
+      description: "The Starfleet workloads, the two webhooks with their faults, a ServiceMonitor and a PrometheusRule"
+      type: file
+      source: manifests/lab-start.yaml
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/starfleet-policy
+      namespace: webhook-system
+
+testing:
+  init:
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+    - name: wait-for-platform
+      description: Waits until the webhook servers and the Prometheus Operator are ready
+      type: file
+      source: testing/wait-for-platform.sh
+
+validation:
+  scripts:
+    - name: starfleet-creates
+      description: A Deployment can be created in starfleet, and the starfleet-policy webhook answered the request
+      type: file
+      source: validation/validate-starfleet-webhook.sh
+    - name: outpost-creates
+      description: A Deployment can be created in outpost, and the outpost-policy webhook answered the request
+      type: file
+      source: validation/validate-outpost-webhook.sh
+    - name: scout-monitored
+      description: The Prometheus Operator runs, up{job="scout"} is 1 and the ScoutDown rule is loaded in Prometheus
+      type: file
+      source: validation/validate-prometheus.sh
+    - name: design-intact
+      description: Both webhook configurations keep failurePolicy Fail, and the workloads, ServiceMonitor and PrometheusRule are still in place
+      type: file
+      source: validation/validate-design-intact.sh
+
+teardown:
+  keepCluster: false

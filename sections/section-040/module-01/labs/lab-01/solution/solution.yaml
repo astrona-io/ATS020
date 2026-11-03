@@ -1,0 +1,21 @@
+# Reference end state: the failed deployment count reads the Degraded health
+# of the Application. Each Degraded episode flips the 0/1 value twice (up and
+# back down), so the number of changes divided by two is the number of
+# failed deployments.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dora-scout
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  groups:
+    - name: dora-scout
+      rules:
+        - record: dora:deployments:increase6h
+          expr: round(sum(increase(argocd_app_sync_total{name="scout",phase="Succeeded"}[6h])))
+        - record: dora:failed_deployments:count6h
+          expr: sum(changes((max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0)[6h:15s])) / 2
+        - record: dora:change_failure_rate:ratio6h
+          expr: dora:failed_deployments:count6h / dora:deployments:increase6h

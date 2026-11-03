@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-capstone-040
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    addons:
+      metricsServer: true
+    preloadImages:
+      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+      - quay.io/prometheus/prometheus:v3.15.0-distroless
+      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+      - gitea/gitea:28.1.0-rootless
+      - quay.io/argoproj/argocd:v3.5.4
+      - public.ecr.aws/docker/library/redis:8.2.3-alpine
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Install a trimmed kube-prometheus-stack 92.3.0 with kube-state-metrics, Gitea 28.1.0 and Argo CD 3.5.4, then make the delivery history of the Application scout"
+      type: file
+      source: bootstrap/01-prepare.sh
+  manifests:
+    - name: lab-start
+      description: "The ServiceMonitor for scout, the shuttle traffic loop (5% errors to scout) and the over-provisioned Deployment beacon in starfleet"
+      type: file
+      source: manifests/lab-start.yaml
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/beacon
+      namespace: starfleet
+
+testing:
+  init:
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+    - name: wait-for-solution
+      description: Waits until the recorded series exist and Prometheus holds usage data for beacon
+      type: file
+      source: testing/wait-for-solution.sh
+
+validation:
+  scripts:
+    - name: deployment-frequency
+      description: The series dora:deployments:increase6h counts the deployments of scout from the sync counter
+      type: file
+      source: validation/validate-deployment-frequency.sh
+    - name: change-failure-rate
+      description: The series dora:change_failure_rate:ratio6h is built from the Degraded health and returns the real rate
+      type: file
+      source: validation/validate-change-failure-rate.sh
+    - name: error-budget
+      description: The series scout:error_budget_remaining:ratio1h returns the remaining budget of a 99% SLO
+      type: file
+      source: validation/validate-error-budget.sh
+    - name: burn-alert
+      description: The alert ScoutErrorBudgetBurn has two windows, a real threshold and a short for, and fires
+      type: file
+      source: validation/validate-burn-alert.sh
+    - name: beacon-rightsized
+      description: The running beacon pod requests close to its measured peak usage and keeps a memory limit
+      type: file
+      source: validation/validate-beacon-rightsized.sh
+    - name: platform-intact
+      description: The Application scout is healthy with its history, scout and beacon are ready, and nothing was replaced
+      type: file
+      source: validation/validate-platform-intact.sh
+
+teardown:
+  keepCluster: false

@@ -1,0 +1,110 @@
+# Reference solution: the three Deployments with the faults fixed, and the
+# Service starfleet-policy with the selector that matches the webhook pod.
+# Applied only by `astrona test`.
+apiVersion: v1
+kind: Service
+metadata:
+  name: starfleet-policy
+  namespace: webhook-system
+spec:
+  selector:
+    app: starfleet-policy
+  ports:
+    - port: 443
+      targetPort: 8443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+  labels:
+    app: probe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+        - name: probe
+          image: mccutchen/go-httpbin:2.25.0
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /status/200
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 2
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cargo
+  namespace: starfleet
+  labels:
+    app: cargo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cargo
+  template:
+    metadata:
+      labels:
+        app: cargo
+    spec:
+      containers:
+        - name: cargo
+          image: node:22-alpine
+          command:
+            - node
+            - -e
+            - |
+              const hold = Buffer.alloc(150 * 1024 * 1024, 1);
+              require("http")
+                .createServer((req, res) => res.end("cargo holds " + hold.length + " bytes\n"))
+                .listen(8080);
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests: {cpu: 10m, memory: 256Mi}
+            limits: {memory: 320Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beacon
+  namespace: starfleet
+  labels:
+    app: beacon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beacon
+  template:
+    metadata:
+      labels:
+        app: beacon
+    spec:
+      containers:
+        - name: beacon
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}

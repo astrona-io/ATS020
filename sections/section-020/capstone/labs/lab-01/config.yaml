@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-capstone-020
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/jetstack/cert-manager-controller:v1.21.2
+      - quay.io/jetstack/cert-manager-webhook:v1.21.2
+      - quay.io/jetstack/cert-manager-cainjector:v1.21.2
+      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.160.0
+      - otel/opentelemetry-collector-contrib:0.162.0
+      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+      - quay.io/prometheus/prometheus:v3.15.0-distroless
+      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+      - docker.io/grafana/grafana:13.2.3-distroless
+      - quay.io/kiwigrid/k8s-sidecar:2.14.1
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:2.25.0
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Install cert-manager 1.21.2, the OpenTelemetry Operator 0.160.0 and a trimmed kube-prometheus-stack 92.3.0 with Grafana"
+      type: file
+      source: bootstrap/01-prepare.sh
+  manifests:
+    - name: lab-start
+      description: "scout and probe in outpost, the scout ServiceMonitor, the shuttle traffic loop and the Prometheus data source"
+      type: file
+      source: manifests/lab-start.yaml
+    - name: dashboard-start
+      description: "The Outpost Overview dashboard ConfigMap, with two faults"
+      type: file
+      source: manifests/dashboard-start.yaml
+  waitFor:
+    - resource: deploy/scout
+      namespace: outpost
+    - resource: deploy/probe
+      namespace: outpost
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+testing:
+  init:
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+    - name: wait-for-prometheus
+      description: Waits until Prometheus holds the scout metrics and the metric made from the probe logs
+      type: file
+      source: testing/wait-for-prometheus.sh
+
+validation:
+  scripts:
+    - name: target-up
+      description: Prometheus scrapes the Collector's metric port and the target is up
+      type: file
+      source: validation/validate-target-up.sh
+    - name: error-metric
+      description: log_error_lines_total for probe in outpost exists with its Kubernetes labels and keeps rising
+      type: file
+      source: validation/validate-error-metric.sh
+    - name: least-privilege
+      description: The Collector keeps its design and its service account can only read pods
+      type: file
+      source: validation/validate-least-privilege.sh
+    - name: dashboard-provisioned
+      description: The Outpost Overview dashboard is loaded from a labelled ConfigMap and Grafana reports it as provisioned
+      type: file
+      source: validation/validate-dashboard-provisioned.sh
+    - name: panels-return-data
+      description: All three panels exist and every panel query returns data, the third from the log metric
+      type: file
+      source: validation/validate-panels-data.sh
+    - name: data-source-as-code
+      description: The data source the panels use is provisioned from a ConfigMap, not created by hand
+      type: file
+      source: validation/validate-data-source-as-code.sh
+
+teardown:
+  keepCluster: false

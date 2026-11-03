@@ -1,40 +1,35 @@
 # Run An OpenTelemetry Collector With The Operator
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-01/playground
-> ```
+Metrics tell you that something is slow. They do not tell you which step of a request took the time. A trace does: it records every step of one request, from the first service to the last, with a start time and a duration for each. Getting traces to a place where you can read them takes three components, and the exam expects you to build and repair that path by hand.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+The three components are an instrumented application, an OpenTelemetry Collector and a trace backend. The application creates spans, the Collector receives, batches and forwards them, and Jaeger stores and shows them. On Kubernetes, the OpenTelemetry Operator runs the Collector for you from one custom resource, the OpenTelemetryCollector. When no trace arrives, the first question is which of the three stopped it.
+
+The module has five parts. **The Operator And Its Webhook** installs the Operator after cert-manager and proves that its webhook answers. **A Collector With An OTLP Receiver And A Jaeger Exporter** writes the OpenTelemetryCollector for `scout` and shows what the Operator builds. **Reading A Trace In Jaeger** defines traces and spans and finds them with the API. **Choosing A Collector Mode** creates a gateway, an agent and a sidecar. **Diagnosing A Broken Collector Pipeline** fixes two faults and ends with a graded lab.
 
 ## Learning objectives
 
-- Install the OpenTelemetry Operator after cert-manager and confirm its webhook is ready
-- Write an OpenTelemetryCollector resource with an OTLP receiver, a batch processor and an exporter to Jaeger
-- Choose the Collector mode (deployment, daemonset, sidecar) for a given need
-- Send a test trace over OTLP and find it in the Jaeger UI and API
-- Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)
+After this module you can:
+
+- Install the OpenTelemetry Operator after cert-manager and confirm that its webhook is ready.
+- Write an OpenTelemetryCollector with an OTLP receiver, a batch processor and an exporter to Jaeger.
+- Choose the Collector mode (deployment, daemonset or sidecar) for a given need.
+- Send a test trace over OTLP and find it in the Jaeger API and web interface.
+- Diagnose a broken pipeline from the Service ports, the Collector log and the Collector counters.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need Kubernetes basics and `kubectl port-forward`, `kubectl logs` and `kubectl exec`, and `jq` on your machine. You need to read a Kubernetes Service and its ports.
 
-## Outline
+Your playground is a single-node `kind` cluster running Kubernetes 1.35. It has cert-manager 1.21.2 and Jaeger 2.22.0. The OpenTelemetry Operator (version 0.160.0) and the Collector (contrib image 0.162.0) are not installed yet: you install the Operator and create the Collector. No Prometheus stack runs, to save memory.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+| Namespace | Workload | What it is |
+| --- | --- | --- |
+| `observability` | `jaeger` | Jaeger 2.22.0 in one pod with in-memory storage. The Service `jaeger` has OTLP on ports `4317` and `4318` and the web interface and API on `16686` |
+| `starfleet` | `scout` | One pod of `podinfo` 6.15.0 with OpenTelemetry tracing on. It sends spans over OTLP to `otel-collector.observability:4317`, a Service that does not exist yet |
+| `starfleet` | `shuttle` | A client pod that sends a request to `scout` every 2 seconds, and a slow request (`/delay/1`) every tenth round |
 
-- Traces and spans, trace IDs and context propagation through the `traceparent` header
-- The OpenTelemetry Operator and its OpenTelemetryCollector resource
-- Receivers, processors, exporters and pipelines for traces
-- Jaeger 2 as the trace backend, and reading a trace in its UI
+Every command in the parts runs against the playground cluster, and `kubectl` already points at it.
 
-## Diagrams planned
+Launch your playground now, and keep it running next to you while you read the parts:
 
-<!-- TODO(build): mermaid `sequence` — A request crosses two services, each creates a span with the same trace ID and exports it over OTLP -->
-<!-- TODO(build): mermaid `flowchart` — App, OTLP receiver, batch processor, OTLP exporter, Jaeger, UI -->
-
-<!-- playground provides: kind cluster with cert-manager 1.21.2 and Jaeger 2.22.0 (all-in-one, in-memory storage, OTLP on 4317 and 4318, UI on 16686) in namespace `observability`. The OpenTelemetry Operator is not installed yet, so the reader installs it. `scout` in `starfleet` configured to export traces over OTLP to a Collector Service name that does not exist yet, so no traces appear until the Collector is created. No Prometheus stack, to save memory. -->
-
-<!-- module section-030/module-01 (Module 1) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->

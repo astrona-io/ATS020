@@ -1,0 +1,197 @@
+# Knowledge check for section 030. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats020-030
+course_id: ATS020
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-030
+  title: "Distributed Tracing With OpenTelemetry And Jaeger"
+questions:
+  - id: ats020-030-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Install the OpenTelemetry Operator after cert-manager and confirm its webhook is ready"
+    source_readings:
+      - sections/section-030/module-01/course-01-the-operator-and-its-webhook.md
+    prompt: "You installed the OpenTelemetry Operator, and applying an OpenTelemetryCollector fails with a webhook error. Which cause is the most likely?"
+    options:
+      - id: a
+        text: "cert-manager was not installed or not ready, so the Operator's webhook has no valid certificate."
+        explanation: "Correct. The Operator's webhook needs a certificate from cert-manager. Install cert-manager first and wait until the Operator pod is ready."
+      - id: b
+        text: "Jaeger is not running."
+        explanation: "A Collector resource can be created without any backend."
+      - id: c
+        text: "The Collector image is too old."
+        explanation: "Image problems appear in the pod, not as a webhook error on apply."
+      - id: d
+        text: "The namespace name is too long."
+        explanation: "This does not cause a webhook error."
+    correct_option: a
+    explanation: "Install cert-manager first and confirm that the Operator and its webhook are ready before you apply any Operator resource."
+
+  - id: ats020-030-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Write an OpenTelemetryCollector resource with an OTLP receiver, a batch processor and an exporter to Jaeger"
+    source_readings:
+      - sections/section-030/module-01/course-02-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
+    prompt: "A Collector defines the receivers `otlp/grpc` and `otlp/http`, but its `traces` pipeline lists only `otlp/http`. An application sends spans to port `4317`. What happens?"
+    options:
+      - id: a
+        text: "The Operator rejects the resource."
+        explanation: "The resource is valid, so the Operator accepts it."
+      - id: b
+        text: "The Collector starts a gRPC server anyway."
+        explanation: "A receiver that no pipeline uses is not started."
+      - id: c
+        text: "The Service of the Collector has only port `4318`, and the application cannot connect on `4317`."
+        explanation: "Correct. The Operator builds the Service ports from the receivers that pipelines use. The gRPC receiver is unused, so port `4317` does not exist."
+      - id: d
+        text: "The spans are accepted and dropped by the batch processor."
+        explanation: "The spans never reach the Collector."
+    correct_option: c
+    explanation: "Define a receiver and also list it in a pipeline. Only receivers that a pipeline uses start and get a Service port."
+
+  - id: ats020-030-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the Collector mode (deployment, daemonset, sidecar) for a given need"
+    source_readings:
+      - sections/section-030/module-01/course-04-choosing-a-collector-mode.md
+    prompt: "Many applications in several namespaces send OTLP spans to one shared address, and the platform team wants one place to batch and export them. Which Collector mode fits?"
+    options:
+      - id: a
+        text: "`deployment`, which gives a Service that applications reach by name."
+        explanation: "Correct. A Deployment Collector has a Service, so many applications send to one address."
+      - id: b
+        text: "`statefulset`, because spans must keep their order."
+        explanation: "Span order is carried by timestamps and IDs, not by the pod type."
+      - id: c
+        text: "`sidecar`, because every pod needs its own Collector."
+        explanation: "A sidecar gives one Collector per pod, which is not one shared address."
+      - id: d
+        text: "`daemonset`, because the applications must reach the node they run on."
+        explanation: "A DaemonSet is for per-node work, such as reading log files."
+    correct_option: a
+    explanation: "A gateway that many applications send to is a `deployment`. Use a `daemonset` for per-node work and a `sidecar` for one Collector per pod."
+
+  - id: ats020-030-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Send a test trace over OTLP and find it in the Jaeger UI and API"
+    source_readings:
+      - sections/section-030/module-01/course-03-reading-a-trace-in-jaeger.md
+    prompt: "A test trace was sent to the Collector, and Jaeger shows no service for it a few seconds later. What is the best next step?"
+    options:
+      - id: a
+        text: "Reinstall Jaeger at once."
+        explanation: "This removes stored data and does not find the cause."
+      - id: b
+        text: "Delete the Collector so that it sends again."
+        explanation: "Deleting the Collector loses spans and fixes nothing."
+      - id: c
+        text: "Lower the sampler to zero."
+        explanation: "A sampler of zero drops every trace."
+      - id: d
+        text: "Wait about a minute because of batching, then query Jaeger again, and look at the Collector counters if it is still empty."
+        explanation: "Correct. The batch processor and the agent delay spans. The accepted and sent span counters of the Collector show where spans stop."
+    correct_option: d
+    explanation: "Spans arrive late. Wait, then compare the accepted and sent counters of the Collector to find where spans stop."
+
+  - id: ats020-030-q05
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)"
+    source_readings:
+      - sections/section-030/module-01/course-05-diagnosing-a-broken-collector-pipeline.md
+    prompt: "The Collector is `Running` and `scout` can connect, but the log of the Collector shows `dial tcp ...:4316: i/o timeout` for the exporter to Jaeger, which listens on `4317`. What is the fault?"
+    options:
+      - id: a
+        text: "The receiver endpoint is wrong."
+        explanation: "The application connects, so the receiver works."
+      - id: b
+        text: "The exporter endpoint uses the wrong port, so the Collector cannot deliver spans."
+        explanation: "Correct. The error comes from the exporter. Fix the port to match the one that Jaeger serves."
+      - id: c
+        text: "The Operator is not installed."
+        explanation: "The Collector is running, so the Operator works."
+      - id: d
+        text: "The batch processor is missing."
+        explanation: "A missing batch processor does not cause a connection timeout."
+    correct_option: b
+    explanation: "Errors that name `dial tcp` from the exporter point to the exporter endpoint. Errors in the application point to the receiver or the Service."
+
+  - id: ats020-030-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Write an Instrumentation resource with the exporter endpoint, propagators and sampler"
+    source_readings:
+      - sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+    prompt: "Spans of `relay` and `scout` appear in Jaeger as two separate traces. Both services are traced. Which setting in the Instrumentation makes one request one trace?"
+    options:
+      - id: a
+        text: "A different exporter endpoint."
+        explanation: "The endpoint decides where spans go, not whether they link."
+      - id: b
+        text: "A `tracecontext` propagator, so the trace ID travels in the `traceparent` header."
+        explanation: "Correct. Without a shared propagator the second service starts a new trace."
+      - id: c
+        text: "A sampler of `always_off`."
+        explanation: "This drops traces."
+      - id: d
+        text: "A larger batch size."
+        explanation: "Batching does not link spans."
+    correct_option: b
+    explanation: "Propagators carry the trace context between services. Use `tracecontext` so that the child span joins the parent trace."
+
+  - id: ats020-030-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Annotate a Deployment so the Operator injects the language agent, and read the injected init container and environment variables to prove it"
+    source_readings:
+      - sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+    prompt: "You added `instrumentation.opentelemetry.io/inject-nodejs: \"true\"` to the pod template of a Deployment, and the pods already running do not change. How do you prove injection happened for new pods?"
+    options:
+      - id: a
+        text: "Read the Deployment annotations only."
+        explanation: "The annotation shows the request, not the result."
+      - id: b
+        text: "Check the node for a new file."
+        explanation: "The agent is delivered through the pod, not the node."
+      - id: c
+        text: "Restart the Deployment and look for the init container and the `OTEL_` environment variables in the new pod."
+        explanation: "Correct. The Operator changes a pod only when it is created, and the injected init container and variables show it worked."
+      - id: d
+        text: "Look for a new Service."
+        explanation: "Injection adds no Service."
+    correct_option: c
+    explanation: "Injection happens at pod creation. Restart the pods, then read the pod spec for the init container and the `OTEL_` variables."
+
+  - id: ats020-030-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find why a pod was not instrumented (annotation on the wrong object, Instrumentation in another namespace, pod not restarted)"
+    source_readings:
+      - sections/section-030/module-02/course-03-finding-why-a-pod-is-not-instrumented.md
+    prompt: "The annotation is on the pod template, the pod was recreated, and the pod still has no init container. The Instrumentation `nodejs` exists in the namespace `observability`, and the pod runs in `starfleet`. What is wrong?"
+    options:
+      - id: a
+        text: "Node.js cannot be instrumented."
+        explanation: "The Operator supports Node.js."
+      - id: b
+        text: "The pod must run as root."
+        explanation: "User ID does not control injection."
+      - id: c
+        text: "Jaeger must be in `starfleet`."
+        explanation: "The backend location does not control injection."
+      - id: d
+        text: "The annotation `inject-nodejs: \"true\"` looks for an Instrumentation in the pod's own namespace, and there is none."
+        explanation: "Correct. The Instrumentation must be in the namespace of the pod, or the annotation must name it as `namespace/name`."
+    correct_option: d
+    explanation: "Check three places: the annotation is on the pod template, the Instrumentation is in the pod's namespace, and the pod was created after both."
+

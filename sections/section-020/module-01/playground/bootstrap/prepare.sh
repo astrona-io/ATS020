@@ -14,14 +14,16 @@ set -euo pipefail
 HELM_VERSION="v4.3.0"
 CHART_VERSION="92.3.0"
 
-BIN_DIR="/usr/local/bin"
-[ -w "$BIN_DIR" ] || BIN_DIR="$HOME/.local/bin"
+BIN_DIR="$HOME/.astrona/tools/ats020"
 mkdir -p "$BIN_DIR"
 export PATH="$BIN_DIR:$PATH"
+export HELM_CACHE_HOME="$HOME/.astrona/helm/cache"
+export HELM_CONFIG_HOME="$HOME/.astrona/helm/config"
+export HELM_DATA_HOME="$HOME/.astrona/helm/data"
 
-if ! command -v helm >/dev/null 2>&1; then
+if ! command -v helm >/dev/null 2>&1 || ! helm version --short | grep -q "^v4.3.0"; then
   WORK="$(mktemp -d)"
-  trap 'rm -rf "$WORK"' EXIT
+  trap 'python3 -c "import shutil,sys; shutil.rmtree(sys.argv[1])" "$WORK"' EXIT
   OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
   ARCH="$(uname -m)"; case "$ARCH" in x86_64) ARCH=amd64 ;; aarch64|arm64) ARCH=arm64 ;; esac
   echo "[playground] Downloading Helm ${HELM_VERSION}..."

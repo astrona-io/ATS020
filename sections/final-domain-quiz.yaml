@@ -1,0 +1,805 @@
+# Final domain knowledge check across all five sections. Questions are drawn from the section quizzes, so every one tests material taught in the modules.
+schema_version: 1
+kind: question_bank
+id: ats020-final
+course_id: ATS020
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: domain
+  id: observability-and-operations
+  title: Observability and Operations
+questions:
+- id: ats020-final-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Read the Prometheus targets page and the `up` metric to say which targets are scraped and which fail
+  source_readings:
+  - sections/section-010/module-01/course-01-targets-and-the-up-metric.md
+  prompt: A team deployed a new service and asks why `up{namespace="billing"}` returns nothing at all. Which statement is correct?
+  options:
+  - id: a
+    text: Prometheus has no target for the service, so it has never tried to scrape it.
+    explanation: Correct. `up` is `0` when Prometheus tried and failed. When no `up` series exists, no monitor produced a target, so Prometheus never tried.
+  - id: b
+    text: Prometheus tried to scrape the service and every scrape failed.
+    explanation: A failed scrape stores `up` with the value `0`. It does not remove the series.
+  - id: c
+    text: The service returned HTTP status 500 on `/metrics`.
+    explanation: A failed scrape (for example HTTP status 500) also stores `up` with the value `0`.
+  - id: d
+    text: The `up` metric is only stored for pods in the `monitoring` namespace.
+    explanation: '`up` exists for every target in every namespace.'
+  correct_option: a
+  explanation: '`up` is `0` when Prometheus tried and failed. When no `up` series exists, no monitor produced a target, so Prometheus never tried.'
+- id: ats020-final-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
+  source_readings:
+  - sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+  prompt: 'You apply a correct ServiceMonitor in `starfleet`. `kubectl apply` prints `created`, but no job for it appears in Prometheus after five minutes. The Prometheus resource has `serviceMonitorNamespaceSelector: {}` and `serviceMonitorSelector.matchLabels: {release: kps}`. What is the most likely cause?'
+  options:
+  - id: a
+    text: The empty `serviceMonitorNamespaceSelector` blocks every namespace except `monitoring`.
+    explanation: An empty namespace selector matches every namespace.
+  - id: b
+    text: The operator writes an error into the ServiceMonitor status, which you must clear first.
+    explanation: A ServiceMonitor has no status that reports this problem, and the operator logs nothing.
+  - id: c
+    text: ServiceMonitors only work in the `monitoring` namespace.
+    explanation: A ServiceMonitor may live in any namespace the namespace selector matches.
+  - id: d
+    text: 'The ServiceMonitor does not carry the label `release: kps`, so Prometheus ignores it.'
+    explanation: 'Correct. `serviceMonitorSelector` only matches ServiceMonitors with the label `release: kps`. A monitor without it is ignored with no error. An empty namespace selector matches every namespace.'
+  correct_option: d
+  explanation: '`serviceMonitorSelector` only matches ServiceMonitors with the label `release: kps`. A monitor without it is ignored with no error. An empty namespace selector matches every namespace.'
+- id: ats020-final-q03
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
+  source_readings:
+  - sections/section-010/module-01/course-04-finding-a-missing-target.md
+  prompt: After a change to a ServiceMonitor, `show_targets` lists no `scout` targets and `up` has no series for `starfleet`. The job `serviceMonitor/starfleet/scout/0` exists in the Prometheus configuration. Which check finds the cause fastest?
+  options:
+  - id: a
+    text: Run `up == 0` and read `lastError`.
+    explanation: There is no `up` series, so there is no target with a `lastError`. Only a target that was tried can have an error.
+  - id: b
+    text: Delete the Prometheus pod so it reloads.
+    explanation: A restart does not change a wrong port name.
+  - id: c
+    text: List the dropped targets with `/api/v1/targets?state=dropped` and compare the port name Prometheus saw with the one in the ServiceMonitor.
+    explanation: Correct. The job exists, so Prometheus reads the monitor. No target means every endpoint was dropped, for example because the port name does not exist. The dropped targets show the real port name.
+  - id: d
+    text: Raise the scrape `interval` of the endpoint.
+    explanation: The interval changes how often a scrape runs, not which endpoints are selected.
+  correct_option: c
+  explanation: The job exists, so Prometheus reads the monitor. No target means every endpoint was dropped, for example because the port name does not exist. The dropped targets show the real port name.
+- id: ats020-final-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Aggregate series with `sum by` and `without` to get one value per namespace or per status code
+  source_readings:
+  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  prompt: You need the request rate of `scout` for each HTTP status code across all pods. Which query is correct?
+  options:
+  - id: a
+    text: '`rate(sum by (status) (http_requests_total{namespace="starfleet"})[5m])`'
+    explanation: This is not valid PromQL, and summing counters before `rate()` breaks the reset handling.
+  - id: b
+    text: '`sum by (status) (rate(http_requests_total{namespace="starfleet"}[5m]))`'
+    explanation: Correct. Take the rate of each series first, then aggregate. `by (status)` keeps only the label `status`, so you get one value per status code.
+  - id: c
+    text: '`sum(rate(http_requests_total{namespace="starfleet"}[5m]))`'
+    explanation: This returns one value with no labels, not one per status code.
+  - id: d
+    text: '`sum without (status) (rate(http_requests_total{namespace="starfleet"}[5m]))`'
+    explanation: '`without (status)` removes the status label, so the codes are added together.'
+  correct_option: b
+  explanation: Take the rate of each series first, then aggregate. `by (status)` keeps only the label `status`, so you get one value per status code.
+- id: ats020-final-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
+  source_readings:
+  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  prompt: A teammate writes `sum by (namespace) (rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))` and gets an empty result. Why?
+  options:
+  - id: a
+    text: The division operator does not work on rates.
+    explanation: Rates can be divided.
+  - id: b
+    text: The two sides have different label sets (`namespace` on the left, none on the right), so no series match.
+    explanation: Correct. Division in PromQL matches series by their labels. Use the same `by (...)` clause on both sides.
+  - id: c
+    text: '`status=~"5.."` is not a valid matcher.'
+    explanation: The matcher is valid and selects `5xx` codes.
+  - id: d
+    text: A ratio needs `increase()` instead of `rate()`.
+    explanation: '`rate()` is fine for a ratio. It gives a per-second value on both sides.'
+  correct_option: b
+  explanation: Division in PromQL matches series by their labels. Use the same `by (...)` clause on both sides.
+- id: ats020-final-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write an alerting rule in a PrometheusRule with `expr`, `for`, labels and annotations
+  source_readings:
+  - sections/section-010/module-03/course-01-recording-and-alerting-rules.md
+  prompt: 'A PrometheusRule is created in `starfleet`, but Prometheus does not list its rules, and no error appears. The `ruleSelector` of the Prometheus resource matches `release: kps`. What is the first thing to check?'
+  options:
+  - id: a
+    text: 'Whether the PrometheusRule carries the label `release: kps`.'
+    explanation: Correct. Like monitors, a PrometheusRule is only read when the label selector of the Prometheus resource matches it, and a rule that does not match is ignored silently.
+  - id: b
+    text: Whether `for` is set to at least `5m`.
+    explanation: '`for` changes when an alert fires, not whether the rule is loaded.'
+  - id: c
+    text: Whether the recording rule is placed before the alerting rule.
+    explanation: Order only matters for rules that depend on each other inside a group.
+  - id: d
+    text: Whether Alertmanager has a receiver.
+    explanation: Alertmanager receives alerts after Prometheus loads and evaluates the rule.
+  correct_option: a
+  explanation: Like monitors, a PrometheusRule is only read when the label selector of the Prometheus resource matches it, and a rule that does not match is ignored silently.
+- id: ats020-final-q07
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Route alerts by label to a receiver with an AlertmanagerConfig or the Alertmanager configuration
+  source_readings:
+  - sections/section-010/module-03/course-03-routing-alerts-with-alertmanager.md
+  prompt: 'An AlertmanagerConfig in `monitoring` routes `team: frontier` to a webhook. An alert for `team: frontier` fires from a rule in `starfleet`, and the webhook receives nothing. Which cause fits?'
+  options:
+  - id: a
+    text: 'The operator sets `continue: false`, so the alert stops at the root route.'
+    explanation: 'The operator sets `continue: true`, and the real problem is the namespace matcher.'
+  - id: b
+    text: Alertmanager ignores routes with a `team` matcher.
+    explanation: Routes can match any label the alert carries.
+  - id: c
+    text: The webhook receiver must be named `default`.
+    explanation: Receivers can have any name. The operator prefixes it with the namespace and config name.
+  - id: d
+    text: The operator adds a `namespace="monitoring"` matcher to the route, and the alert has `namespace="starfleet"`.
+    explanation: Correct. An AlertmanagerConfig only receives alerts whose `namespace` label equals its own namespace. Put the AlertmanagerConfig in the namespace of the alerts.
+  correct_option: d
+  explanation: An AlertmanagerConfig only receives alerts whose `namespace` label equals its own namespace. Put the AlertmanagerConfig in the namespace of the alerts.
+- id: ats020-final-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Silence an alert for a time window and prove it stops notifying
+  source_readings:
+  - sections/section-010/module-03/course-04-silences-and-inhibition.md
+  prompt: Which silence is safest for muting `ScoutHighErrorRatio` for the `starfleet` team only?
+  options:
+  - id: a
+    text: Matcher `alertname=ScoutHighErrorRatio` only.
+    explanation: A silence with only `alertname` mutes the alert for every namespace and team.
+  - id: b
+    text: Delete the alerting rule and apply it again later.
+    explanation: Deleting the rule hides the problem for everyone and is easy to forget to undo.
+  - id: c
+    text: Matchers `alertname=ScoutHighErrorRatio` and `namespace=starfleet`, with an end time and a comment.
+    explanation: Correct. Match on more than the alert name so other namespaces keep notifying, and set an end time so the silence expires on its own.
+  - id: d
+    text: 'Set `for: 24h` on the alerting rule.'
+    explanation: '`for` delays firing for every namespace and does not mute an alert that already fires.'
+  correct_option: c
+  explanation: Match on more than the alert name so other namespaces keep notifying, and set an end time so the silence expires on its own.
+- id: ats020-final-q09
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Add a Prometheus data source to Grafana with a provisioning file or a labelled ConfigMap
+  source_readings:
+  - sections/section-020/module-01/course-01-grafana-parts-and-a-provisioned-data-source.md
+  prompt: The platform team wants the Prometheus data source in Grafana to exist after every pod restart, and nobody should be able to change it in the web interface. Which approach meets this?
+  options:
+  - id: a
+    text: Add the data source in the Grafana web interface and save it.
+    explanation: A data source saved in the interface is not defined as code and can be edited by any admin.
+  - id: b
+    text: Edit the Grafana Deployment and add the Prometheus URL as an environment variable.
+    explanation: Grafana does not create a data source from an environment variable of this kind.
+  - id: c
+    text: 'Apply a ConfigMap with the label `grafana_datasource: "1"` that holds the data source definition, so the sidecar loads it as a provisioned data source.'
+    explanation: Correct. The sidecar writes the file into Grafana's provisioning directory. Grafana marks the data source as read-only and loads it again on every start.
+  - id: d
+    text: Create a ServiceMonitor for Grafana.
+    explanation: A ServiceMonitor tells Prometheus what to scrape. It does not add a data source to Grafana.
+  correct_option: c
+  explanation: 'A ConfigMap with the label `grafana_datasource: "1"` is read by the sidecar and becomes a provisioned, read-only data source that survives restarts.'
+- id: ats020-final-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Build a panel from a PromQL query and choose the right visualisation for a rate, a ratio and a latency
+  source_readings:
+  - sections/section-020/module-01/course-02-panels-for-rate-error-ratio-and-latency.md
+  prompt: A panel must show the share of requests that failed over the last five minutes, as one number between 0 and 1 per service. The counter `http_requests_total` has a `status` label. Which query fits?
+  options:
+  - id: a
+    text: '`http_requests_total{status=~"5.."}`'
+    explanation: This is a raw counter. It only rises and it is not a ratio.
+  - id: b
+    text: '`sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))`'
+    explanation: Correct. The rate of failed requests divided by the rate of all requests gives the error ratio.
+  - id: c
+    text: '`rate(http_requests_total{status=~"5.."}[5m])`'
+    explanation: This is the rate of failed requests. It is not divided by the total, so it is not a ratio.
+  - id: d
+    text: '`sum(http_requests_total{status=~"5.."}) / sum(http_requests_total)`'
+    explanation: Raw counters give the ratio since the process started, not over the last five minutes.
+  correct_option: b
+  explanation: An error ratio is the rate of failed requests divided by the rate of all requests. Use `rate()` on counters, never the raw value.
+- id: ats020-final-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Use a dashboard variable to switch the namespace shown on every panel
+  source_readings:
+  - sections/section-020/module-01/course-03-a-namespace-variable-for-every-panel.md
+  prompt: A dashboard has a variable `namespace`, but the panels do not change when the viewer selects another namespace. What is the most likely cause?
+  options:
+  - id: a
+    text: The panel queries still contain a fixed namespace and do not use `$namespace` in their label matchers.
+    explanation: Correct. A variable changes a panel only where the query uses it, for example `namespace="$namespace"`.
+  - id: b
+    text: Prometheus does not store the label `namespace`.
+    explanation: If the label were missing, the variable could not list any values.
+  - id: c
+    text: Grafana allows only one variable per dashboard.
+    explanation: A dashboard can have many variables.
+  - id: d
+    text: The data source is provisioned.
+    explanation: A provisioned data source has no effect on how variables work.
+  correct_option: a
+  explanation: A variable only changes the queries that reference it. Replace the fixed value in each panel query with `$namespace`.
+- id: ats020-final-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Export a dashboard as JSON and load it through the Grafana sidecar ConfigMap so it survives a pod restart
+  source_readings:
+  - sections/section-020/module-01/course-04-dashboards-that-survive-a-restart.md
+  prompt: A teammate built a dashboard by hand in the Grafana web interface. After the Grafana pod was replaced, the dashboard was gone. Which change keeps the dashboard after every restart?
+  options:
+  - id: a
+    text: Click Save again in the web interface.
+    explanation: The saved dashboard lives in the pod's storage, which the new pod does not have.
+  - id: b
+    text: Delete the Grafana pod so that it reads its old state.
+    explanation: A new pod does not read the old pod's storage.
+  - id: c
+    text: Apply the ConfigMap without a label, because Grafana reads every ConfigMap in the namespace.
+    explanation: The sidecar loads only ConfigMaps with its label. A ConfigMap without the label is ignored.
+  - id: d
+    text: 'Export the dashboard JSON, put it in a ConfigMap with the label `grafana_dashboard: "1"` and apply it.'
+    explanation: Correct. The sidecar loads every labelled ConfigMap into Grafana, so the dashboard exists again after a restart.
+  correct_option: d
+  explanation: Dashboards as code are ConfigMaps with the label the sidecar watches. The sidecar loads them again whenever Grafana starts.
+- id: ats020-final-q13
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Read a pod's logs, its previous container's logs and its events with `kubectl logs` and `kubectl events`
+  source_readings:
+  - sections/section-020/module-02/course-01-what-kubernetes-keeps-about-logs.md
+  prompt: The container in the pod `probe` crashed and restarted. You need the output of the container that crashed, not the new one. Which command do you run?
+  options:
+  - id: a
+    text: '`kubectl logs probe`'
+    explanation: This prints the log of the current container, which started after the crash.
+  - id: b
+    text: '`kubectl events probe`'
+    explanation: Events show what Kubernetes did, for example a restart, not what the container wrote.
+  - id: c
+    text: '`kubectl describe node`'
+    explanation: This describes a node and does not show the container output.
+  - id: d
+    text: '`kubectl logs probe --previous`'
+    explanation: Correct. The flag `--previous` prints the log of the last terminated instance of the container.
+  correct_option: d
+  explanation: Use `kubectl logs --previous` for the container that ended, and `kubectl events` for what Kubernetes did to the pod.
+- id: ats020-final-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Deploy an OpenTelemetry Collector as a DaemonSet whose file_log receiver reads the container log files on each node
+  source_readings:
+  - sections/section-020/module-02/course-02-a-daemonset-collector-reads-the-log-files.md
+  prompt: A Collector must read the log files of every pod on every node. Which setup does that?
+  options:
+  - id: a
+    text: A Deployment with one replica and the `file_log` receiver.
+    explanation: One pod runs on one node and sees only the log files of that node.
+  - id: b
+    text: A Collector that receives logs over OTLP from the API server.
+    explanation: The API server does not push container logs over OTLP.
+  - id: c
+    text: A DaemonSet that mounts `/var/log/pods` from the node and uses the `file_log` receiver.
+    explanation: Correct. A DaemonSet runs one Collector pod per node. The host path mount gives each pod the log files of its own node.
+  - id: d
+    text: A StatefulSet with the `prometheus` receiver.
+    explanation: The `prometheus` receiver scrapes metrics. It does not read log files.
+  correct_option: c
+  explanation: The log files are on each node, so one Collector per node with a read-only mount of `/var/log/pods` is needed. That is a DaemonSet.
+- id: ats020-final-q15
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Add Kubernetes metadata to each log record with the k8s_attributes processor and drop unwanted records with the filter processor
+  source_readings:
+  - sections/section-020/module-02/course-03-add-kubernetes-metadata-and-drop-records.md
+  prompt: The Collector log records show no `k8s.deployment.name`, and the log of the Collector contains a `forbidden` error for pods. What is missing?
+  options:
+  - id: a
+    text: A larger `batch` size in the processor.
+    explanation: Batching changes how records are grouped. It does not give access to pod data.
+  - id: b
+    text: A ClusterRole that allows `get`, `list` and `watch` on pods, and a ClusterRoleBinding to the Collector's service account.
+    explanation: Correct. The `k8s_attributes` processor asks the API server for pod data. Without read access it cannot add the metadata.
+  - id: c
+    text: A `cluster-admin` binding.
+    explanation: This would work but gives far more access than needed.
+  - id: d
+    text: A second `file_log` receiver.
+    explanation: A second receiver reads the same files and does not give access to the API.
+  correct_option: b
+  explanation: The processor needs read access to pods. Grant only `get`, `list` and `watch` on pods, not a broad role.
+- id: ats020-final-q16
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Install the OpenTelemetry Operator after cert-manager and confirm its webhook is ready
+  source_readings:
+  - sections/section-030/module-01/course-01-the-operator-and-its-webhook.md
+  prompt: You installed the OpenTelemetry Operator, and applying an OpenTelemetryCollector fails with a webhook error. Which cause is the most likely?
+  options:
+  - id: a
+    text: cert-manager was not installed or not ready, so the Operator's webhook has no valid certificate.
+    explanation: Correct. The Operator's webhook needs a certificate from cert-manager. Install cert-manager first and wait until the Operator pod is ready.
+  - id: b
+    text: Jaeger is not running.
+    explanation: A Collector resource can be created without any backend.
+  - id: c
+    text: The Collector image is too old.
+    explanation: Image problems appear in the pod, not as a webhook error on apply.
+  - id: d
+    text: The namespace name is too long.
+    explanation: This does not cause a webhook error.
+  correct_option: a
+  explanation: Install cert-manager first and confirm that the Operator and its webhook are ready before you apply any Operator resource.
+- id: ats020-final-q17
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write an OpenTelemetryCollector resource with an OTLP receiver, a batch processor and an exporter to Jaeger
+  source_readings:
+  - sections/section-030/module-01/course-02-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
+  prompt: A Collector defines the receivers `otlp/grpc` and `otlp/http`, but its `traces` pipeline lists only `otlp/http`. An application sends spans to port `4317`. What happens?
+  options:
+  - id: a
+    text: The Service of the Collector has only port `4318`, and the application cannot connect on `4317`.
+    explanation: Correct. The Operator builds the Service ports from the receivers that pipelines use. The gRPC receiver is unused, so port `4317` does not exist.
+  - id: b
+    text: The Operator rejects the resource.
+    explanation: The resource is valid, so the Operator accepts it.
+  - id: c
+    text: The Collector starts a gRPC server anyway.
+    explanation: A receiver that no pipeline uses is not started.
+  - id: d
+    text: The spans are accepted and dropped by the batch processor.
+    explanation: The spans never reach the Collector.
+  correct_option: a
+  explanation: Define a receiver and also list it in a pipeline. Only receivers that a pipeline uses start and get a Service port.
+- id: ats020-final-q18
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose the Collector mode (deployment, daemonset, sidecar) for a given need
+  source_readings:
+  - sections/section-030/module-01/course-04-choosing-a-collector-mode.md
+  prompt: Many applications in several namespaces send OTLP spans to one shared address, and the platform team wants one place to batch and export them. Which Collector mode fits?
+  options:
+  - id: a
+    text: '`statefulset`, because spans must keep their order.'
+    explanation: Span order is carried by timestamps and IDs, not by the pod type.
+  - id: b
+    text: '`sidecar`, because every pod needs its own Collector.'
+    explanation: A sidecar gives one Collector per pod, which is not one shared address.
+  - id: c
+    text: '`daemonset`, because the applications must reach the node they run on.'
+    explanation: A DaemonSet is for per-node work, such as reading log files.
+  - id: d
+    text: '`deployment`, which gives a Service that applications reach by name.'
+    explanation: Correct. A Deployment Collector has a Service, so many applications send to one address.
+  correct_option: d
+  explanation: A gateway that many applications send to is a `deployment`. Use a `daemonset` for per-node work and a `sidecar` for one Collector per pod.
+- id: ats020-final-q19
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Send a test trace over OTLP and find it in the Jaeger UI and API
+  source_readings:
+  - sections/section-030/module-01/course-03-reading-a-trace-in-jaeger.md
+  prompt: A test trace was sent to the Collector, and Jaeger shows no service for it a few seconds later. What is the best next step?
+  options:
+  - id: a
+    text: Reinstall Jaeger at once.
+    explanation: This removes stored data and does not find the cause.
+  - id: b
+    text: Delete the Collector so that it sends again.
+    explanation: Deleting the Collector loses spans and fixes nothing.
+  - id: c
+    text: Wait about a minute because of batching, then query Jaeger again, and look at the Collector counters if it is still empty.
+    explanation: Correct. The batch processor and the agent delay spans. The accepted and sent span counters of the Collector show where spans stop.
+  - id: d
+    text: Lower the sampler to zero.
+    explanation: A sampler of zero drops every trace.
+  correct_option: c
+  explanation: Spans arrive late. Wait, then compare the accepted and sent counters of the Collector to find where spans stop.
+- id: ats020-final-q20
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)
+  source_readings:
+  - sections/section-030/module-01/course-05-diagnosing-a-broken-collector-pipeline.md
+  prompt: 'The Collector is `Running` and `scout` can connect, but the log of the Collector shows `dial tcp ...:4316: i/o timeout` for the exporter to Jaeger, which listens on `4317`. What is the fault?'
+  options:
+  - id: a
+    text: The receiver endpoint is wrong.
+    explanation: The application connects, so the receiver works.
+  - id: b
+    text: The exporter endpoint uses the wrong port, so the Collector cannot deliver spans.
+    explanation: Correct. The error comes from the exporter. Fix the port to match the one that Jaeger serves.
+  - id: c
+    text: The Operator is not installed.
+    explanation: The Collector is running, so the Operator works.
+  - id: d
+    text: The batch processor is missing.
+    explanation: A missing batch processor does not cause a connection timeout.
+  correct_option: b
+  explanation: Errors that name `dial tcp` from the exporter point to the exporter endpoint. Errors in the application point to the receiver or the Service.
+- id: ats020-final-q21
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write an Instrumentation resource with the exporter endpoint, propagators and sampler
+  source_readings:
+  - sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+  prompt: Spans of `relay` and `scout` appear in Jaeger as two separate traces. Both services are traced. Which setting in the Instrumentation makes one request one trace?
+  options:
+  - id: a
+    text: A different exporter endpoint.
+    explanation: The endpoint decides where spans go, not whether they link.
+  - id: b
+    text: A `tracecontext` propagator, so the trace ID travels in the `traceparent` header.
+    explanation: Correct. Without a shared propagator the second service starts a new trace.
+  - id: c
+    text: A sampler of `always_off`.
+    explanation: This drops traces.
+  - id: d
+    text: A larger batch size.
+    explanation: Batching does not link spans.
+  correct_option: b
+  explanation: Propagators carry the trace context between services. Use `tracecontext` so that the child span joins the parent trace.
+- id: ats020-final-q22
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Annotate a Deployment so the Operator injects the language agent, and read the injected init container and environment variables to prove it
+  source_readings:
+  - sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+  prompt: 'You added `instrumentation.opentelemetry.io/inject-nodejs: "true"` to the pod template of a Deployment, and the pods already running do not change. How do you prove injection happened for new pods?'
+  options:
+  - id: a
+    text: Restart the Deployment and look for the init container and the `OTEL_` environment variables in the new pod.
+    explanation: Correct. The Operator changes a pod only when it is created, and the injected init container and variables show it worked.
+  - id: b
+    text: Read the Deployment annotations only.
+    explanation: The annotation shows the request, not the result.
+  - id: c
+    text: Check the node for a new file.
+    explanation: The agent is delivered through the pod, not the node.
+  - id: d
+    text: Look for a new Service.
+    explanation: Injection adds no Service.
+  correct_option: a
+  explanation: Injection happens at pod creation. Restart the pods, then read the pod spec for the init container and the `OTEL_` variables.
+- id: ats020-final-q23
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Define deployment frequency, lead time for changes, change failure rate and time to restore service
+  source_readings:
+  - sections/section-040/module-01/course-01-the-four-dora-metrics-and-where-the-data-lives.md
+  prompt: A platform team reports these results for last month. Changes reach production in about 20 minutes after the commit. The team deploys 40 times a week. About one deployment in three needs a rollback, and each rollback takes half a day to finish. Which statement describes the result correctly?
+  options:
+  - id: a
+    text: Stability is good and speed is poor, because the team rolls back often.
+    explanation: This option reverses the two pairs. Frequent rollbacks are a stability problem, and 40 deployments a week with a 20 minute lead time is good speed.
+  - id: b
+    text: Both speed and stability are good, because the team deploys often.
+    explanation: A high deployment frequency is only one speed metric. It does not make up for a high change failure rate and a long time to restore.
+  - id: c
+    text: Nothing can be said until the team also measures the CPU use of the workloads.
+    explanation: CPU use is a resource efficiency number. The four DORA metrics come from the delivery data alone.
+  - id: d
+    text: Speed is good and stability is poor. Deployment frequency and lead time for changes are good, but change failure rate and time to restore service are poor.
+    explanation: Correct. Deployment frequency and lead time for changes measure speed. Change failure rate and time to restore service measure stability. One failed deployment in three and a half day to restore are poor stability numbers.
+  correct_option: d
+  explanation: Deployment frequency and lead time for changes measure speed. Change failure rate and time to restore service measure stability. The team is fast and unstable.
+- id: ats020-final-q24
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Count deployments over a time window from the GitOps controller's sync metrics in Prometheus
+  source_readings:
+  - sections/section-040/module-01/course-02-deployment-frequency-from-the-sync-counter.md
+  prompt: Argo CD exposes the counter `argocd_app_sync_total` with the labels `name` and `phase`. A team wants the number of deployments of the Application `scout` in the last 7 days, as a whole number. The Prometheus server holds more than 7 days of data. Which query does this?
+  options:
+  - id: a
+    text: '`argocd_app_sync_total{name="scout"}`'
+    explanation: This option returns the raw counter. It counts every sync since the controller started, not the syncs in the last 7 days.
+  - id: b
+    text: '`rate(argocd_app_sync_total{name="scout",phase="Succeeded"}[7d])`'
+    explanation: This option returns a rate per second, not a count of deployments.
+  - id: c
+    text: '`round(sum(increase(argocd_app_sync_total{name="scout",phase="Succeeded"}[7d])))`'
+    explanation: Correct. `increase()` returns the growth of the counter over the window, the filter `phase="Succeeded"` keeps the syncs that applied a change, `sum()` joins the series and `round()` removes the fraction that extrapolation adds.
+  - id: d
+    text: '`count(argocd_app_sync_total{name="scout"})`'
+    explanation: '`count()` counts the series, and there is one series per phase. It does not count syncs.'
+  correct_option: c
+  explanation: The counter only grows, so `increase()` over the window gives the number of syncs. The phase filter keeps successful syncs, `sum()` joins the series and `round()` gives a whole number.
+- id: ats020-final-q25
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate change failure rate and time to restore from failed and recovered deployments
+  source_readings:
+  - sections/section-040/module-01/course-03-change-failure-rate-from-application-health.md
+  prompt: The flag `max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0` is `1` while the Application is `Degraded` and `0` otherwise. The Application was `Degraded` twice in the last 6 hours, and it is healthy now. A rule applies `changes()` to the flag over a 6 hour subquery. Which value does `changes()` return, and what must the rule do to get the failed deployments?
+  options:
+  - id: a
+    text: It returns `2`, and the rule uses the value as it is.
+    explanation: Each failure flips the flag twice, once from `0` to `1` and once from `1` to `0`. Two failures give four changes.
+  - id: b
+    text: It returns `4`, and the rule multiplies it by two.
+    explanation: Multiplying would give eight failures. Each failure is counted twice, so the rule must divide.
+  - id: c
+    text: It returns `4`, and the rule divides it by two.
+    explanation: Correct. Each failure flips the flag up and back down, so two failures give four changes. Dividing by two gives the failed deployments.
+  - id: d
+    text: It returns `1`, because the flag has one value now.
+    explanation: '`changes()` counts how often the value changed in the range, not the current value.'
+  correct_option: c
+  explanation: Each failed deployment flips the flag from `0` to `1` and back to `0`, which is two changes. Four changes divided by two give two failed deployments.
+- id: ats020-final-q26
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Name one change to the delivery process that improves each metric
+  source_readings:
+  - sections/section-040/module-01/course-04-lead-time-and-time-to-restore-from-timestamps.md
+  prompt: A team has a change failure rate of 30 percent. Most failures are image tags that do not exist, and every one is found only after the deployment. Which change to the delivery process lowers the change failure rate the most?
+  options:
+  - id: a
+    text: Make deployments larger and less frequent, so that fewer deployments happen.
+    explanation: Larger changes are harder to review and fail more often. This also lowers deployment frequency.
+  - id: b
+    text: Add a pipeline step before the merge that checks that the image tag exists in the registry.
+    explanation: Correct. A check before the merge catches the fault before it reaches the cluster, so fewer deployments fail.
+  - id: c
+    text: Add an alert on the `Degraded` health status.
+    explanation: An alert shortens the time to restore service. It does not stop the failed deployment from happening.
+  - id: d
+    text: Replace the automated sync with a manual deployment step.
+    explanation: A manual step adds waiting time and raises the lead time. It does not catch a missing image tag.
+  correct_option: b
+  explanation: A check before the merge catches the fault before the deployment, which lowers the change failure rate. An alert on `Degraded` shortens the time to restore service instead.
+- id: ats020-final-q27
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Calculate the remaining error budget for a 99% SLO over a window
+  source_readings:
+  - sections/section-040/module-02/course-01-sli-slo-and-error-budget-from-request-counters.md
+  prompt: A service has an SLO of 99 percent of successful requests over 30 days. In the last 30 days it served 2,000,000 requests. So far 12,000 of them failed. How much of the error budget is left?
+  options:
+  - id: a
+    text: 40 percent of the budget. The SLO allows 20,000 failed requests and 8,000 failures are still allowed.
+    explanation: Correct. 1 percent of 2,000,000 is 20,000 failed requests. 12,000 are used, so 8,000 remain, which is 40 percent of the budget.
+  - id: b
+    text: 99 percent of the budget, because the SLO is 99 percent.
+    explanation: The SLO is the target for the SLI. It is not the remaining budget.
+  - id: c
+    text: 88 percent of the budget, because 12,000 is 0.6 percent of the requests.
+    explanation: The failures are 0.6 percent of the requests, but the budget is 1 percent of the requests. The share of the budget used is 0.6 divided by 1, which is 60 percent.
+  - id: d
+    text: The budget is used up, because 12,000 requests failed.
+    explanation: The budget is 20,000 failed requests. It is not used up until more than 20,000 fail.
+  correct_option: a
+  explanation: The budget is 1 percent of 2,000,000 requests, which is 20,000. After 12,000 failures, 8,000 are left, which is 40 percent. The formula `1 - (1 - SLI) / (1 - SLO)` gives `1 - 0.006 / 0.01 = 0.4`.
+- id: ats020-final-q28
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write a burn-rate alert that fires when the budget would run out early
+  source_readings:
+  - sections/section-040/module-02/course-02-burn-rate-alerts-with-two-windows.md
+  prompt: The SLO is 99 percent over 30 days. For the last hour, 6 percent of the requests to `scout` failed, and the rate does not change. What is the burn rate, and when is the 30-day error budget used up if nothing changes?
+  options:
+  - id: a
+    text: The burn rate is 0.06, and the budget is used up in 500 days.
+    explanation: 0.06 is the error ratio. The burn rate divides it by the budget `1 - SLO`, which is 0.01.
+  - id: b
+    text: The burn rate is 6, and the budget is used up in 180 days.
+    explanation: The burn rate is right, but the days are the window divided by the burn rate, not multiplied by it.
+  - id: c
+    text: The burn rate is 1, because the SLO is 99 percent.
+    explanation: A burn rate of 1 would mean the errors are exactly 1 percent of the requests. Here they are 6 percent.
+  - id: d
+    text: The burn rate is 6, and the budget is used up in 5 days.
+    explanation: 'Correct. The burn rate is the error ratio divided by the budget: 0.06 divided by 0.01 is 6. The days until the budget is gone are 30 divided by 6, which is 5.'
+  correct_option: d
+  explanation: 'Burn rate is the error ratio divided by the error budget: 0.06 / 0.01 = 6. A 30-day budget lasts 30 / 6 = 5 days at that speed.'
+- id: ats020-final-q29
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare container CPU and memory requests with real usage from metrics-server and Prometheus
+  source_readings:
+  - sections/section-040/module-02/course-03-requests-versus-usage-with-kubectl-top-and-prometheus.md
+  prompt: A team wants the peak memory use of every container in `starfleet` over the last day, next to the memory each container requested. `kubectl top pods --containers` shows only the latest value. Which combination answers the question?
+  options:
+  - id: a
+    text: '`container_memory_usage_bytes` with `rate()`, and the limits from `kubectl describe node`.'
+    explanation: '`container_memory_usage_bytes` includes cache that the kernel can take back, `rate()` is for counters and a limit is not a request.'
+  - id: b
+    text: '`kubectl top nodes` run once a minute for a day.'
+    explanation: '`kubectl top nodes` shows the use of the node, not of each container, and it does not keep a history.'
+  - id: c
+    text: '`kube_pod_container_resource_requests` alone, because the request is the usage.'
+    explanation: A request is what the scheduler reserves. It is not the usage.
+  - id: d
+    text: '`max_over_time(container_memory_working_set_bytes{namespace="starfleet",container!=""}[1d])` from cAdvisor, and `kube_pod_container_resource_requests{resource="memory"}` from kube-state-metrics.'
+    explanation: Correct. cAdvisor, scraped by Prometheus, keeps the usage history, and `max_over_time()` gives the peak. kube-state-metrics exports the requests as metrics. The selector `container!=""` removes the series for the whole pod.
+  correct_option: d
+  explanation: metrics-server keeps only the latest value. Prometheus keeps the history from cAdvisor (`container_memory_working_set_bytes`) and the requests from kube-state-metrics, so `max_over_time()` and a division show the gap.
+- id: ats020-final-q30
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Follow a fixed triage order — status, events, describe, logs, previous logs — to find a pod's failure cause
+  source_readings:
+  - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+  prompt: A pod in `starfleet` shows `Pending`. Which command gives the cause fastest?
+  options:
+  - id: a
+    text: '`kubectl logs` on the pod, because the log shows why it waits.'
+    explanation: A pod with no node has no container and no log.
+  - id: b
+    text: '`kubectl exec` into the pod and run `ps`.'
+    explanation: A pending pod has no running container to enter.
+  - id: c
+    text: '`kubectl -n starfleet get events --field-selector type=Warning,reason=FailedScheduling`, because the scheduler writes the reason as an event.'
+    explanation: Correct. The scheduler records the failed check, such as `Insufficient cpu`, in a `FailedScheduling` event.
+  - id: d
+    text: '`kubectl top pod`, because the metrics show what is missing.'
+    explanation: A pod that is not placed has no metrics.
+  correct_option: c
+  explanation: Correct. The scheduler records the failed check, such as `Insufficient cpu`, in a `FailedScheduling` event.
+- id: ats020-final-q31
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Fix a Pending pod caused by too-large requests, a missing PersistentVolumeClaim or an unmatched node selector
+  source_readings:
+  - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+  prompt: The event of a pending pod reads `persistentvolumeclaim "bridge-data" not found`. What fixes it without changing the Deployment?
+  options:
+  - id: a
+    text: Delete the pod so it is placed again.
+    explanation: A new pod fails the same check.
+  - id: b
+    text: Create a PersistentVolumeClaim named `bridge-data` in the namespace of the pod.
+    explanation: Correct. The scheduler checks a pending pod again when the claim appears.
+  - id: c
+    text: 'Set `failurePolicy: Ignore` on the scheduler.'
+    explanation: The scheduler has no such field.
+  - id: d
+    text: Raise the memory request of the container.
+    explanation: The cause is a missing claim, not memory.
+  correct_option: b
+  explanation: Correct. The scheduler checks a pending pod again when the claim appears.
+- id: ats020-final-q32
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe
+  source_readings:
+  - sections/section-050/module-01/course-02-crashloopbackoff-and-failing-probes.md
+  prompt: A pod went from `Error` to `CrashLoopBackOff`. You want the log of the run that crashed, and the current container has just started again. Which command do you run?
+  options:
+  - id: a
+    text: '`kubectl logs <pod> --previous`'
+    explanation: Correct. `--previous` reads the log of the container before the current one.
+  - id: b
+    text: '`kubectl logs <pod> --follow`'
+    explanation: '`--follow` streams the log of the new container only.'
+  - id: c
+    text: '`kubectl describe node`'
+    explanation: The node description does not hold container logs.
+  - id: d
+    text: '`kubectl rollout undo`'
+    explanation: An undo changes the Deployment and does not show the log.
+  correct_option: a
+  explanation: Correct. `--previous` reads the log of the container before the current one.
+- id: ats020-final-q33
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Fix an OOMKilled container by reading its usage and setting a fitting memory limit
+  source_readings:
+  - sections/section-050/module-01/course-03-oomkilled-and-memory-limits.md
+  prompt: Why does the cause of an `OOMKilled` container not appear in the events of the pod?
+  options:
+  - id: a
+    text: The kernel stops the container, and the kubelet records the reason in the container's last state, so the events only show restarts and `BackOff`.
+    explanation: Correct. Read `Last State` in `kubectl describe pod`.
+  - id: b
+    text: The events are deleted after one minute.
+    explanation: Events stay for a longer time and they are not the problem here.
+  - id: c
+    text: The scheduler hides the event.
+    explanation: The scheduler does not write container events.
+  - id: d
+    text: '`OOMKilled` is only written to the node log.'
+    explanation: The reason is stored in the pod status.
+  correct_option: a
+  explanation: Correct. Read `Last State` in `kubectl describe pod`.
+- id: ats020-final-q34
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret
+  source_readings:
+  - sections/section-050/module-01/course-04-imagepullbackoff-and-image-references.md
+  prompt: 'A pull event reads `failed to authorize: ... 403 Forbidden`. Which statement is correct?'
+  options:
+  - id: a
+    text: The tag does not exist, so only the tag must change.
+    explanation: '`not found` is the message for a missing tag.'
+  - id: b
+    text: The kubelet is out of disk space.
+    explanation: Disk problems give a different message.
+  - id: c
+    text: The Service has no endpoints.
+    explanation: A Service is not involved in a pull.
+  - id: d
+    text: The registry wants credentials, so a pull secret named in `imagePullSecrets` of the pod template is the usual fix. A wrong repository name can also give a 403, so check the spelling first.
+    explanation: Correct. The text `failed to authorize` points to credentials.
+  correct_option: d
+  explanation: Correct. The text `failed to authorize` points to credentials.
+- id: ats020-final-q35
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Prove each fix by the platform behaviour it restores (create succeeds, resource reconciles, sync is Healthy)
+  source_readings:
+  - sections/section-050/module-02/course-01-a-webhook-service-without-endpoints.md
+  prompt: 'A webhook Service has no endpoints. A colleague proposes to set `failurePolicy: Ignore` so creates work again. What happens, and how do you prove a real fix?'
+  options:
+  - id: a
+    text: Nothing changes, because `Ignore` is the default.
+    explanation: '`Fail` is set in this configuration.'
+  - id: b
+    text: The webhook server restarts and logs the request.
+    explanation: A policy change does not restart the server.
+  - id: c
+    text: Creates work, but the policy no longer runs. A real fix shows a new `allowed` line in the log of the webhook server after a create.
+    explanation: Correct. With `Ignore` the API server skips the failed call, so the server log stays empty.
+  - id: d
+    text: The create works and the server log still shows the request.
+    explanation: With `Ignore` the request never reaches the server.
+  correct_option: c
+  explanation: Correct. With `Ignore` the API server skips the failed call, so the server log stays empty.
+- id: ats020-final-q36
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Find an expired webhook serving certificate from the `x509` error text and `openssl`, and replace it
+  source_readings:
+  - sections/section-050/module-02/course-02-an-expired-webhook-certificate.md
+  prompt: You signed a new serving certificate with the platform CA and updated the Secret. Creates still fail with the old `x509` expiry error. What is the most likely cause?
+  options:
+  - id: a
+    text: The new certificate has no subject alternative name.
+    explanation: That would give a name mismatch error, not the old expiry date.
+  - id: b
+    text: The webhook server loads its certificate only at start and still serves the old one, so it needs a restart.
+    explanation: Correct. Run `kubectl rollout restart` on the webhook Deployment.
+  - id: c
+    text: The API server caches all certificates for one day.
+    explanation: The API server checks the certificate the server shows, and it is the server that still shows the old one.
+  - id: d
+    text: The Service port is wrong.
+    explanation: A wrong port gives `connection refused`.
+  correct_option: b
+  explanation: Correct. Run `kubectl rollout restart` on the webhook Deployment.

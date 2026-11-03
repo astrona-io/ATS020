@@ -1,0 +1,198 @@
+# Starting workloads for the dashboards and logs capstone: `scout` (podinfo,
+# with Prometheus metrics) and `probe` (go-httpbin, which logs one line per
+# request) in `outpost`, a ServiceMonitor for `scout`, a `shuttle` pod that
+# sends steady traffic with errors to both, and the Grafana data source
+# `prometheus`, provisioned from a correct ConfigMap. The dashboard comes from
+# manifests/dashboard-start.yaml, with two faults. No Collector exists: the
+# learner writes it.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: outpost
+  labels:
+    app: scout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: outpost
+  labels:
+    app: scout
+spec:
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: outpost
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: outpost
+  labels:
+    app: probe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+        - name: probe
+          image: mccutchen/go-httpbin:2.25.0
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /status/200
+              port: http
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe
+  namespace: outpost
+  labels:
+    app: probe
+spec:
+  selector:
+    app: probe
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shuttle-traffic
+  namespace: starfleet
+data:
+  traffic.sh: |
+    #!/bin/sh
+    # Steady traffic for the capstone. Every second: one request to scout and
+    # one to probe. Every 4th second: one /status/500 to scout and one
+    # /status/500 to probe, so scout has an error ratio and probe logs an
+    # error line.
+    request_iteration=0
+    while true; do
+      request_iteration=$((request_iteration+1))
+      curl -s -o /dev/null http://scout.outpost:9898/
+      curl -s -o /dev/null http://probe.outpost:8080/get
+      [ $((request_iteration % 4)) -eq 0 ] && curl -s -o /dev/null http://scout.outpost:9898/status/500
+      [ $((request_iteration % 4)) -eq 0 ] && curl -s -o /dev/null http://probe.outpost:8080/status/500
+      sleep 1
+    done
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command: ["sh", "/traffic/traffic.sh"]
+          volumeMounts:
+            - name: traffic
+              mountPath: /traffic
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}
+      volumes:
+        - name: traffic
+          configMap:
+            name: shuttle-traffic
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datasource-prometheus
+  namespace: monitoring
+  labels:
+    grafana_datasource: "1"
+data:
+  prometheus.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        uid: prometheus
+        access: proxy
+        url: http://kps-prometheus.monitoring:9090
+        isDefault: true
+        jsonData:
+          timeInterval: 15s

@@ -117,3 +117,30 @@ You can now tell from the targets list whether a monitor fails to scrape or neve
 > - **Reading only the active targets.** A port name mismatch only shows in the dropped targets.
 > - **Changing two things at once.** Every change takes about a minute to reach Prometheus; change one field, wait, and check.
 > - **Fixing the Service to match a wrong monitor.** Other tools may rely on the Service's port names. Fix the monitor unless the Service is really wrong.
+
+## Your mission: Get A Workload Scraped With A ServiceMonitor
+
+You can now tell a target that fails from a target that never appears, and follow the chain from the Prometheus resource to the endpoints. The mission gives you a ServiceMonitor for `scout` that Prometheus does not scrape. Find what is wrong and prove the fix with `up == 1` for every `scout` endpoint.
+
+Pause the playground, then start the lab:
+
+```sh
+astrona stop ats-020-playground-010-01
+```
+
+```sh
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-01/labs/lab-01
+```
+
+The task is on the next page. When you have fixed the monitor, grade your work:
+
+```sh
+astrona submit -c sections/section-010/module-01/labs/lab-01
+```
+
+When the lab is done, remove it and start the playground again:
+
+```sh
+astrona destroy ats-020-lab-010-01
+astrona start ats-020-playground-010-01
+```

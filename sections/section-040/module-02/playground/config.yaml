@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Measure Service Levels And Resource Efficiency (PLAYGROUND).
+# A clean sandbox: it starts with metrics-server, a trimmed Prometheus stack
+# with kube-state-metrics, the Starfleet workloads and a traffic loop, then
+# stays running for free exploration. No task, no grading, no `astrona submit`.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-playground-040-02
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    addons:
+      metricsServer: true
+    preloadImages:
+      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+      - quay.io/prometheus/prometheus:v3.15.0-distroless
+      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:2.25.0
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Install Helm if missing and a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator, one Prometheus, kube-state-metrics, kubelet scrape job) in `monitoring`"
+      type: file
+      source: bootstrap/prepare.sh
+  manifests:
+    - name: lab-start
+      description: "scout, probe, the shuttle traffic loop and the ServiceMonitor for scout"
+      type: file
+      source: manifests/lab-start.yaml
+  waitFor:
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Run An OpenTelemetry Collector With The Operator (PLAYGROUND).
+# A clean sandbox: it starts, installs cert-manager and Jaeger, deploys the
+# Starfleet workloads with tracing switched on, then stays running for free
+# exploration. The OpenTelemetry Operator is not installed and no Collector
+# exists yet. No task, no grading, no `astrona submit`.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-playground-030-01
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/jetstack/cert-manager-controller:v1.21.2
+      - quay.io/jetstack/cert-manager-webhook:v1.21.2
+      - quay.io/jetstack/cert-manager-cainjector:v1.21.2
+      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.160.0
+      - otel/opentelemetry-collector-contrib:0.162.0
+      - ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.162.0
+      - jaegertracing/jaeger:2.22.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Install cert-manager 1.21.2 and wait until its webhook is ready"
+      type: file
+      source: bootstrap/prepare.sh
+  manifests:
+    - name: lab-start
+      description: "Jaeger 2.22.0 in observability, scout with tracing on in starfleet, and the shuttle traffic loop"
+      type: file
+      source: manifests/lab-start.yaml
+  waitFor:
+    - resource: deploy/jaeger
+      namespace: observability
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

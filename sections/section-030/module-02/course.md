@@ -1,39 +1,37 @@
 # Add Tracing Without Code Changes Using Auto-Instrumentation
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-02/playground
-> ```
+A trace is only useful when it covers every service that a request touches. Adding a tracing library to each service means changing code, rebuilding images and rolling out every service again. The OpenTelemetry Operator offers another way: it adds a tracing agent to a pod when the pod is created, and the application code stays as it is. The exam expects you to set this up by hand and to find out why it does not work.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+The setting has two parts, an Instrumentation resource and an annotation on the pod template. Both are small, and a mistake in either one gives no error. The pod starts, serves requests and has no agent. The only sign is a trace in Jaeger that is missing a service or that breaks in two.
+
+The module has three parts. **What The Operator Injects Into A Pod** creates the Instrumentation and the annotation for `relay` and reads the init container and the environment variables that the Operator adds. **Reading One Trace Across Two Services** finds a trace with spans from `relay` and `scout`, names the slowest step, and shows what happens when the propagators change. **Finding Why A Pod Is Not Instrumented** breaks the setup in two ways, reads the Operator log, and ends with a graded lab.
 
 ## Learning objectives
 
-- Write an Instrumentation resource with the exporter endpoint, propagators and sampler
-- Annotate a Deployment so the operator injects the language agent, and restart it so the change takes effect
-- Read the injected init container and environment variables to prove injection happened
-- Follow one request across two services in Jaeger and name the slowest span
-- Find why a pod was not instrumented (annotation on the wrong object, Instrumentation in another namespace, pod not restarted)
+After this module you can:
+
+- Write an Instrumentation resource with the exporter endpoint, the propagators and the sampler.
+- Annotate the pod template of a Deployment so the Operator injects the Node.js agent, and restart it so the change takes effect.
+- Read the injected init container and the environment variables to prove that injection happened.
+- Follow one request across two services in Jaeger and name the slowest span.
+- Find why a pod was not instrumented: the annotation on the wrong object, an Instrumentation in another namespace, or a pod that was not created again.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need to know what a trace and a span are, how a Deployment creates pods from its pod template, and how to use `kubectl port-forward`, `kubectl logs` and `jq`. You need to read an annotation and a custom resource.
 
-## Outline
+Your playground is a single-node `kind` cluster running Kubernetes 1.35. cert-manager 1.21.2 and the OpenTelemetry Operator 0.160.0 are installed and ready. A working Collector (contrib image 0.162.0) sends spans to Jaeger 2.22.0. No Prometheus stack runs, to save memory.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+| Namespace | Workload | What it is |
+| --- | --- | --- |
+| `observability` | `jaeger` | Jaeger 2.22.0 in one pod with in-memory storage. The web interface and the API are on port `16686` |
+| `observability` | `otel` | The Collector. The Service `otel-collector` takes OTLP on ports `4317` (gRPC) and `4318` (HTTP) and exports to Jaeger |
+| `starfleet` | `scout` | One pod of `podinfo` 6.15.0 with its own OpenTelemetry tracing on, sending to `otel-collector.observability:4317` |
+| `starfleet` | `relay` | A small Node.js HTTP server (`node:22-alpine`) with no tracing code. Each request makes one request to `scout`. The path `/slow` asks `scout` for `/delay/1` |
+| `starfleet` | `shuttle` | A client pod that sends a request to `relay` every 2 seconds, and a slow one every fifth round |
 
-- What auto-instrumentation injects and when (pod creation, mutating webhook)
-- The Instrumentation resource — exporter, propagators, sampler, language blocks
-- Annotations and restarts
-- Reading a two-service trace and finding the slow step
+No Instrumentation exists yet, and `relay` has no annotation. Every command in the parts runs against the playground cluster, and `kubectl` already points at it.
 
-## Diagrams planned
+Launch your playground now, and keep it running next to you while you read the parts:
 
-<!-- TODO(build): mermaid `sequence` — Pod create request, operator webhook adds init container and env, app starts with agent, spans exported -->
-
-<!-- playground provides: kind cluster with cert-manager, OpenTelemetry Operator 0.160.0, a working Collector exporting to Jaeger 2.22.0. A `relay` Node.js service (node:22-alpine with a small HTTP server script from a ConfigMap) in `starfleet` that calls `scout`; `relay` has no instrumentation and no annotation yet. `scout` exports its own spans, so once `relay` is instrumented the reader sees one trace with spans from both. -->
-
-<!-- module section-030/module-02 (Module 2) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->

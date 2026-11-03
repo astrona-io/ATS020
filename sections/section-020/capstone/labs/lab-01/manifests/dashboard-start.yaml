@@ -1,0 +1,108 @@
+# The starting dashboard, with two faults.
+# 1. The ConfigMap has no `grafana_dashboard: "1"` label, so the Grafana
+#    dashboard sidecar never copies it.
+# 2. The panel "Error log lines" selects the label `k8s_deploy`. The metric
+#    made from the logs has the label `k8s_deployment_name`, so the panel
+#    stays empty even after the Collector works.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-outpost-overview
+  namespace: monitoring
+data:
+  outpost-overview.json: |
+    {
+      "uid": "outpost-overview",
+      "title": "Outpost Overview",
+      "schemaVersion": 41,
+      "time": {
+        "from": "now-15m",
+        "to": "now"
+      },
+      "refresh": "30s",
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Request rate",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (status) (rate(http_requests_total{namespace=\"outpost\"}[1m]))",
+              "legendFormat": "{{status}}"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Error ratio",
+          "gridPos": {
+            "x": 12,
+            "y": 0,
+            "w": 6,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(rate(http_requests_total{namespace=\"outpost\", status=~\"5..\"}[1m])) / sum(rate(http_requests_total{namespace=\"outpost\"}[1m]))"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Error log lines",
+          "gridPos": {
+            "x": 18,
+            "y": 0,
+            "w": 6,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(rate(log_error_lines_total{k8s_namespace_name=\"outpost\", k8s_deploy=\"probe\"}[1m]))",
+              "legendFormat": "probe errors per second"
+            }
+          ]
+        }
+      ]
+    }

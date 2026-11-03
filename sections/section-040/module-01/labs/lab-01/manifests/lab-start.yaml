@@ -1,0 +1,28 @@
+# Starting objects for the DORA playground. The Application `scout` and the
+# history behind it are made by bootstrap/prepare.sh, because the seed needs
+# Prometheus scraping Argo CD while it runs. This file adds the `shuttle`
+# client in `starfleet`, which the reader uses to send requests to `scout`.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command: ["sleep", "infinity"]
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}

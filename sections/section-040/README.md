@@ -33,7 +33,7 @@ Makes the reader able to measure how well the platform delivers and how well it 
 
 ### 2. Measure Service Levels And Resource Efficiency
 *   **Module Reader:** **[Module 2: Measure Service Levels And Resource Efficiency](./module-02/course.md)**
-*   **Hands-on Playground:** `sections/section-040/module-02/playground` — kind cluster with metrics-server 0.9.0 and trimmed kube-prometheus-stack with kube-state-metrics on (needed for requests). `probe` serves a fixed share of 500 responses so the SLI is below target and the error budget is burning. `scout` requests far more CPU and memory than it uses, and a third Deployment requests too little, so both directions of the gap are visible.
+*   **Hands-on Playground:** `sections/section-040/module-02/playground` — kind cluster with metrics-server 0.9.0 and trimmed kube-prometheus-stack with kube-state-metrics on (needed for requests). `scout` serves a fixed share of 500 responses so the SLI is below target and the error budget is burning. `scout` also requests far more CPU and memory than it uses, and `probe` requests too little, so both directions of the gap are visible.
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-040/module-02/playground
     ```
@@ -44,10 +44,10 @@ Makes the reader able to measure how well the platform delivers and how well it 
     astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-040/capstone/labs/lab-01
     astrona submit -c .
     ```
-*   **Hands-on Objective:** The platform team must report on `starfleet`. The reader writes recording rules for deployment frequency and change failure rate over the seeded history, an SLO error-budget recording rule and burn-rate alert for `probe`, and right-sizes the most over-requested Deployment. The grader queries the recorded series, checks the alert definition, and compares the new requests with measured usage.
+*   **Hands-on Objective:** The platform team must report on `starfleet`. The reader writes recording rules for deployment frequency and change failure rate over the seeded history, an SLO error-budget recording rule and burn-rate alert for `scout`, and right-sizes the most over-requested Deployment. The grader queries the recorded series, checks the alert definition, and compares the new requests with measured usage.
 
 ---
 
 ## Ready for Assessment?
 
-*   **[Take the Section 040 Knowledge Check](./quiz.md)**
+*   **[Take the Section 040 Knowledge Check](./quiz.yaml)**

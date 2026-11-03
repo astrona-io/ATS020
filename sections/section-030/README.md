@@ -50,4 +50,4 @@ Makes the reader able to run an OpenTelemetry Collector with the OpenTelemetry O
 
 ## Ready for Assessment?
 
-*   **[Take the Section 030 Knowledge Check](./quiz.md)**
+*   **[Take the Section 030 Knowledge Check](./quiz.yaml)**

@@ -1,0 +1,181 @@
+# Starting workloads for the capstone: `scout` (podinfo) in the namespace
+# `frontier` behind a Service with a named port, a `shuttle` pod whose loop
+# sends about one failing request in six, and `alert-receiver` in `monitoring`,
+# a small HTTP server that prints every Alertmanager notification it receives.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: frontier
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: frontier
+  labels:
+    app: scout
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scout
+  namespace: frontier
+  labels:
+    app: scout
+spec:
+  selector:
+    app: scout
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shuttle-traffic
+  namespace: frontier
+data:
+  traffic.sh: |
+    #!/bin/sh
+    # Every second: one normal request to scout. Every 5th second: one
+    # /status/500, so about one request in six fails.
+    i=0
+    while true; do
+      i=$((i+1))
+      curl -s -o /dev/null http://scout.frontier:9898/
+      [ $((i % 5)) -eq 0 ] && curl -s -o /dev/null http://scout.frontier:9898/status/500
+      sleep 1
+    done
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: frontier
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command: ["sh", "/traffic/traffic.sh"]
+          volumeMounts:
+            - name: traffic
+              mountPath: /traffic
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}
+      volumes:
+        - name: traffic
+          configMap:
+            name: shuttle-traffic
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-receiver
+  namespace: monitoring
+data:
+  receiver.py: |
+    # Prints a short summary of every Alertmanager webhook notification.
+    import json
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_POST(self):
+            body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+            msg = json.loads(body)
+            for alert in msg.get("alerts", []):
+                labels = alert.get("labels", {})
+                print(f"{msg.get('receiver')} {alert.get('status')} "
+                      f"{labels.get('alertname')} namespace={labels.get('namespace')} "
+                      f"severity={labels.get('severity')} startsAt={alert.get('startsAt')}",
+                      flush=True)
+            self.send_response(200)
+            self.end_headers()
+
+        def log_message(self, *args):
+            pass
+
+    HTTPServer(("", 8080), Handler).serve_forever()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-receiver
+  namespace: monitoring
+  labels:
+    app: alert-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alert-receiver
+  template:
+    metadata:
+      labels:
+        app: alert-receiver
+    spec:
+      containers:
+        - name: alert-receiver
+          image: python:3.13-alpine
+          command: ["python", "-u", "/app/receiver.py"]
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: app
+              mountPath: /app
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 64Mi}
+      volumes:
+        - name: app
+          configMap:
+            name: alert-receiver
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-receiver
+  namespace: monitoring
+spec:
+  selector:
+    app: alert-receiver
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

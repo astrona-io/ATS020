@@ -1,41 +1,38 @@
 # Triage And Fix Failing Workloads
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-050/module-01/playground
-> ```
+A workload that does not run shows only a short word in the `STATUS` column: `Pending`, `CrashLoopBackOff`, `OOMKilled`, `ImagePullBackOff`. The word is a symptom. Many different causes lead to the same word, and the fix depends on the cause. On the exam you have a few minutes for each broken workload, so you need a fixed order of commands that finds the cause fast, and a proof that the fix works.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+This module teaches that order. You read the status, then the events, then the description of the pod, then the logs. You then fix the cause and prove the fix with a request from the `shuttle` pod and with the state of the pod. You never stop at "the pod is `Running`", because a pod can be `Running` and still not serve.
+
+The module has four parts. **A Triage Order And Pending Pods** sets the order of commands and fixes two pods that the scheduler cannot place. **CrashLoopBackOff And Failing Probes** reads exit codes, container logs and probe events, and fixes a container that exits and a container that a liveness probe restarts. **OOMKilled And Memory Limits** reads the last state of a container, measures its memory use and sets a limit that fits. **ImagePullBackOff And Image References** reads the pull error, fixes a wrong tag and ends with a graded lab on all four fault families.
 
 ## Learning objectives
 
-- Follow a fixed triage order — status, events, describe, logs, previous logs — to find a pod's failure cause
-- Fix a Pending pod caused by too-large requests, a missing PersistentVolumeClaim or an unmatched node selector
-- Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe
-- Fix an OOMKilled container by reading its usage and setting a fitting memory limit
-- Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret
+After this module you can:
+
+- Follow a fixed triage order (status, events, describe, logs, previous logs) to find the cause of a pod failure.
+- Fix a `Pending` pod caused by a request that is too large, a missing PersistentVolumeClaim or a node selector that matches no node.
+- Fix a `CrashLoopBackOff` caused by a process that exits or by a liveness probe that fails.
+- Fix an `OOMKilled` container by reading its memory use and setting a limit that fits.
+- Fix an `ImagePullBackOff` caused by a wrong tag, and tell a missing tag from a missing pull secret.
+- Prove each fix with a request from `shuttle` and with the state of the pod.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need to know what a pod, a Deployment and a Service are, and how to read YAML. You need the basic commands `kubectl get`, `kubectl describe`, `kubectl logs` and `kubectl exec`.
 
-## Outline
+Your playground is a single-node `kind` cluster running Kubernetes 1.35. The metrics-server add-on is installed, so `kubectl top` works. No Prometheus stack runs, to save memory. The cluster starts broken on purpose, and you fix it step by step in the parts.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+| Workload | What it is | What is wrong |
+| --- | --- | --- |
+| `shuttle` | A client pod with `curl` | Nothing. You send test requests from it |
+| `scout` | `podinfo` 6.15.0, port `9898` | The pod stays `Pending` |
+| `bridge` | `podinfo` 6.15.0, port `9898` | The pod stays `Pending` |
+| `probe` | `go-httpbin` 2.25.0, port `8080` | The container is restarted again and again |
+| `engine` | A small shell program | The container exits at once |
+| `cargo` | A Node.js server, port `8080` | The container is stopped with `OOMKilled` |
+| `beacon` | `podinfo` with a wrong tag, port `9898` | The pod is in `ImagePullBackOff` |
 
-- A triage order and the commands for each step
-- Pending — scheduler events and what they say
-- CrashLoopBackOff and probes — exit codes, previous logs
-- OOMKilled — last state, memory limits and usage
-- ImagePullBackOff — image references and pull secrets
+Launch your playground now, and keep it running next to you while you read the parts:
 
-## Diagrams planned
-
-<!-- TODO(build): mermaid `flowchart` — Decision tree from pod status to the command that shows the cause to the usual fix -->
-<!-- TODO(build): mermaid `state` — Pod and container states — Pending, ContainerCreating, Running, CrashLoopBackOff, Terminated OOMKilled -->
-
-<!-- playground provides: kind cluster with metrics-server, starts broken on purpose: in `starfleet`, one Deployment per failure kind — `scout` Pending (requests more CPU than the node has), `probe` in CrashLoopBackOff (liveness probe on a wrong path), a `cargo` Deployment OOMKilled (memory limit below its working set), and `beacon` in ImagePullBackOff (tag that does not exist). `shuttle` is healthy and used to prove each fix with a request. No monitoring stack needed. -->
-
-<!-- module section-050/module-01 (Module 1) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->

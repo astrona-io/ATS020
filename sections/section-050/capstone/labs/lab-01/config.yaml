@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-capstone-050
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    addons:
+      metricsServer: true
+    preloadImages:
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - mccutchen/go-httpbin:2.25.0
+      - node:22-alpine
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Wait until metrics-server answers, so kubectl top works"
+      type: file
+      source: bootstrap/01-prepare.sh
+  manifests:
+    - name: lab-start
+      description: "The namespace starfleet with shuttle and three broken workloads, and the starfleet-policy webhook with a broken Service"
+      type: file
+      source: manifests/lab-start.yaml
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+    - resource: deploy/starfleet-policy
+      namespace: webhook-system
+
+testing:
+  init:
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+    - name: wait-for-platform
+      description: Waits until the three workloads and the webhook server have a ready pod
+      type: file
+      source: testing/wait-for-platform.sh
+
+validation:
+  scripts:
+    - name: cargo-limit
+      description: cargo keeps a memory limit that fits its use (256Mi to 1Gi), has no OOMKilled restart and answers 200
+      type: file
+      source: validation/validate-cargo.sh
+    - name: beacon-image
+      description: beacon runs podinfo 6.15.0 and answers 200
+      type: file
+      source: validation/validate-beacon.sh
+    - name: probe-stable
+      description: probe keeps its liveness probe, stays Ready without new restarts and answers 200
+      type: file
+      source: validation/validate-probe.sh
+    - name: webhook-answers
+      description: A Deployment can be created in starfleet and the webhook server logs the request
+      type: file
+      source: validation/validate-webhook.sh
+    - name: design-intact
+      description: The workloads, the webhook configuration, the webhook server and shuttle are still in place
+      type: file
+      source: validation/validate-design-intact.sh
+
+teardown:
+  keepCluster: false

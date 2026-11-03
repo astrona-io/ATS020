@@ -50,4 +50,4 @@ Makes the reader able to find and fix the cause of a broken workload or a broken
 
 ## Ready for Assessment?
 
-*   **[Take the Section 050 Knowledge Check](./quiz.md)**
+*   **[Take the Section 050 Knowledge Check](./quiz.yaml)**

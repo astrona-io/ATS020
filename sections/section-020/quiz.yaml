@@ -1,0 +1,197 @@
+# Knowledge check for section 020. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats020-020
+course_id: ATS020
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-020
+  title: "Dashboards And Logs"
+questions:
+  - id: ats020-020-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Add a Prometheus data source to Grafana with a provisioning file or a labelled ConfigMap"
+    source_readings:
+      - sections/section-020/module-01/course-01-grafana-parts-and-a-provisioned-data-source.md
+    prompt: "The platform team wants the Prometheus data source in Grafana to exist after every pod restart, and nobody should be able to change it in the web interface. Which approach meets this?"
+    options:
+      - id: a
+        text: "Add the data source in the Grafana web interface and save it."
+        explanation: "A data source saved in the interface is not defined as code and can be edited by any admin."
+      - id: b
+        text: "Apply a ConfigMap with the label `grafana_datasource: \"1\"` that holds the data source definition, so the sidecar loads it as a provisioned data source."
+        explanation: "Correct. The sidecar writes the file into Grafana's provisioning directory. Grafana marks the data source as read-only and loads it again on every start."
+      - id: c
+        text: "Edit the Grafana Deployment and add the Prometheus URL as an environment variable."
+        explanation: "Grafana does not create a data source from an environment variable of this kind."
+      - id: d
+        text: "Create a ServiceMonitor for Grafana."
+        explanation: "A ServiceMonitor tells Prometheus what to scrape. It does not add a data source to Grafana."
+    correct_option: b
+    explanation: "A ConfigMap with the label `grafana_datasource: \"1\"` is read by the sidecar and becomes a provisioned, read-only data source that survives restarts."
+
+  - id: ats020-020-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Build a panel from a PromQL query and choose the right visualisation for a rate, a ratio and a latency"
+    source_readings:
+      - sections/section-020/module-01/course-02-panels-for-rate-error-ratio-and-latency.md
+    prompt: "A panel must show the share of requests that failed over the last five minutes, as one number between 0 and 1 per service. The counter `http_requests_total` has a `status` label. Which query fits?"
+    options:
+      - id: a
+        text: "`http_requests_total{status=~\"5..\"}`"
+        explanation: "This is a raw counter. It only rises and it is not a ratio."
+      - id: b
+        text: "`rate(http_requests_total{status=~\"5..\"}[5m])`"
+        explanation: "This is the rate of failed requests. It is not divided by the total, so it is not a ratio."
+      - id: c
+        text: "`sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))`"
+        explanation: "Correct. The rate of failed requests divided by the rate of all requests gives the error ratio."
+      - id: d
+        text: "`sum(http_requests_total{status=~\"5..\"}) / sum(http_requests_total)`"
+        explanation: "Raw counters give the ratio since the process started, not over the last five minutes."
+    correct_option: c
+    explanation: "An error ratio is the rate of failed requests divided by the rate of all requests. Use `rate()` on counters, never the raw value."
+
+  - id: ats020-020-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Use a dashboard variable to switch the namespace shown on every panel"
+    source_readings:
+      - sections/section-020/module-01/course-03-a-namespace-variable-for-every-panel.md
+    prompt: "A dashboard has a variable `namespace`, but the panels do not change when the viewer selects another namespace. What is the most likely cause?"
+    options:
+      - id: a
+        text: "The panel queries still contain a fixed namespace and do not use `$namespace` in their label matchers."
+        explanation: "Correct. A variable changes a panel only where the query uses it, for example `namespace=\"$namespace\"`."
+      - id: b
+        text: "Prometheus does not store the label `namespace`."
+        explanation: "If the label were missing, the variable could not list any values."
+      - id: c
+        text: "Grafana allows only one variable per dashboard."
+        explanation: "A dashboard can have many variables."
+      - id: d
+        text: "The data source is provisioned."
+        explanation: "A provisioned data source has no effect on how variables work."
+    correct_option: a
+    explanation: "A variable only changes the queries that reference it. Replace the fixed value in each panel query with `$namespace`."
+
+  - id: ats020-020-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Export a dashboard as JSON and load it through the Grafana sidecar ConfigMap so it survives a pod restart"
+    source_readings:
+      - sections/section-020/module-01/course-04-dashboards-that-survive-a-restart.md
+    prompt: "A teammate built a dashboard by hand in the Grafana web interface. After the Grafana pod was replaced, the dashboard was gone. Which change keeps the dashboard after every restart?"
+    options:
+      - id: a
+        text: "Export the dashboard JSON, put it in a ConfigMap with the label `grafana_dashboard: \"1\"` and apply it."
+        explanation: "Correct. The sidecar loads every labelled ConfigMap into Grafana, so the dashboard exists again after a restart."
+      - id: b
+        text: "Click Save again in the web interface."
+        explanation: "The saved dashboard lives in the pod's storage, which the new pod does not have."
+      - id: c
+        text: "Delete the Grafana pod so that it reads its old state."
+        explanation: "A new pod does not read the old pod's storage."
+      - id: d
+        text: "Apply the ConfigMap without a label, because Grafana reads every ConfigMap in the namespace."
+        explanation: "The sidecar loads only ConfigMaps with its label. A ConfigMap without the label is ignored."
+    correct_option: a
+    explanation: "Dashboards as code are ConfigMaps with the label the sidecar watches. The sidecar loads them again whenever Grafana starts."
+
+  - id: ats020-020-q05
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Read a pod's logs, its previous container's logs and its events with `kubectl logs` and `kubectl events`"
+    source_readings:
+      - sections/section-020/module-02/course-01-what-kubernetes-keeps-about-logs.md
+    prompt: "The container in the pod `probe` crashed and restarted. You need the output of the container that crashed, not the new one. Which command do you run?"
+    options:
+      - id: a
+        text: "`kubectl logs probe`"
+        explanation: "This prints the log of the current container, which started after the crash."
+      - id: b
+        text: "`kubectl logs probe --previous`"
+        explanation: "Correct. The flag `--previous` prints the log of the last terminated instance of the container."
+      - id: c
+        text: "`kubectl events probe`"
+        explanation: "Events show what Kubernetes did, for example a restart, not what the container wrote."
+      - id: d
+        text: "`kubectl describe node`"
+        explanation: "This describes a node and does not show the container output."
+    correct_option: b
+    explanation: "Use `kubectl logs --previous` for the container that ended, and `kubectl events` for what Kubernetes did to the pod."
+
+  - id: ats020-020-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Deploy an OpenTelemetry Collector as a DaemonSet whose file_log receiver reads the container log files on each node"
+    source_readings:
+      - sections/section-020/module-02/course-02-a-daemonset-collector-reads-the-log-files.md
+    prompt: "A Collector must read the log files of every pod on every node. Which setup does that?"
+    options:
+      - id: a
+        text: "A Deployment with one replica and the `file_log` receiver."
+        explanation: "One pod runs on one node and sees only the log files of that node."
+      - id: b
+        text: "A DaemonSet that mounts `/var/log/pods` from the node and uses the `file_log` receiver."
+        explanation: "Correct. A DaemonSet runs one Collector pod per node. The host path mount gives each pod the log files of its own node."
+      - id: c
+        text: "A Collector that receives logs over OTLP from the API server."
+        explanation: "The API server does not push container logs over OTLP."
+      - id: d
+        text: "A StatefulSet with the `prometheus` receiver."
+        explanation: "The `prometheus` receiver scrapes metrics. It does not read log files."
+    correct_option: b
+    explanation: "The log files are on each node, so one Collector per node with a read-only mount of `/var/log/pods` is needed. That is a DaemonSet."
+
+  - id: ats020-020-q07
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Add Kubernetes metadata to each log record with the k8s_attributes processor and drop unwanted records with the filter processor"
+    source_readings:
+      - sections/section-020/module-02/course-03-add-kubernetes-metadata-and-drop-records.md
+    prompt: "The Collector log records show no `k8s.deployment.name`, and the log of the Collector contains a `forbidden` error for pods. What is missing?"
+    options:
+      - id: a
+        text: "A ClusterRole that allows `get`, `list` and `watch` on pods, and a ClusterRoleBinding to the Collector's service account."
+        explanation: "Correct. The `k8s_attributes` processor asks the API server for pod data. Without read access it cannot add the metadata."
+      - id: b
+        text: "A larger `batch` size in the processor."
+        explanation: "Batching changes how records are grouped. It does not give access to pod data."
+      - id: c
+        text: "A `cluster-admin` binding."
+        explanation: "This would work but gives far more access than needed."
+      - id: d
+        text: "A second `file_log` receiver."
+        explanation: "A second receiver reads the same files and does not give access to the API."
+    correct_option: a
+    explanation: "The processor needs read access to pods. Grant only `get`, `list` and `watch` on pods, not a broad role."
+
+  - id: ats020-020-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Turn error log lines into a Prometheus metric with the count connector and query it with PromQL"
+    source_readings:
+      - sections/section-020/module-02/course-04-count-error-lines-into-a-prometheus-metric.md
+    prompt: "The `count` connector in the Collector is configured, and the metric `log_error_lines_total` appears on port `8889` of the Collector. Prometheus has no such series. What must you check first?"
+    options:
+      - id: a
+        text: "Whether a ServiceMonitor with the label `release: kps` selects the Collector's metrics Service and its port."
+        explanation: "Correct. Prometheus scrapes only targets from ServiceMonitors that its own selector accepts."
+      - id: b
+        text: "Whether Grafana has a data source."
+        explanation: "Grafana reads from Prometheus. It does not feed it."
+      - id: c
+        text: "Whether the metric name ends in `_total`."
+        explanation: "The name does not decide whether a target is scraped."
+      - id: d
+        text: "Whether `kubectl logs` shows the lines."
+        explanation: "The lines are already counted, because the metric exists on the Collector."
+    correct_option: a
+    explanation: "A metric on the Collector is useless until Prometheus scrapes it. Check the ServiceMonitor, its label and the target state in Prometheus."
+

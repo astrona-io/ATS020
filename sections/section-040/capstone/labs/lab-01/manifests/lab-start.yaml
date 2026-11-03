@@ -1,0 +1,107 @@
+# Starting objects for the platform efficiency capstone. The Application
+# `scout` and the delivery history behind it come from bootstrap/01-prepare.sh,
+# because the seed needs Prometheus scraping Argo CD while it runs. This file
+# adds:
+#   - the ServiceMonitor `scout`, so Prometheus scrapes the request counter,
+#   - the `shuttle` traffic loop: 19 normal requests and one request to
+#     /status/500 to `scout` in every round (an error ratio of 5%),
+#   - the Deployment `beacon`, which requests far more CPU and memory than it
+#     uses. It is the over-provisioned workload to right-size.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shuttle-traffic
+  namespace: starfleet
+data:
+  traffic.sh: |
+    #!/bin/sh
+    # One round sends 19 normal requests and one request to /status/500 to
+    # scout (5% errors). curl reuses the connection for the URLs of one round.
+    # Every URL needs its own "-o /dev/null".
+    SCOUT=http://scout.starfleet:9898
+    URLS=""
+    for i in $(seq 1 19); do URLS="$URLS -o /dev/null $SCOUT/"; done
+    URLS="$URLS -o /dev/null $SCOUT/status/500"
+    while true; do
+      curl -s --max-time 10 $URLS
+      sleep 0.5
+    done
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.22.0
+          command: ["sh", "/traffic/traffic.sh"]
+          volumeMounts:
+            - name: traffic
+              mountPath: /traffic
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}
+      volumes:
+        - name: traffic
+          configMap:
+            name: shuttle-traffic
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beacon
+  namespace: starfleet
+  labels:
+    app: beacon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beacon
+  template:
+    metadata:
+      labels:
+        app: beacon
+    spec:
+      containers:
+        - name: beacon
+          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          resources:
+            requests: {cpu: 600m, memory: 768Mi}
+            limits: {memory: 768Mi}

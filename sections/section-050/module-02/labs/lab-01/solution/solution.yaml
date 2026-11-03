@@ -1,0 +1,13 @@
+# Reference solution, part 1: the Service starfleet-policy sends traffic to the
+# port the webhook server listens on (8443). Applied only by `astrona test`.
+apiVersion: v1
+kind: Service
+metadata:
+  name: starfleet-policy
+  namespace: webhook-system
+spec:
+  selector:
+    app: starfleet-policy
+  ports:
+    - port: 443
+      targetPort: 8443

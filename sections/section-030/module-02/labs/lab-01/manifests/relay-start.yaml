@@ -1,0 +1,58 @@
+# The broken starting state for the "Get Two Services Into One Trace" lab.
+# The fault is the material; do not fix it in the bootstrap. Three faults:
+#   1. The inject annotation is on the Deployment, not on the pod template, so
+#      the Operator's webhook never sees it on a pod.
+#   2. The only Instrumentation is in the namespace `observability`. An
+#      annotation value of "true" looks in the namespace of the pod.
+#   3. That Instrumentation lists only the `baggage` propagator, so relay
+#      does not send a `traceparent` header and scout starts a new trace.
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: nodejs
+  namespace: observability
+spec:
+  exporter:
+    endpoint: http://otel-collector.observability:4318
+  propagators:
+    - baggage
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay
+  namespace: starfleet
+  labels:
+    app: relay
+  annotations:
+    instrumentation.opentelemetry.io/inject-nodejs: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay
+  template:
+    metadata:
+      labels:
+        app: relay
+    spec:
+      containers:
+        - name: relay
+          image: node:22-alpine
+          command: ["node", "/app/server.js"]
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: app
+              mountPath: /app
+          resources:
+            requests: {cpu: 10m, memory: 48Mi}
+            limits: {memory: 256Mi}
+      volumes:
+        - name: app
+          configMap:
+            name: relay-app

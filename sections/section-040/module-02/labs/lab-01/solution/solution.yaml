@@ -1,0 +1,26 @@
+# Reference solution: the selector status=~"5.." matches every 5xx status,
+# so the recording rules return the error ratio and the alert can fire.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: scout-slo
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  groups:
+    - name: scout-slo
+      rules:
+        - record: scout:error_ratio:rate5m
+          expr: sum(rate(http_requests_total{namespace="starfleet",container="scout",status=~"5.."}[5m])) / sum(rate(http_requests_total{namespace="starfleet",container="scout"}[5m]))
+        - record: scout:error_ratio:rate1h
+          expr: sum(rate(http_requests_total{namespace="starfleet",container="scout",status=~"5.."}[1h])) / sum(rate(http_requests_total{namespace="starfleet",container="scout"}[1h]))
+        - alert: ScoutErrorBudgetBurn
+          expr: scout:error_ratio:rate5m / (1 - 0.99) > 2 and scout:error_ratio:rate1h / (1 - 0.99) > 2
+          for: 2m
+          labels:
+            severity: ticket
+            service: scout
+          annotations:
+            summary: scout spends its 30-day error budget more than twice as fast as the SLO allows
+

@@ -1,0 +1,18 @@
+# Tells Prometheus to scrape the Argo CD application controller. The Service
+# `argocd-metrics` exposes the controller on the port named `metrics` (8082).
+# The label `release: kps` is the label the Prometheus resource selects.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-application-controller
+  namespace: argocd
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-metrics
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s

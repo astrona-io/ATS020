@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-010-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+      - quay.io/prometheus/prometheus:v3.15.0-distroless
+      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Install a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator and one Prometheus) in monitoring"
+      type: file
+      source: bootstrap/01-prepare.sh
+  manifests:
+    - name: lab-start
+      description: "The scout workloads with their ServiceMonitors and the shuttle traffic loop"
+      type: file
+      source: manifests/lab-start.yaml
+    - name: rules-start
+      description: "The PrometheusRule scout-queries, with two faulty recording rules"
+      type: file
+      source: manifests/rules-start.yaml
+  waitFor:
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/scout
+      namespace: outpost
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+testing:
+  init:
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+    - name: wait-for-rules
+      description: Waits until both recording rules return one series
+      type: file
+      source: testing/wait-for-rules.sh
+
+validation:
+  scripts:
+    - name: rules-intact
+      description: The PrometheusRule scout-queries keeps both recording rules, and they read the real metrics
+      type: file
+      source: validation/validate-rules-intact.sh
+    - name: error-ratio
+      description: scout:error_ratio:rate5m returns one series that matches the real error ratio
+      type: file
+      source: validation/validate-error-ratio.sh
+    - name: p95-latency
+      description: scout:request_duration_seconds:p95_5m returns one series that matches the real p95 latency
+      type: file
+      source: validation/validate-p95-latency.sh
+
+teardown:
+  keepCluster: false

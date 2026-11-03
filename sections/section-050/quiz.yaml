@@ -1,0 +1,373 @@
+# Knowledge check for section 050. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats020-050
+course_id: ATS020
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-050
+  title: "Diagnosing And Remediating Incidents"
+questions:
+  - id: ats020-050-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Follow a fixed triage order — status, events, describe, logs, previous logs — to find a pod's failure cause"
+    source_readings:
+      - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+    prompt: |-
+      A pod in `starfleet` shows `Pending`. Which command gives the cause fastest?
+    options:
+      - id: a
+        text: "`kubectl logs` on the pod, because the log shows why it waits."
+        explanation: "A pod with no node has no container and no log."
+      - id: b
+        text: "`kubectl -n starfleet get events --field-selector type=Warning,reason=FailedScheduling`, because the scheduler writes the reason as an event."
+        explanation: "Correct. The scheduler records the failed check, such as `Insufficient cpu`, in a `FailedScheduling` event."
+      - id: c
+        text: "`kubectl exec` into the pod and run `ps`."
+        explanation: "A pending pod has no running container to enter."
+      - id: d
+        text: "`kubectl top pod`, because the metrics show what is missing."
+        explanation: "A pod that is not placed has no metrics."
+    correct_option: b
+    explanation: "Correct. The scheduler records the failed check, such as `Insufficient cpu`, in a `FailedScheduling` event."
+
+  - id: ats020-050-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Fix a Pending pod caused by too-large requests, a missing PersistentVolumeClaim or an unmatched node selector"
+    source_readings:
+      - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+    prompt: |-
+      The event of a pending pod reads `0/1 nodes are available: 1 Insufficient cpu`. The node is almost idle in `kubectl top node`. What is the cause?
+    options:
+      - id: a
+        text: "The scheduler compares the CPU request of the pod with the allocatable CPU of the node, not with real use, so the request is larger than any node can reserve."
+        explanation: "Correct. The scheduler reserves requests. Real use does not matter for placement."
+      - id: b
+        text: "The node is broken and must be replaced."
+        explanation: "The message says the request does not fit, not that the node is broken."
+      - id: c
+        text: "The CPU limit of the container is too low."
+        explanation: "A limit does not take part in scheduling."
+      - id: d
+        text: "The image of the pod is missing."
+        explanation: "An image problem appears after scheduling, not as a scheduling event."
+    correct_option: a
+    explanation: "Correct. The scheduler reserves requests. Real use does not matter for placement."
+
+  - id: ats020-050-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Fix a Pending pod caused by too-large requests, a missing PersistentVolumeClaim or an unmatched node selector"
+    source_readings:
+      - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+    prompt: |-
+      The event of a pending pod reads `persistentvolumeclaim "bridge-data" not found`. What fixes it without changing the Deployment?
+    options:
+      - id: a
+        text: "Delete the pod so it is placed again."
+        explanation: "A new pod fails the same check."
+      - id: b
+        text: "Create a PersistentVolumeClaim named `bridge-data` in the namespace of the pod."
+        explanation: "Correct. The scheduler checks a pending pod again when the claim appears."
+      - id: c
+        text: "Set `failurePolicy: Ignore` on the scheduler."
+        explanation: "The scheduler has no such field."
+      - id: d
+        text: "Raise the memory request of the container."
+        explanation: "The cause is a missing claim, not memory."
+    correct_option: b
+    explanation: "Correct. The scheduler checks a pending pod again when the claim appears."
+
+  - id: ats020-050-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe"
+    source_readings:
+      - sections/section-050/module-01/course-02-crashloopbackoff-and-failing-probes.md
+    prompt: |-
+      A container shows `CrashLoopBackOff`. The describe output shows `Last State: Terminated`, `Reason: Completed`, `Exit Code: 0`, and the events show `Liveness probe failed: HTTP probe failed with statuscode: 404` and `Killing`. What is the cause?
+    options:
+      - id: a
+        text: "The process crashed with an error."
+        explanation: "A crash gives a non-zero exit code and no `Unhealthy` events."
+      - id: b
+        text: "The kernel killed the container for memory."
+        explanation: "A memory kill gives `OOMKilled` and exit code 137."
+      - id: c
+        text: "The kubelet restarts a healthy container because the liveness probe asks for a path the server does not serve."
+        explanation: "Correct. The exit code can be 0 because the server shuts down cleanly on `SIGTERM`. The `Unhealthy` and `Killing` events name the probe."
+      - id: d
+        text: "The image tag does not exist."
+        explanation: "An image problem keeps the container from starting at all."
+    correct_option: c
+    explanation: "Correct. The exit code can be 0 because the server shuts down cleanly on `SIGTERM`. The `Unhealthy` and `Killing` events name the probe."
+
+  - id: ats020-050-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe"
+    source_readings:
+      - sections/section-050/module-01/course-02-crashloopbackoff-and-failing-probes.md
+    prompt: |-
+      A pod went from `Error` to `CrashLoopBackOff`. You want the log of the run that crashed, and the current container has just started again. Which command do you run?
+    options:
+      - id: a
+        text: "`kubectl logs <pod> --previous`"
+        explanation: "Correct. `--previous` reads the log of the container before the current one."
+      - id: b
+        text: "`kubectl logs <pod> --follow`"
+        explanation: "`--follow` streams the log of the new container only."
+      - id: c
+        text: "`kubectl describe node`"
+        explanation: "The node description does not hold container logs."
+      - id: d
+        text: "`kubectl rollout undo`"
+        explanation: "An undo changes the Deployment and does not show the log."
+    correct_option: a
+    explanation: "Correct. `--previous` reads the log of the container before the current one."
+
+  - id: ats020-050-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Fix an OOMKilled container by reading its usage and setting a fitting memory limit"
+    source_readings:
+      - sections/section-050/module-01/course-03-oomkilled-and-memory-limits.md
+    prompt: |-
+      A container restarts and `kubectl logs --previous` prints nothing. `kubectl describe pod` shows `Last State: Terminated`, `Reason: OOMKilled`, `Exit Code: 137`. Which fix is correct?
+    options:
+      - id: a
+        text: "Remove the memory limit."
+        explanation: "A container without a limit can use all memory of the node and make the kernel kill other pods."
+      - id: b
+        text: "Set the limit equal to the memory use that `kubectl top` shows right now."
+        explanation: "The first peak above the limit kills the container again."
+      - id: c
+        text: "Measure the use with `kubectl top`, then set a limit with headroom above the highest reading."
+        explanation: "Correct. A limit of about 1.3 to 1.5 times the highest reading leaves room for peaks and keeps the protection."
+      - id: d
+        text: "Add a liveness probe."
+        explanation: "A probe does not change memory use."
+    correct_option: c
+    explanation: "Correct. A limit of about 1.3 to 1.5 times the highest reading leaves room for peaks and keeps the protection."
+
+  - id: ats020-050-q07
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Fix an OOMKilled container by reading its usage and setting a fitting memory limit"
+    source_readings:
+      - sections/section-050/module-01/course-03-oomkilled-and-memory-limits.md
+    prompt: |-
+      Why does the cause of an `OOMKilled` container not appear in the events of the pod?
+    options:
+      - id: a
+        text: "The events are deleted after one minute."
+        explanation: "Events stay for a longer time and they are not the problem here."
+      - id: b
+        text: "The kernel stops the container, and the kubelet records the reason in the container's last state, so the events only show restarts and `BackOff`."
+        explanation: "Correct. Read `Last State` in `kubectl describe pod`."
+      - id: c
+        text: "The scheduler hides the event."
+        explanation: "The scheduler does not write container events."
+      - id: d
+        text: "`OOMKilled` is only written to the node log."
+        explanation: "The reason is stored in the pod status."
+    correct_option: b
+    explanation: "Correct. Read `Last State` in `kubectl describe pod`."
+
+  - id: ats020-050-q08
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret"
+    source_readings:
+      - sections/section-050/module-01/course-04-imagepullbackoff-and-image-references.md
+    prompt: |-
+      The event of a pod reads `Failed to pull image "ghcr.io/stefanprodan/podinfo:6.15.99": ... not found`. What do you change?
+    options:
+      - id: a
+        text: "Add `imagePullSecrets` to the pod template."
+        explanation: "`not found` points to the reference, not to credentials."
+      - id: b
+        text: "Change the image tag in the pod template of the Deployment to a tag that exists."
+        explanation: "Correct. Change the Deployment, not the running pod, and do not use `latest`."
+      - id: c
+        text: "Raise the memory limit."
+        explanation: "Memory has no effect on a pull."
+      - id: d
+        text: "Delete the node."
+        explanation: "The node is not the problem."
+    correct_option: b
+    explanation: "Correct. Change the Deployment, not the running pod, and do not use `latest`."
+
+  - id: ats020-050-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret"
+    source_readings:
+      - sections/section-050/module-01/course-04-imagepullbackoff-and-image-references.md
+    prompt: |-
+      A pull event reads `failed to authorize: ... 403 Forbidden`. Which statement is correct?
+    options:
+      - id: a
+        text: "The tag does not exist, so only the tag must change."
+        explanation: "`not found` is the message for a missing tag."
+      - id: b
+        text: "The registry wants credentials, so a pull secret named in `imagePullSecrets` of the pod template is the usual fix. A wrong repository name can also give a 403, so check the spelling first."
+        explanation: "Correct. The text `failed to authorize` points to credentials."
+      - id: c
+        text: "The kubelet is out of disk space."
+        explanation: "Disk problems give a different message."
+      - id: d
+        text: "The Service has no endpoints."
+        explanation: "A Service is not involved in a pull."
+    correct_option: b
+    explanation: "Correct. The text `failed to authorize` points to credentials."
+
+  - id: ats020-050-q10
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Find a failing admission webhook from the API server error message and fix its Service without deleting it"
+    source_readings:
+      - sections/section-050/module-02/course-01-a-webhook-service-without-endpoints.md
+    prompt: |-
+      `kubectl create` fails with `failed calling webhook "starfleet-policy.astrona.io": ... dial tcp 10.96.155.36:443: connect: connection refused`. The webhook pod is `Running` and `Ready`. What do you check first?
+    options:
+      - id: a
+        text: "The EndpointSlices and the selector of the Service named in the error, against the pod labels."
+        explanation: "Correct. `connection refused` on a webhook Service points to a Service with no usable endpoint."
+      - id: b
+        text: "The `kubectl` version on your machine."
+        explanation: "The API server, not `kubectl`, calls the webhook."
+      - id: c
+        text: "The CPU of the node."
+        explanation: "CPU does not cause a refused connection."
+      - id: d
+        text: "The `caBundle` only."
+        explanation: "A certificate problem gives an `x509` error, not `connection refused`."
+    correct_option: a
+    explanation: "Correct. `connection refused` on a webhook Service points to a Service with no usable endpoint."
+
+  - id: ats020-050-q11
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Prove each fix by the platform behaviour it restores (create succeeds, resource reconciles, sync is Healthy)"
+    source_readings:
+      - sections/section-050/module-02/course-01-a-webhook-service-without-endpoints.md
+    prompt: |-
+      A webhook Service has no endpoints. A colleague proposes to set `failurePolicy: Ignore` so creates work again. What happens, and how do you prove a real fix?
+    options:
+      - id: a
+        text: "Nothing changes, because `Ignore` is the default."
+        explanation: "`Fail` is set in this configuration."
+      - id: b
+        text: "Creates work, but the policy no longer runs. A real fix shows a new `allowed` line in the log of the webhook server after a create."
+        explanation: "Correct. With `Ignore` the API server skips the failed call, so the server log stays empty."
+      - id: c
+        text: "The webhook server restarts and logs the request."
+        explanation: "A policy change does not restart the server."
+      - id: d
+        text: "The create works and the server log still shows the request."
+        explanation: "With `Ignore` the request never reaches the server."
+    correct_option: b
+    explanation: "Correct. With `Ignore` the API server skips the failed call, so the server log stays empty."
+
+  - id: ats020-050-q12
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find an expired webhook serving certificate from the `x509` error text and `openssl`, and replace it"
+    source_readings:
+      - sections/section-050/module-02/course-02-an-expired-webhook-certificate.md
+    prompt: |-
+      A create fails with `tls: failed to verify certificate: x509: certificate has expired or is not yet valid: current time ... is after 2025-01-08T00:00:00Z`. Which step is correct?
+    options:
+      - id: a
+        text: "Delete the `ValidatingWebhookConfiguration`."
+        explanation: "That removes the policy together with the error."
+      - id: b
+        text: "Read the serving certificate with `openssl x509 -noout -enddate`, sign a new one with the same CA that the `caBundle` trusts, store it in the Secret and restart the webhook server."
+        explanation: "Correct. The server reads its certificate at start, so a Secret change needs a restart."
+      - id: c
+        text: "Change the `caBundle` to an empty value."
+        explanation: "The API server then trusts no CA."
+      - id: d
+        text: "Scale the webhook Deployment to zero."
+        explanation: "With no server the create still fails with `failurePolicy: Fail`."
+    correct_option: b
+    explanation: "Correct. The server reads its certificate at start, so a Secret change needs a restart."
+
+  - id: ats020-050-q13
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Find an expired webhook serving certificate from the `x509` error text and `openssl`, and replace it"
+    source_readings:
+      - sections/section-050/module-02/course-02-an-expired-webhook-certificate.md
+    prompt: |-
+      You signed a new serving certificate with the platform CA and updated the Secret. Creates still fail with the old `x509` expiry error. What is the most likely cause?
+    options:
+      - id: a
+        text: "The new certificate has no subject alternative name."
+        explanation: "That would give a name mismatch error, not the old expiry date."
+      - id: b
+        text: "The webhook server loads its certificate only at start and still serves the old one, so it needs a restart."
+        explanation: "Correct. Run `kubectl rollout restart` on the webhook Deployment."
+      - id: c
+        text: "The API server caches all certificates for one day."
+        explanation: "The API server checks the certificate the server shows, and it is the server that still shows the old one."
+      - id: d
+        text: "The Service port is wrong."
+        explanation: "A wrong port gives `connection refused`."
+    correct_option: b
+    explanation: "Correct. Run `kubectl rollout restart` on the webhook Deployment."
+
+  - id: ats020-050-q14
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find a stopped or crashing controller from its Deployment, logs and the resources that stop reconciling"
+    source_readings:
+      - sections/section-050/module-02/course-03-a-controller-scaled-to-zero.md
+    prompt: |-
+      You create a ServiceMonitor, the API server accepts it, and Prometheus never shows the target. `kubectl get prometheus` shows `RECONCILED True`. What do you check?
+    options:
+      - id: a
+        text: "Whether the Deployment of the Prometheus Operator has replicas, because a status written by a stopped controller stays old."
+        explanation: "Correct. `READY 0/0` on the operator Deployment explains an object that exists and has no effect."
+      - id: b
+        text: "Whether the ServiceMonitor has a `failurePolicy`."
+        explanation: "A ServiceMonitor has no such field."
+      - id: c
+        text: "Whether `kubectl` is the latest version."
+        explanation: "The API server already accepted the object."
+      - id: d
+        text: "Whether the namespace has a webhook."
+        explanation: "A webhook error would have shown at create time."
+    correct_option: a
+    explanation: "Correct. `READY 0/0` on the operator Deployment explains an object that exists and has no effect."
+
+  - id: ats020-050-q15
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Prove each fix by the platform behaviour it restores (create succeeds, resource reconciles, sync is Healthy)"
+    source_readings:
+      - sections/section-050/module-02/course-03-a-controller-scaled-to-zero.md
+    prompt: |-
+      The Prometheus Operator Deployment was scaled to zero and you scale it to one. Which result proves the fix?
+    options:
+      - id: a
+        text: "`kubectl get deployment kps-operator` prints `1/1`."
+        explanation: "That shows the controller runs, not that it reconciled the objects."
+      - id: b
+        text: "The query `up{job=\"scout\"}` returns a series with value `1`, and the rule `ScoutDown` is listed by the Prometheus rules API."
+        explanation: "Correct. A fix is proved by the behaviour that was lost."
+      - id: c
+        text: "The `ServiceMonitor` object still exists."
+        explanation: "The object existed before the fix."
+      - id: d
+        text: "The `Prometheus` resource shows `RECONCILED True`."
+        explanation: "That status was `True` before the fix too."
+    correct_option: b
+    explanation: "Correct. A fix is proved by the behaviour that was lost."
+

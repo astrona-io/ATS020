@@ -1,0 +1,53 @@
+# Reference end state for the Distributed Tracing Capstone. Five changes
+# against manifests/lab-start.yaml: a Collector `otel` in `observability`
+# that receives OTLP and exports to Jaeger, an Instrumentation `nodejs` in
+# `starfleet` with the `tracecontext` propagator, the inject annotation on
+# the pod template of `relay`, the exporter endpoint of `scout` set back to
+# port 4317, and the ConfigMap that records the slow call.
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+  namespace: observability
+spec:
+  mode: deployment
+  image: otel/opentelemetry-collector-contrib:0.162.0
+  resources:
+    requests: {cpu: 20m, memory: 64Mi}
+    limits: {memory: 256Mi}
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      batch: {}
+    exporters:
+      otlp_grpc/jaeger:
+        endpoint: jaeger.observability:4317
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp_grpc/jaeger]
+---
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: nodejs
+  namespace: starfleet
+spec:
+  exporter:
+    endpoint: http://otel-collector.observability:4318
+  propagators:
+    - tracecontext
+    - baggage
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"

@@ -1,0 +1,110 @@
+# Solution
+
+Work in order. After each step run `astrona submit` and read which checks still fail. Telemetry arrives late, so wait about a minute after a fix before you look in Jaeger.
+
+## Step 1: Create the Collector
+
+Save this as `opentelemetrycollector-otel.yaml`:
+
+```yaml
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+  namespace: observability
+spec:
+  mode: deployment
+  image: otel/opentelemetry-collector-contrib:0.162.0
+  config:
+    receivers:
+      otlp/grpc:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+      otlp/http:
+        protocols:
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      batch: {}
+    exporters:
+      otlp_grpc/jaeger:
+        endpoint: jaeger.observability:4317
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp/grpc, otlp/http]
+          processors: [batch]
+          exporters: [otlp_grpc/jaeger]
+```
+
+Apply it and check that the Service has both ports:
+
+```sh
+kubectl apply -f opentelemetrycollector-otel.yaml
+kubectl -n observability get service otel-collector
+```
+
+The Operator builds the Service ports from the receivers that a pipeline uses, so both receivers must be in the `traces` pipeline.
+
+## Step 2: Fix the endpoint of scout
+
+`scout` sends to port `4318`, which is OTLP over HTTP. `scout` uses gRPC, so it needs port `4317`:
+
+```sh
+kubectl -n starfleet set env deployment/scout OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability:4317
+kubectl -n starfleet rollout status deployment/scout
+```
+
+Before the fix, the `scout` log shows an export error. Read it with `kubectl -n starfleet logs deploy/scout --tail=2`.
+
+## Step 3: Instrument relay
+
+Save this as `instrumentation-nodejs.yaml`:
+
+```yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: nodejs
+  namespace: starfleet
+spec:
+  exporter:
+    endpoint: http://otel-collector.observability:4318
+  propagators:
+    - tracecontext
+    - baggage
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+```
+
+Apply it, then add the annotation to the pod template of `relay`. The annotation must be on the pod template, not on the Deployment, and the Operator injects the agent only into pods that are created after the annotation exists. The patch creates a new pod:
+
+```sh
+kubectl apply -f instrumentation-nodejs.yaml
+kubectl -n starfleet patch deployment relay --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-nodejs":"true"}}}}}'
+kubectl -n starfleet rollout status deployment/relay
+```
+
+The `tracecontext` propagator sends the trace ID in the `traceparent` header, so the span of `scout` becomes a child of the span of `relay`.
+
+## Step 4: Find the slow call
+
+Open Jaeger:
+
+```sh
+kubectl -n observability port-forward svc/jaeger 16686:16686
+```
+
+Open `http://localhost:16686`, choose the service `relay` and sort the traces by duration. Open the longest trace. The span of `relay` is about one second long, and its child span from `scout` is almost as long. The time is spent in `scout`, in the span for the `/delay` path. Copy the exact span name from Jaeger.
+
+Record it, with your span name as the value of `operation`:
+
+```sh
+kubectl -n starfleet create configmap slow-call --from-literal=service=scout --from-literal=operation="<span name from Jaeger>"
+```
+
+Run `astrona submit`. All five checks must pass.

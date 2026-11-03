@@ -13,6 +13,11 @@ items:
   what: 'chapter for module 1: Scrape Workloads With ServiceMonitor And PodMonitor'
   status: done
   note: landing + 4 parts + summary; output from real runs (two playground runs, noted on page)
+- key: section-010/module-01/lab-01
+  kind: lab
+  what: module lab 01 for section-010 module 01
+  status: done
+  note: written; validate-only; not run
 - key: section-010/module-02/playground
   kind: playground
   what: 'playground for module 2: Query Metrics With PromQL'
@@ -23,6 +28,11 @@ items:
   what: 'chapter for module 2: Query Metrics With PromQL'
   status: done
   note: landing + 4 parts + summary
+- key: section-010/module-02/lab-02
+  kind: lab
+  what: module lab 02 for section-010 module 02
+  status: done
+  note: written; validate-only; not run
 - key: section-010/module-03/playground
   kind: playground
   what: 'playground for module 3: Alert With PrometheusRule And Alertmanager'
@@ -36,135 +46,184 @@ items:
 - key: section-010/quiz
   kind: quiz
   what: 'knowledge check for section-010: Metrics And Alerting With Prometheus'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: quiz.yaml, 19 questions'
 - key: section-010/capstone
   kind: capstone
   what: 'capstone lab: Metrics And Alerting Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: 'written; tested: astrona test 5/5 passes'
 - key: section-020/module-01/playground
   kind: playground
   what: 'playground for module 1: Build Grafana Dashboards As Code'
-  status: pending
-  note: ''
+  status: done
+  note: Booted Kubernetes 1.35.8; Grafana 13.2.3 and Prometheus 3.15.0; provisioning, traffic, three UP
+    targets and pod replacement verified
 - key: section-020/module-01/course
   kind: course
   what: 'chapter for module 1: Build Grafana Dashboards As Code'
-  status: pending
-  note: ''
+  status: done
+  note: Landing, four parts and summary; all commands run, draft output replaced with live output; export
+    and ConfigMap recovery verified
+- key: section-020/module-01/lab-01
+  kind: lab
+  what: module lab 01 for section-020 module 01
+  status: done
+  note: written; not run (UNTESTED)
 - key: section-020/module-02/playground
   kind: playground
-  what: 'playground for module 2: Collect And Query Logs With OpenTelemetry And Loki'
-  status: pending
-  note: ''
+  what: 'playground for module 2: Collect Pod Logs With The OpenTelemetry Collector'
+  status: done
+  note: written; playground never booted (UNTESTED)
 - key: section-020/module-02/course
   kind: course
-  what: 'chapter for module 2: Collect And Query Logs With OpenTelemetry And Loki'
-  status: pending
-  note: ''
+  what: 'chapter for module 2: Collect Pod Logs With The OpenTelemetry Collector'
+  status: done
+  note: 'written: landing + 4 parts + summary; commands not run against a live playground'
+- key: section-020/module-02/lab-01
+  kind: lab
+  what: module lab 01 for section-020 module 02
+  status: done
+  note: 'written; tested: astrona test 3/3 pass'
 - key: section-020/quiz
   kind: quiz
   what: 'knowledge check for section-020: Dashboards And Logs'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: quiz.yaml, 8 questions'
 - key: section-020/capstone
   kind: capstone
   what: 'capstone lab: Dashboards And Logs Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: written; lab never run (UNTESTED)
 - key: section-030/module-01/playground
   kind: playground
   what: 'playground for module 1: Run An OpenTelemetry Collector With The Operator'
-  status: pending
-  note: ''
+  status: done
+  note: written; playground UNTESTED
 - key: section-030/module-01/course
   kind: course
   what: 'chapter for module 1: Run An OpenTelemetry Collector With The Operator'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: landing + 5 parts + summary'
+- key: section-030/module-01/lab-01
+  kind: lab
+  what: module lab 01 for section-030 module 01
+  status: done
+  note: 'written; tested: astrona test 3/3 pass'
 - key: section-030/module-02/playground
   kind: playground
   what: 'playground for module 2: Add Tracing Without Code Changes Using Auto-Instrumentation'
-  status: pending
-  note: ''
+  status: done
+  note: written; playground UNTESTED
 - key: section-030/module-02/course
   kind: course
   what: 'chapter for module 2: Add Tracing Without Code Changes Using Auto-Instrumentation'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: landing + 3 parts + summary'
+- key: section-030/module-02/lab-01
+  kind: lab
+  what: module lab 01 for section-030 module 02
+  status: done
+  note: written; never run (UNTESTED)
 - key: section-030/quiz
   kind: quiz
   what: 'knowledge check for section-030: Distributed Tracing With OpenTelemetry And Jaeger'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: quiz.yaml, 8 questions'
 - key: section-030/capstone
   kind: capstone
   what: 'capstone lab: Distributed Tracing Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: 'written; tested: unsolved fails 0/5 as expected, reference solution never run (UNTESTED)'
 - key: section-040/module-01/playground
   kind: playground
   what: 'playground for module 1: Measure Delivery With DORA Metrics'
-  status: pending
-  note: ''
+  status: done
+  note: 'written; booted, but numbers (increase()=8, failure rate 0.375) differ from course text (9, 0.22):
+    RE-VERIFY'
 - key: section-040/module-01/course
   kind: course
   what: 'chapter for module 1: Measure Delivery With DORA Metrics'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: landing + 4 parts + summary; numbers need re-verification against playground'
+- key: section-040/module-01/lab-01
+  kind: lab
+  what: module lab 01 for section-040 module 01
+  status: done
+  note: written; never run (UNTESTED)
 - key: section-040/module-02/playground
   kind: playground
   what: 'playground for module 2: Measure Service Levels And Resource Efficiency'
-  status: pending
-  note: ''
+  status: done
+  note: written; never booted (UNTESTED)
 - key: section-040/module-02/course
   kind: course
   what: 'chapter for module 2: Measure Service Levels And Resource Efficiency'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: landing + 4 parts + summary; playground never booted'
+- key: section-040/module-02/lab-01
+  kind: lab
+  what: module lab 01 for section-040 module 02
+  status: done
+  note: written; never run (UNTESTED)
+- key: section-040/module-02/lab-02
+  kind: lab
+  what: module lab 02 for section-040 module 02
+  status: done
+  note: written; never run (UNTESTED)
 - key: section-040/quiz
   kind: quiz
   what: 'knowledge check for section-040: Measuring Platform Efficiency'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: quiz.yaml, 12 questions'
 - key: section-040/capstone
   kind: capstone
   what: 'capstone lab: Platform Efficiency Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: written; lab never run (UNTESTED)
 - key: section-050/module-01/playground
   kind: playground
   what: 'playground for module 1: Triage And Fix Failing Workloads'
-  status: pending
-  note: ''
+  status: done
+  note: written; tested live (booted)
 - key: section-050/module-01/course
   kind: course
   what: 'chapter for module 1: Triage And Fix Failing Workloads'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: landing + 4 parts + summary'
+- key: section-050/module-01/lab-01
+  kind: lab
+  what: module lab 01 for section-050 module 01
+  status: done
+  note: 'written; tested live: passes 5/5, unsolved fails 1/5'
 - key: section-050/module-02/playground
   kind: playground
   what: 'playground for module 2: Diagnose And Fix Broken Platform Components'
-  status: pending
-  note: ''
+  status: done
+  note: written; never booted (UNTESTED)
 - key: section-050/module-02/course
   kind: course
   what: 'chapter for module 2: Diagnose And Fix Broken Platform Components'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: landing + 3 parts + summary; playground never booted'
+- key: section-050/module-02/lab-01
+  kind: lab
+  what: module lab 01 for section-050 module 02
+  status: done
+  note: written; never booted (UNTESTED)
 - key: section-050/quiz
   kind: quiz
   what: 'knowledge check for section-050: Diagnosing And Remediating Incidents'
-  status: pending
-  note: ''
+  status: done
+  note: 'written: quiz.yaml, 15 questions'
 - key: section-050/capstone
   kind: capstone
   what: 'capstone lab: Incident Response Capstone'
-  status: pending
-  note: ''
+  status: done
+  note: written; never booted (UNTESTED). Replaces the blueprint GitOps Application fault with a probe
+    liveness fault
 - key: course/final-quiz
   kind: quiz
   what: final domain quiz across every section
-  status: pending
-  note: ''
+  status: done
+  note: 'written: sections/final-domain-quiz.yaml, 36 single-choice questions drawn from the section quizzes'

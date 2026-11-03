@@ -1,0 +1,277 @@
+---
+schema_version: 1
+kind: question_bank
+id: ats020-040
+course_id: ATS020
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-040
+  title: Measuring Platform Efficiency
+questions:
+- id: ats020-040-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Define deployment frequency, lead time for changes, change failure rate and time to restore service
+  source_readings:
+  - sections/section-040/module-01/course-01-the-four-dora-metrics-and-where-the-data-lives.md
+  prompt: A platform team reports these results for last month. Changes reach production in about 20 minutes after the commit. The team deploys 40 times a week. About one deployment in three needs a rollback, and each rollback takes half a day to finish. Which statement describes the result correctly?
+  options:
+  - id: a
+    text: Speed is good and stability is poor. Deployment frequency and lead time for changes are good, but change failure rate and time to restore service are poor.
+    explanation: Correct. Deployment frequency and lead time for changes measure speed. Change failure rate and time to restore service measure stability. One failed deployment in three and a half day to restore are poor stability numbers.
+  - id: b
+    text: Stability is good and speed is poor, because the team rolls back often.
+    explanation: This option reverses the two pairs. Frequent rollbacks are a stability problem, and 40 deployments a week with a 20 minute lead time is good speed.
+  - id: c
+    text: Both speed and stability are good, because the team deploys often.
+    explanation: A high deployment frequency is only one speed metric. It does not make up for a high change failure rate and a long time to restore.
+  - id: d
+    text: Nothing can be said until the team also measures the CPU use of the workloads.
+    explanation: CPU use is a resource efficiency number. The four DORA metrics come from the delivery data alone.
+  correct_option: a
+  explanation: Deployment frequency and lead time for changes measure speed. Change failure rate and time to restore service measure stability. The team is fast and unstable.
+- id: ats020-040-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Count deployments over a time window from the GitOps controller's sync metrics in Prometheus
+  source_readings:
+  - sections/section-040/module-01/course-02-deployment-frequency-from-the-sync-counter.md
+  prompt: Argo CD exposes the counter `argocd_app_sync_total` with the labels `name` and `phase`. A team wants the number of deployments of the Application `scout` in the last 7 days, as a whole number. The Prometheus server holds more than 7 days of data. Which query does this?
+  options:
+  - id: a
+    text: '`argocd_app_sync_total{name="scout"}`'
+    explanation: This option returns the raw counter. It counts every sync since the controller started, not the syncs in the last 7 days.
+  - id: b
+    text: '`round(sum(increase(argocd_app_sync_total{name="scout",phase="Succeeded"}[7d])))`'
+    explanation: Correct. `increase()` returns the growth of the counter over the window, the filter `phase="Succeeded"` keeps the syncs that applied a change, `sum()` joins the series and `round()` removes the fraction that extrapolation adds.
+  - id: c
+    text: '`rate(argocd_app_sync_total{name="scout",phase="Succeeded"}[7d])`'
+    explanation: This option returns a rate per second, not a count of deployments.
+  - id: d
+    text: '`count(argocd_app_sync_total{name="scout"})`'
+    explanation: "`count()` counts the series, and there is one series per phase. It does not count syncs."
+  correct_option: b
+  explanation: The counter only grows, so `increase()` over the window gives the number of syncs. The phase filter keeps successful syncs, `sum()` joins the series and `round()` gives a whole number.
+- id: ats020-040-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate change failure rate and time to restore from failed and recovered deployments
+  source_readings:
+  - sections/section-040/module-01/course-03-change-failure-rate-from-application-health.md
+  prompt: The Application `scout` was deployed ten times. In two of those deployments the image tag did not exist, and the new pods stayed in `ImagePullBackOff`. A recording rule counts `argocd_app_sync_total{name="scout",phase=~"Failed|Error"}` as the failed deployments, and the change failure rate it returns is `0`. What is the cause, and what is the fix?
+  options:
+  - id: a
+    text: Prometheus lost the data. The fix is to raise the retention.
+    explanation: The sync counter is present and grows with every deployment. The data is not lost, the rule reads the wrong signal.
+  - id: b
+    text: The rule needs `increase()` over a longer window. A window of 6 hours is too short to see a failure.
+    explanation: The window does not matter here. No series with the phase `Failed` or `Error` exists in any window.
+  - id: c
+    text: Argo CD marks a sync as `Failed` only when it cannot apply the manifest. A bad image tag is applied without an error, so the sync ends in `Succeeded`. Read the health status from `argocd_app_info`, which turns `Degraded`.
+    explanation: Correct. The sync phase says whether Argo CD applied the change. The health status says whether the workload works, and it is the signal for a failed change.
+  - id: d
+    text: The rule needs `phase="Running"`, because a failed deployment is a running sync.
+    explanation: The value `Running` is not the phase that marks a failure, and a sync that is still running is not a failed deployment.
+  correct_option: c
+  explanation: A bad image tag is applied without an error, so every sync ends in `Succeeded`. The failure shows in the health status of the Application, which turns `Degraded`.
+- id: ats020-040-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate change failure rate and time to restore from failed and recovered deployments
+  source_readings:
+  - sections/section-040/module-01/course-03-change-failure-rate-from-application-health.md
+  prompt: The flag `max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0` is `1` while the Application is `Degraded` and `0` otherwise. The Application was `Degraded` twice in the last 6 hours, and it is healthy now. A rule applies `changes()` to the flag over a 6 hour subquery. Which value does `changes()` return, and what must the rule do to get the failed deployments?
+  options:
+  - id: a
+    text: It returns `2`, and the rule uses the value as it is.
+    explanation: Each failure flips the flag twice, once from `0` to `1` and once from `1` to `0`. Two failures give four changes.
+  - id: b
+    text: It returns `4`, and the rule multiplies it by two.
+    explanation: Multiplying would give eight failures. Each failure is counted twice, so the rule must divide.
+  - id: c
+    text: It returns `1`, because the flag has one value now.
+    explanation: "`changes()` counts how often the value changed in the range, not the current value."
+  - id: d
+    text: It returns `4`, and the rule divides it by two.
+    explanation: Correct. Each failure flips the flag up and back down, so two failures give four changes. Dividing by two gives the failed deployments.
+  correct_option: d
+  explanation: Each failed deployment flips the flag from `0` to `1` and back to `0`, which is two changes. Four changes divided by two give two failed deployments.
+- id: ats020-040-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate lead time from a commit time in Git and the sync time recorded by the controller
+  source_readings:
+  - sections/section-040/module-01/course-04-lead-time-and-time-to-restore-from-timestamps.md
+  prompt: The Application history of `scout` has an entry with `revision` `736f9f2...` and `deployedAt` `2026-11-02T19:53:26Z`. The Git commit with the same hash has the committer date `2026-11-02T19:47:24Z`. The team squashes pull requests when it merges, and `736f9f2...` is the merge commit. What is the lead time for changes of this deployment, and why does the join work?
+  options:
+  - id: a
+    text: 6 minutes and 2 seconds, but only when the author date of the first commit in the pull request is used instead.
+    explanation: After a squash merge, Argo CD deploys the merge commit. Its committer date is the right start, not the date of an earlier commit.
+  - id: b
+    text: 6 minutes and 2 seconds. The two sources share the full commit hash, which is the key for the join.
+    explanation: Correct. The lead time is `deployedAt` minus the committer date of the commit that Argo CD deployed. Here that is 362 seconds. The hash is the key that joins the Git data with the history.
+  - id: c
+    text: It cannot be calculated, because the Application history has no commit time.
+    explanation: The history has no commit time, but it holds the hash. The commit time comes from Git, and the hash joins the two.
+  - id: d
+    text: 19 hours 53 minutes, because `deployedAt` is the time since midnight.
+    explanation: "`deployedAt` is a full timestamp. The lead time is the difference between two timestamps."
+  correct_option: b
+  explanation: Lead time is the deployment time from the history minus the committer date from Git, joined on the full commit hash. After a squash merge the merge commit is the commit that is deployed.
+- id: ats020-040-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Name one change to the delivery process that improves each metric
+  source_readings:
+  - sections/section-040/module-01/course-04-lead-time-and-time-to-restore-from-timestamps.md
+  prompt: A team has a change failure rate of 30 percent. Most failures are image tags that do not exist, and every one is found only after the deployment. Which change to the delivery process lowers the change failure rate the most?
+  options:
+  - id: a
+    text: Make deployments larger and less frequent, so that fewer deployments happen.
+    explanation: Larger changes are harder to review and fail more often. This also lowers deployment frequency.
+  - id: b
+    text: Add an alert on the `Degraded` health status.
+    explanation: An alert shortens the time to restore service. It does not stop the failed deployment from happening.
+  - id: c
+    text: Add a pipeline step before the merge that checks that the image tag exists in the registry.
+    explanation: Correct. A check before the merge catches the fault before it reaches the cluster, so fewer deployments fail.
+  - id: d
+    text: Replace the automated sync with a manual deployment step.
+    explanation: A manual step adds waiting time and raises the lead time. It does not catch a missing image tag.
+  correct_option: c
+  explanation: A check before the merge catches the fault before the deployment, which lowers the change failure rate. An alert on `Degraded` shortens the time to restore service instead.
+- id: ats020-040-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Calculate the remaining error budget for a 99% SLO over a window
+  source_readings:
+  - sections/section-040/module-02/course-01-sli-slo-and-error-budget-from-request-counters.md
+  prompt: A service has an SLO of 99 percent of successful requests over 30 days. In the last 30 days it served 2,000,000 requests. So far 12,000 of them failed. How much of the error budget is left?
+  options:
+  - id: a
+    text: 99 percent of the budget, because the SLO is 99 percent.
+    explanation: The SLO is the target for the SLI. It is not the remaining budget.
+  - id: b
+    text: 88 percent of the budget, because 12,000 is 0.6 percent of the requests.
+    explanation: The failures are 0.6 percent of the requests, but the budget is 1 percent of the requests. The share of the budget used is 0.6 divided by 1, which is 60 percent.
+  - id: c
+    text: The budget is used up, because 12,000 requests failed.
+    explanation: The budget is 20,000 failed requests. It is not used up until more than 20,000 fail.
+  - id: d
+    text: 40 percent of the budget. The SLO allows 20,000 failed requests and 8,000 failures are still allowed.
+    explanation: Correct. 1 percent of 2,000,000 is 20,000 failed requests. 12,000 are used, so 8,000 remain, which is 40 percent of the budget.
+  correct_option: d
+  explanation: The budget is 1 percent of 2,000,000 requests, which is 20,000. After 12,000 failures, 8,000 are left, which is 40 percent. The formula `1 - (1 - SLI) / (1 - SLO)` gives `1 - 0.006 / 0.01 = 0.4`.
+- id: ats020-040-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write an SLI as a PromQL ratio of good requests to all requests
+  source_readings:
+  - sections/section-040/module-02/course-01-sli-slo-and-error-budget-from-request-counters.md
+  prompt: The counter `http_requests_total` has a `status` label with the values `200`, `404` and `500`. The SLI of `scout` is the share of requests that did not end with a `5xx` status. Which query returns the SLI of the whole service, over the last 5 minutes?
+  options:
+  - id: a
+    text: sum(rate(http_requests_total{container="scout",status!~"5.."}[5m])) / sum(rate(http_requests_total{container="scout"}[5m]))
+    explanation: Correct. `rate()` turns the counter into a per-second value, `sum()` joins the pods, and `status!~"5.."` keeps every status that is not a `5xx` code. Good requests divided by all requests is the SLI.
+  - id: b
+    text: sum(http_requests_total{container="scout",status!~"5.."}) / sum(http_requests_total{container="scout"})
+    explanation: This option divides raw counters. It averages over the whole life of the pods, not over the last 5 minutes.
+  - id: c
+    text: sum(rate(http_requests_total{container="scout",status=~"5xx"}[5m])) / sum(rate(http_requests_total{container="scout"}[5m]))
+    explanation: This option returns no data, because the regular expression `5xx` looks for that literal text. It also calculates the error ratio, not the SLI.
+  - id: d
+    text: rate(http_requests_total{container="scout",status!~"5.."}[5m])
+    explanation: This option has no division and no `sum()`. It returns one rate for each pod and status, not a ratio.
+  correct_option: a
+  explanation: The SLI is the rate of good requests divided by the rate of all requests, with `sum()` to join the pods. Prometheus anchors regular expressions, so `5..` matches every `5xx` status.
+- id: ats020-040-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write a burn-rate alert that fires when the budget would run out early
+  source_readings:
+  - sections/section-040/module-02/course-02-burn-rate-alerts-with-two-windows.md
+  prompt: The SLO is 99 percent over 30 days. For the last hour, 6 percent of the requests to `scout` failed, and the rate does not change. What is the burn rate, and when is the 30-day error budget used up if nothing changes?
+  options:
+  - id: a
+    text: The burn rate is 0.06, and the budget is used up in 500 days.
+    explanation: 0.06 is the error ratio. The burn rate divides it by the budget `1 - SLO`, which is 0.01.
+  - id: b
+    text: The burn rate is 6, and the budget is used up in 180 days.
+    explanation: The burn rate is right, but the days are the window divided by the burn rate, not multiplied by it.
+  - id: c
+    text: The burn rate is 6, and the budget is used up in 5 days.
+    explanation: 'Correct. The burn rate is the error ratio divided by the budget: 0.06 divided by 0.01 is 6. The days until the budget is gone are 30 divided by 6, which is 5.'
+  - id: d
+    text: The burn rate is 1, because the SLO is 99 percent.
+    explanation: A burn rate of 1 would mean the errors are exactly 1 percent of the requests. Here they are 6 percent.
+  correct_option: c
+  explanation: 'Burn rate is the error ratio divided by the error budget: 0.06 / 0.01 = 6. A 30-day budget lasts 30 / 6 = 5 days at that speed.'
+- id: ats020-040-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Write a burn-rate alert that fires when the budget would run out early
+  source_readings:
+  - sections/section-040/module-02/course-02-burn-rate-alerts-with-two-windows.md
+  prompt: A team has a burn-rate alert with the expression `scout:burn_rate:rate5m > 2`. It sends a notification at every short spike of errors, and the team starts to ignore it. A second alert with only a 1 hour window keeps firing for almost an hour after an incident ends. Which design fixes both problems?
+  options:
+  - id: a
+    text: An alert with `scout:burn_rate:rate5m > 2 or scout:burn_rate:rate1h > 2`.
+    explanation: With `or`, the alert fires when either window is true. It has the spikes of the short window and the late resolve of the long window.
+  - id: b
+    text: One alert with `scout:burn_rate:rate5m > 2 and scout:burn_rate:rate1h > 2` and a short `for:`.
+    explanation: Correct. The 1 hour window proves that the burn is not a spike. The 5 minute window proves that the burn is still going on, so the alert stops soon after the errors stop.
+  - id: c
+    text: An alert with `scout:burn_rate:rate1h > 0` and no `for:`.
+    explanation: A threshold of zero fires on a single failed request, and the long window still resolves late.
+  - id: d
+    text: 'An alert with a 5 minute window and `for: 1h`.'
+    explanation: A long `for:` delays the notification for an hour even for a real incident, and it does not use a second window.
+  correct_option: b
+  explanation: A multi-window alert joins a long window and a short window with `and`. The long window ignores spikes, and the short window lets the alert resolve soon after the errors stop.
+- id: ats020-040-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare container CPU and memory requests with real usage from metrics-server and Prometheus
+  source_readings:
+  - sections/section-040/module-02/course-03-requests-versus-usage-with-kubectl-top-and-prometheus.md
+  prompt: A team wants the peak memory use of every container in `starfleet` over the last day, next to the memory each container requested. `kubectl top pods --containers` shows only the latest value. Which combination answers the question?
+  options:
+  - id: a
+    text: "`container_memory_usage_bytes` with `rate()`, and the limits from `kubectl describe node`."
+    explanation: "`container_memory_usage_bytes` includes cache that the kernel can take back, `rate()` is for counters and a limit is not a request."
+  - id: b
+    text: "`kubectl top nodes` run once a minute for a day."
+    explanation: "`kubectl top nodes` shows the use of the node, not of each container, and it does not keep a history."
+  - id: c
+    text: "`kube_pod_container_resource_requests` alone, because the request is the usage."
+    explanation: A request is what the scheduler reserves. It is not the usage.
+  - id: d
+    text: '`max_over_time(container_memory_working_set_bytes{namespace="starfleet",container!=""}[1d])` from cAdvisor, and `kube_pod_container_resource_requests{resource="memory"}` from kube-state-metrics.'
+    explanation: Correct. cAdvisor, scraped by Prometheus, keeps the usage history, and `max_over_time()` gives the peak. kube-state-metrics exports the requests as metrics. The selector `container!=""` removes the series for the whole pod.
+  correct_option: d
+  explanation: metrics-server keeps only the latest value. Prometheus keeps the history from cAdvisor (`container_memory_working_set_bytes`) and the requests from kube-state-metrics, so `max_over_time()` and a division show the gap.
+- id: ats020-040-q12
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Name the workload with the biggest gap and change its requests to match usage
+  source_readings:
+  - sections/section-040/module-02/course-04-find-and-fix-over-and-under-provisioned-workloads.md
+  prompt: The ratio of the memory request to the peak memory usage over 30 minutes is `7.6` for the container `scout`, `0.45` for `probe` and `1.8` for `shuttle`. The peak of `scout` is about `34Mi` and the peak of `probe` is about `9Mi`. Which statement and action are correct?
+  options:
+  - id: a
+    text: "`scout` has the biggest gap and `probe` is at risk. Set the request of `scout` a little above `34Mi`, for example `64Mi`, with a memory limit above the request, and raise the request of `probe` above `9Mi`."
+    explanation: Correct. A ratio above 1 is waste and a ratio below 1 means the container peaks above what it requested. A request must sit a little above the peak, and a memory limit must not be below the request.
+  - id: b
+    text: "`probe` has the biggest gap because its ratio is the lowest. Lower its request."
+    explanation: A ratio below 1 is not waste. `probe` peaks above its request, so its request is too low and must go up.
+  - id: c
+    text: "`scout` has the biggest gap. Remove its requests, so the scheduler reserves nothing."
+    explanation: A pod without requests is scheduled as if it needed nothing, and the kubelet evicts it first under memory pressure. Size the requests, do not remove them.
+  - id: d
+    text: "`scout` has the biggest gap. Set its request to the average usage, which is lower than the peak."
+    explanation: A request must cover the peak, not the average. A request below the peak packs the node too tight.
+  correct_option: a
+  explanation: The ratio of request to peak is above 1 for waste and below 1 for risk. `scout` wastes the most, so lower its request to a value a little above its peak. `probe` peaks above its request, so raise it. Keep a memory limit above the request.

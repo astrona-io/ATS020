@@ -145,16 +145,16 @@ metadata:
 data:
   traffic.sh: |
     #!/bin/sh
-    # Steady traffic for the PromQL playground. Every second: one normal
-    # request to each scout. Every 5th second: one /status/500 to the
-    # starfleet scout. Every 10th second: one /delay/1 to the starfleet scout.
-    i=0
+    # Steady traffic for the dashboards playground. Each loop sends one normal
+    # request to each scout. Every fifth loop: one /status/500 to the
+    # starfleet scout. Every tenth loop: one /delay/1 to the starfleet scout.
+    request_iteration=0
     while true; do
-      i=$((i+1))
+      request_iteration=$((request_iteration+1))
       curl -s -o /dev/null http://scout.starfleet:9898/
       curl -s -o /dev/null http://scout.outpost:9898/
-      [ $((i % 5)) -eq 0 ] && curl -s -o /dev/null http://scout.starfleet:9898/status/500
-      [ $((i % 10)) -eq 0 ] && curl -s -o /dev/null http://scout.starfleet:9898/delay/1
+      [ $((request_iteration % 5)) -eq 0 ] && curl -s -o /dev/null http://scout.starfleet:9898/status/500
+      [ $((request_iteration % 10)) -eq 0 ] && curl -s -o /dev/null http://scout.starfleet:9898/delay/1
       sleep 1
     done
 ---

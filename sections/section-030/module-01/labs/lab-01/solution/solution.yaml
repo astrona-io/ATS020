@@ -1,0 +1,31 @@
+# Reference end state for the "Fix A Broken Collector Pipeline" lab.
+# Two changes against manifests/collector-start.yaml: the exporter host is the
+# real Jaeger Service (`jaeger.observability`), and the exporter sets
+# `tls.insecure: true` because the Jaeger OTLP port speaks plain gRPC.
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+  namespace: observability
+spec:
+  mode: deployment
+  image: otel/opentelemetry-collector-contrib:0.162.0
+  config:
+    receivers:
+      otlp/grpc:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+    processors:
+      batch: {}
+    exporters:
+      otlp_grpc:
+        endpoint: jaeger.observability:4317
+        tls:
+          insecure: true
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp/grpc]
+          processors: [batch]
+          exporters: [otlp_grpc]

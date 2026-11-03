@@ -1,0 +1,17 @@
+# Reference end state: the label Prometheus selects, the port name the Service
+# really has, and the path podinfo serves.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

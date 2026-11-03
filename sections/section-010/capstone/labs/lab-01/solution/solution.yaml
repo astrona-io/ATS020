@@ -1,0 +1,66 @@
+# Reference end state: the label and selector that match, a recording rule that
+# matches 5xx statuses, an alert at 0.05 for 1m, and a route on team: frontier
+# that posts to the port the receiver listens on.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: frontier
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: scout
+  namespace: frontier
+  labels:
+    release: kps
+spec:
+  groups:
+    - name: scout
+      interval: 15s
+      rules:
+        - record: namespace:http_requests_error_ratio:rate1m
+          expr: |
+            sum by (namespace) (rate(http_requests_total{job="scout", status=~"5.."}[1m]))
+            /
+            sum by (namespace) (rate(http_requests_total{job="scout"}[1m]))
+        - alert: ScoutHighErrorRatio
+          expr: namespace:http_requests_error_ratio:rate1m > 0.05
+          for: 1m
+          labels:
+            severity: warning
+            team: frontier
+          annotations:
+            summary: "scout in {{ $labels.namespace }} fails more than 5% of requests"
+---
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: frontier
+  namespace: frontier
+spec:
+  route:
+    receiver: frontier-webhook
+    matchers:
+      - name: team
+        value: frontier
+        matchType: "="
+    groupBy: ["alertname"]
+    groupWait: 10s
+    groupInterval: 30s
+    repeatInterval: 1m
+  receivers:
+    - name: frontier-webhook
+      webhookConfigs:
+        - url: http://alert-receiver.monitoring:8080/
+          sendResolved: true

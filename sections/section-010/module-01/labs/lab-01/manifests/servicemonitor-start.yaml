@@ -1,0 +1,22 @@
+# The faulty ServiceMonitor. Three mistakes keep `scout` from being scraped:
+#   1. the label release is "prometheus", but the Prometheus resource selects
+#      release: kps, so Prometheus ignores the whole object,
+#   2. the port name is "metrics", but the Service names its port "http", so
+#      every endpoint is dropped,
+#   3. the path is "/metric", so the target would be down with a 404.
+# The fault is the material. Never fix it in the bootstrap.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  endpoints:
+    - port: metrics
+      path: /metric
+      interval: 15s

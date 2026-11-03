@@ -62,4 +62,4 @@ Makes the reader able to get any workload's metrics into Prometheus through the 
 
 ## Ready for Assessment?
 
-*   **[Take the Section 010 Knowledge Check](./quiz.md)**
+*   **[Take the Section 010 Knowledge Check](./quiz.yaml)**

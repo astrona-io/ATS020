@@ -1,0 +1,47 @@
+# Trimmed kube-prometheus-stack 92.3.0 for the platform efficiency
+# capstone lab: the Prometheus Operator, one Prometheus, kube-state-metrics
+# (it exports the resource requests of every container) and the kubelet scrape
+# job (it reads cAdvisor, the container usage). Alertmanager, Grafana,
+# node-exporter, the default rules and the scrape jobs for the other
+# Kubernetes components are off to save memory. Alerts still show in the
+# Prometheus web interface without Alertmanager.
+fullnameOverride: kps
+defaultRules:
+  create: false
+alertmanager:
+  enabled: false
+grafana:
+  enabled: false
+kubeStateMetrics:
+  enabled: true
+nodeExporter:
+  enabled: false
+kubelet:
+  enabled: true
+kubeApiServer:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kube-state-metrics:
+  resources:
+    requests: {cpu: 10m, memory: 32Mi}
+prometheusOperator:
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+prometheus:
+  prometheusSpec:
+    replicas: 1
+    retention: 6h
+    scrapeInterval: 15s
+    evaluationInterval: 15s
+    resources:
+      requests: {cpu: 100m, memory: 256Mi}
+      limits: {memory: 768Mi}

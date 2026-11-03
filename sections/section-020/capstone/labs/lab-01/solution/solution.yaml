@@ -1,0 +1,221 @@
+# Reference end state for the Dashboards And Logs Capstone: the Collector
+# `logs` with its ClusterRole, ClusterRoleBinding and ServiceMonitor, and the
+# dashboard ConfigMap with the sidecar label and the right label name in the
+# third panel.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logs-collector
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: logs-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: logs-collector
+subjects:
+  - kind: ServiceAccount
+    name: logs-collector
+    namespace: monitoring
+---
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: logs
+  namespace: monitoring
+spec:
+  mode: daemonset
+  image: otel/opentelemetry-collector-contrib:0.162.0
+  env:
+    - name: K8S_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+  volumes:
+    - name: varlogpods
+      hostPath:
+        path: /var/log/pods
+  volumeMounts:
+    - name: varlogpods
+      mountPath: /var/log/pods
+      readOnly: true
+  config:
+    receivers:
+      file_log:
+        include:
+          - /var/log/pods/*/*/*.log
+        exclude:
+          - /var/log/pods/monitoring_logs-collector-*/*/*.log
+        start_at: end
+        include_file_path: true
+        operators:
+          - type: container
+    processors:
+      k8s_attributes:
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.uid
+        extract:
+          metadata:
+            - k8s.deployment.name
+            - k8s.node.name
+      filter/drop-info:
+        error_mode: ignore
+        logs:
+          log_record:
+            - 'IsMatch(body, "level=INFO")'
+      delta_to_cumulative: {}
+    connectors:
+      count:
+        logs:
+          log_error_lines:
+            description: Log lines with level=ERROR
+            conditions:
+              - 'IsMatch(body, "level=ERROR")'
+    exporters:
+      debug:
+        verbosity: basic
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        resource_to_telemetry_conversion:
+          enabled: true
+    service:
+      pipelines:
+        logs:
+          receivers: [file_log]
+          processors: [k8s_attributes, filter/drop-info]
+          exporters: [debug, count]
+        metrics:
+          receivers: [count]
+          processors: [delta_to_cumulative]
+          exporters: [prometheus]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: logs-collector
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: monitoring.logs
+      operator.opentelemetry.io/collector-service-type: base
+  endpoints:
+    - port: prometheus
+      interval: 15s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-outpost-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  outpost-overview.json: |
+    {
+      "uid": "outpost-overview",
+      "title": "Outpost Overview",
+      "schemaVersion": 41,
+      "time": {
+        "from": "now-15m",
+        "to": "now"
+      },
+      "refresh": "30s",
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Request rate",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (status) (rate(http_requests_total{namespace=\"outpost\"}[1m]))",
+              "legendFormat": "{{status}}"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Error ratio",
+          "gridPos": {
+            "x": 12,
+            "y": 0,
+            "w": 6,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(rate(http_requests_total{namespace=\"outpost\", status=~\"5..\"}[1m])) / sum(rate(http_requests_total{namespace=\"outpost\"}[1m]))"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Error log lines",
+          "gridPos": {
+            "x": 18,
+            "y": 0,
+            "w": 6,
+            "h": 8
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum(rate(log_error_lines_total{k8s_namespace_name=\"outpost\", k8s_deployment_name=\"probe\"}[1m]))",
+              "legendFormat": "probe errors per second"
+            }
+          ]
+        }
+      ]
+    }

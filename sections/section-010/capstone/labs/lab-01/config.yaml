@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-capstone-010
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+      - quay.io/prometheus/prometheus:v3.15.0-distroless
+      - quay.io/prometheus/alertmanager:v0.34.1
+      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - curlimages/curl:8.22.0
+      - python:3.13-alpine
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Install Helm if missing and a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator, one Prometheus, one Alertmanager) in `monitoring`"
+      type: file
+      source: bootstrap/01-prepare.sh
+  manifests:
+    - name: lab-start
+      description: "The namespace frontier with scout and the shuttle traffic loop, and the alert-receiver webhook in monitoring"
+      type: file
+      source: manifests/lab-start.yaml
+    - name: monitoring-start
+      description: "The faulty ServiceMonitor, PrometheusRule and AlertmanagerConfig for scout in frontier"
+      type: file
+      source: manifests/monitoring-start.yaml
+  waitFor:
+    - resource: deploy/scout
+      namespace: frontier
+    - resource: deploy/shuttle
+      namespace: frontier
+    - resource: deploy/alert-receiver
+      namespace: monitoring
+
+testing:
+  init:
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+    - name: wait-for-delivery
+      description: Waits until Prometheus has two healthy scout targets and the alert reached the receiver
+      type: file
+      source: testing/wait-for-delivery.sh
+
+validation:
+  scripts:
+    - name: target-up
+      description: Every ready scout endpoint in frontier is a healthy Prometheus target with up equal to 1
+      type: file
+      source: validation/validate-target-up.sh
+    - name: recorded-ratio
+      description: The recording rule returns the real error ratio of scout in frontier
+      type: file
+      source: validation/validate-recorded-ratio.sh
+    - name: alert-firing
+      description: The alert ScoutHighErrorRatio fires for frontier, with a threshold of 0.05 and for 1m
+      type: file
+      source: validation/validate-alert-firing.sh
+    - name: alert-delivered
+      description: Alertmanager sent ScoutHighErrorRatio for frontier to the alert-receiver
+      type: file
+      source: validation/validate-alert-delivered.sh
+    - name: design-intact
+      description: The Prometheus selectors, the Service, the receiver and the rules are fixed in place, not replaced
+      type: file
+      source: validation/validate-design-intact.sh
+
+teardown:
+  keepCluster: false

@@ -65,9 +65,9 @@ modules:
     description: >
       Makes the reader able to get any workload's metrics into
       Prometheus through the Prometheus Operator, query them with
-      PromQL, and turn a query into an alert that reaches a receiver. It
-      comes first because every later section (dashboards, SLOs, DORA
-      metrics, incident triage) reads these metrics.
+      PromQL, and turn a query into an alert that reaches a receiver.
+      It comes first because every later section (dashboards, SLOs,
+      DORA metrics, incident triage) reads these metrics.
 
     content:
       - type: reading
@@ -90,7 +90,17 @@ modules:
         title: "Finding A Missing Target"
         path: sections/section-010/module-01/course-04-finding-a-missing-target.md
       - type: reading
-        title: "Summary"
+        title: Question
+        path: sections/section-010/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Get A Workload Scraped With A ServiceMonitor Lab"
+        path: sections/section-010/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: metrics-and-alerting
+        task_kind: troubleshooting
+      - type: reading
+        title: Summary
         path: sections/section-010/module-01/course-05-summary.md
 
       - type: reading
@@ -106,11 +116,22 @@ modules:
         title: "Aggregation, Error Ratio And Latency"
         path: sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
       - type: reading
+        title: Question
+        path: sections/section-010/module-02/labs/lab-02/question.md
+      - type: lab
+        title: "Record The Error Ratio And p95 Latency Lab"
+        path: sections/section-010/module-02/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: metrics-and-alerting
+        task_kind: troubleshooting
+      - type: reading
         title: "Running Queries From The Command Line"
         path: sections/section-010/module-02/course-04-running-queries-from-the-command-line.md
       - type: reading
-        title: "Summary"
+        title: Summary
         path: sections/section-010/module-02/course-05-summary.md
+
       - type: reading
         title: "Alert With PrometheusRule And Alertmanager"
         path: sections/section-010/module-03/course.md
@@ -127,65 +148,383 @@ modules:
         title: "Silences And Inhibition"
         path: sections/section-010/module-03/course-04-silences-and-inhibition.md
       - type: reading
-        title: "Summary"
+        title: Summary
         path: sections/section-010/module-03/course-05-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-010/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Metrics And Alerting Capstone"
+        path: sections/section-010/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 45m
+        topic: metrics-and-alerting
+        task_kind: build
+      - type: quiz
+        title: "Knowledge Check: Metrics And Alerting With Prometheus"
+        path: sections/section-010/quiz.yaml
+        pass_score: 70
 
   - id: module-020
     title: "Dashboards And Logs"
     description: >
-      Makes the reader able to show metrics on a Grafana dashboard that
-      is stored as code, and to collect pod logs with the OpenTelemetry
-      Collector, enrich and filter them, and turn error lines into a
-      Prometheus metric that a dashboard can draw. It follows metrics
-      because dashboards draw PromQL queries, and logs are the next
-      signal an operator reads.
+      Makes the reader able to show metrics on a Grafana dashboard
+      that is stored as code, and to collect pod logs with the
+      OpenTelemetry Collector, enrich and filter them, and turn error
+      lines into a Prometheus metric that a dashboard can draw. It
+      follows metrics because dashboards draw PromQL queries, and logs
+      are the next signal an operator reads.
 
     content:
       - type: reading
         title: Section Overview
         path: sections/section-020/README.md
 
+      - type: reading
+        title: "Build Grafana Dashboards As Code"
+        path: sections/section-020/module-01/course.md
+      - type: reading
+        title: "Grafana's Parts And A Provisioned Data Source"
+        path: sections/section-020/module-01/course-01-grafana-parts-and-a-provisioned-data-source.md
+      - type: reading
+        title: "Panels For Rate, Error Ratio And Latency"
+        path: sections/section-020/module-01/course-02-panels-for-rate-error-ratio-and-latency.md
+      - type: reading
+        title: "A Namespace Variable For Every Panel"
+        path: sections/section-020/module-01/course-03-a-namespace-variable-for-every-panel.md
+      - type: reading
+        title: "Dashboards That Survive A Restart"
+        path: sections/section-020/module-01/course-04-dashboards-that-survive-a-restart.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Fix A Grafana Dashboard That Is Provisioned From A ConfigMap"
+        path: sections/section-020/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: dashboards-and-logs
+        task_kind: troubleshooting
+      - type: reading
+        title: Summary
+        path: sections/section-020/module-01/course-05-summary.md
+
+      - type: reading
+        title: "Collect Pod Logs With The OpenTelemetry Collector"
+        path: sections/section-020/module-02/course.md
+      - type: reading
+        title: "What Kubernetes Keeps About Logs"
+        path: sections/section-020/module-02/course-01-what-kubernetes-keeps-about-logs.md
+      - type: reading
+        title: "A DaemonSet Collector Reads The Log Files"
+        path: sections/section-020/module-02/course-02-a-daemonset-collector-reads-the-log-files.md
+      - type: reading
+        title: "Add Kubernetes Metadata And Drop Records"
+        path: sections/section-020/module-02/course-03-add-kubernetes-metadata-and-drop-records.md
+      - type: reading
+        title: "Count Error Lines Into A Prometheus Metric"
+        path: sections/section-020/module-02/course-04-count-error-lines-into-a-prometheus-metric.md
+      - type: reading
+        title: Question
+        path: sections/section-020/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Count Error Log Lines With The OpenTelemetry Collector"
+        path: sections/section-020/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: dashboards-and-logs
+        task_kind: build
+      - type: reading
+        title: Summary
+        path: sections/section-020/module-02/course-05-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-020/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Dashboards And Logs Capstone"
+        path: sections/section-020/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 60m
+        topic: dashboards-and-logs
+        task_kind: build
+      - type: quiz
+        title: "Knowledge Check: Dashboards And Logs"
+        path: sections/section-020/quiz.yaml
+        pass_score: 70
+
   - id: module-030
     title: "Distributed Tracing With OpenTelemetry And Jaeger"
     description: >
       Makes the reader able to run an OpenTelemetry Collector with the
-      OpenTelemetry Operator, send traces to Jaeger, and add tracing to
-      an application without changing its code. It comes after metrics
-      and logs because tracing reuses the Collector pipeline idea and
-      answers the question metrics cannot — where in a chain of services
-      the time went.
+      OpenTelemetry Operator, send traces to Jaeger, and add tracing
+      to an application without changing its code. It comes after
+      metrics and logs because tracing reuses the Collector pipeline
+      idea and answers the question metrics cannot — where in a chain
+      of services the time went.
 
     content:
       - type: reading
         title: Section Overview
         path: sections/section-030/README.md
 
+      - type: reading
+        title: "Run An OpenTelemetry Collector With The Operator"
+        path: sections/section-030/module-01/course.md
+      - type: reading
+        title: "The Operator And Its Webhook"
+        path: sections/section-030/module-01/course-01-the-operator-and-its-webhook.md
+      - type: reading
+        title: "A Collector With An OTLP Receiver And A Jaeger Exporter"
+        path: sections/section-030/module-01/course-02-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
+      - type: reading
+        title: "Reading A Trace In Jaeger"
+        path: sections/section-030/module-01/course-03-reading-a-trace-in-jaeger.md
+      - type: reading
+        title: "Choosing A Collector Mode"
+        path: sections/section-030/module-01/course-04-choosing-a-collector-mode.md
+      - type: reading
+        title: "Diagnosing A Broken Collector Pipeline"
+        path: sections/section-030/module-01/course-05-diagnosing-a-broken-collector-pipeline.md
+      - type: reading
+        title: Question
+        path: sections/section-030/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Fix A Broken Collector Pipeline Lab"
+        path: sections/section-030/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: distributed-tracing
+        task_kind: troubleshooting
+      - type: reading
+        title: Summary
+        path: sections/section-030/module-01/course-06-summary.md
+
+      - type: reading
+        title: "Add Tracing Without Code Changes Using Auto-Instrumentation"
+        path: sections/section-030/module-02/course.md
+      - type: reading
+        title: "What The Operator Injects Into A Pod"
+        path: sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+      - type: reading
+        title: "Reading One Trace Across Two Services"
+        path: sections/section-030/module-02/course-02-reading-one-trace-across-two-services.md
+      - type: reading
+        title: "Finding Why A Pod Is Not Instrumented"
+        path: sections/section-030/module-02/course-03-finding-why-a-pod-is-not-instrumented.md
+      - type: reading
+        title: Question
+        path: sections/section-030/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Get Two Services Into One Trace Lab"
+        path: sections/section-030/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 30m
+        topic: distributed-tracing
+        task_kind: troubleshooting
+      - type: reading
+        title: Summary
+        path: sections/section-030/module-02/course-04-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-030/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Distributed Tracing Capstone"
+        path: sections/section-030/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 60m
+        topic: distributed-tracing
+        task_kind: build
+      - type: quiz
+        title: "Knowledge Check: Distributed Tracing With OpenTelemetry And Jaeger"
+        path: sections/section-030/quiz.yaml
+        pass_score: 70
+
   - id: module-040
     title: "Measuring Platform Efficiency"
     description: >
       Makes the reader able to measure how well the platform delivers
-      and how well it uses resources: the four DORA metrics from GitOps
-      history, service level objectives with error budgets, and the gap
-      between requested and used CPU and memory. It comes after the
-      collection sections because every number here is a Prometheus
-      query on data those sections taught to collect.
+      and how well it uses resources: the four DORA metrics from
+      GitOps history, service level objectives with error budgets, and
+      the gap between requested and used CPU and memory. It comes
+      after the collection sections because every number here is a
+      Prometheus query on data those sections taught to collect.
 
     content:
       - type: reading
         title: Section Overview
         path: sections/section-040/README.md
 
+      - type: reading
+        title: "Measure Delivery With DORA Metrics"
+        path: sections/section-040/module-01/course.md
+      - type: reading
+        title: "The Four DORA Metrics And Where The Data Lives"
+        path: sections/section-040/module-01/course-01-the-four-dora-metrics-and-where-the-data-lives.md
+      - type: reading
+        title: "Deployment Frequency From The Sync Counter"
+        path: sections/section-040/module-01/course-02-deployment-frequency-from-the-sync-counter.md
+      - type: reading
+        title: "Change Failure Rate From Application Health"
+        path: sections/section-040/module-01/course-03-change-failure-rate-from-application-health.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Fix The Change Failure Rate Rule Lab"
+        path: sections/section-040/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: platform-efficiency
+        task_kind: troubleshooting
+      - type: reading
+        title: "Lead Time And Time To Restore From Timestamps"
+        path: sections/section-040/module-01/course-04-lead-time-and-time-to-restore-from-timestamps.md
+      - type: reading
+        title: Summary
+        path: sections/section-040/module-01/course-05-summary.md
+
+      - type: reading
+        title: "Measure Service Levels And Resource Efficiency"
+        path: sections/section-040/module-02/course.md
+      - type: reading
+        title: "SLI, SLO And Error Budget From Request Counters"
+        path: sections/section-040/module-02/course-01-sli-slo-and-error-budget-from-request-counters.md
+      - type: reading
+        title: "Burn-Rate Alerts With Two Windows"
+        path: sections/section-040/module-02/course-02-burn-rate-alerts-with-two-windows.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Fix The Burn-Rate Alert Lab"
+        path: sections/section-040/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: platform-efficiency
+        task_kind: troubleshooting
+      - type: reading
+        title: "Requests Versus Usage With kubectl top And Prometheus"
+        path: sections/section-040/module-02/course-03-requests-versus-usage-with-kubectl-top-and-prometheus.md
+      - type: reading
+        title: "Find And Fix Over- And Under-Provisioned Workloads"
+        path: sections/section-040/module-02/course-04-find-and-fix-over-and-under-provisioned-workloads.md
+      - type: reading
+        title: Question
+        path: sections/section-040/module-02/labs/lab-02/question.md
+      - type: lab
+        title: "Right-Size Two Deployments Lab"
+        path: sections/section-040/module-02/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: platform-efficiency
+        task_kind: troubleshooting
+      - type: reading
+        title: Summary
+        path: sections/section-040/module-02/course-05-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-040/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Platform Efficiency Capstone"
+        path: sections/section-040/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 45m
+        topic: platform-efficiency
+        task_kind: build
+      - type: quiz
+        title: "Knowledge Check: Measuring Platform Efficiency"
+        path: sections/section-040/quiz.yaml
+        pass_score: 70
+
   - id: module-050
     title: "Diagnosing And Remediating Incidents"
     description: >
       Makes the reader able to find and fix the cause of a broken
       workload or a broken platform component, using events, logs,
-      status conditions and metrics, and to prove the fix. It comes last
-      because it uses every tool the earlier sections taught, under the
-      time pressure of an incident.
+      status conditions and metrics, and to prove the fix. It comes
+      last because it uses every tool the earlier sections taught,
+      under the time pressure of an incident.
 
     content:
       - type: reading
         title: Section Overview
         path: sections/section-050/README.md
 
+      - type: reading
+        title: "Triage And Fix Failing Workloads"
+        path: sections/section-050/module-01/course.md
+      - type: reading
+        title: "A Triage Order And Pending Pods"
+        path: sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+      - type: reading
+        title: "CrashLoopBackOff And Failing Probes"
+        path: sections/section-050/module-01/course-02-crashloopbackoff-and-failing-probes.md
+      - type: reading
+        title: "OOMKilled And Memory Limits"
+        path: sections/section-050/module-01/course-03-oomkilled-and-memory-limits.md
+      - type: reading
+        title: "ImagePullBackOff And Image References"
+        path: sections/section-050/module-01/course-04-imagepullbackoff-and-image-references.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-01/labs/lab-01/question.md
+      - type: lab
+        title: "Fix Four Failing Workloads Lab"
+        path: sections/section-050/module-01/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 40m
+        topic: incident-response
+        task_kind: troubleshooting
+      - type: reading
+        title: Summary
+        path: sections/section-050/module-01/course-05-summary.md
+
+      - type: reading
+        title: "Diagnose And Fix Broken Platform Components"
+        path: sections/section-050/module-02/course.md
+      - type: reading
+        title: "A Webhook Service Without Endpoints"
+        path: sections/section-050/module-02/course-01-a-webhook-service-without-endpoints.md
+      - type: reading
+        title: "An Expired Webhook Certificate"
+        path: sections/section-050/module-02/course-02-an-expired-webhook-certificate.md
+      - type: reading
+        title: "A Controller Scaled To Zero"
+        path: sections/section-050/module-02/course-03-a-controller-scaled-to-zero.md
+      - type: reading
+        title: Question
+        path: sections/section-050/module-02/labs/lab-01/question.md
+      - type: lab
+        title: "Restore A Platform After Three Failures Lab"
+        path: sections/section-050/module-02/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 40m
+        topic: incident-response
+        task_kind: troubleshooting
+      - type: reading
+        title: Summary
+        path: sections/section-050/module-02/course-04-summary.md
+
+      - type: reading
+        title: Question
+        path: sections/section-050/capstone/labs/lab-01/question.md
+      - type: lab
+        title: "Incident Response Capstone"
+        path: sections/section-050/capstone/labs/lab-01
+        difficulty: advanced
+        estimated_duration: 45m
+        topic: incident-response
+        task_kind: build
+      - type: quiz
+        title: "Knowledge Check: Diagnosing And Remediating Incidents"
+        path: sections/section-050/quiz.yaml
+        pass_score: 70
+
+      - type: quiz
+        title: "Final Knowledge Check: Observability and Operations"
+        path: sections/final-domain-quiz.yaml
+        pass_score: 70

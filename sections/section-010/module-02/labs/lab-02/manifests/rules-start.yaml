@@ -1,0 +1,22 @@
+# The faulty PrometheusRule. Both recording rules run, and both return the
+# wrong thing:
+#   1. the error ratio divides a rate by a raw counter (no rate() on the
+#      denominator), so it is far too small,
+#   2. the p95 latency calls histogram_quantile() on the bucket rates without
+#      sum by (le), so it returns one value for each series instead of one.
+# The fault is the material. Never fix it in the bootstrap.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: scout-queries
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  groups:
+    - name: scout-queries
+      rules:
+        - record: scout:error_ratio:rate5m
+          expr: sum(rate(http_requests_total{namespace="starfleet",status=~"5.."}[5m])) / sum(http_requests_total{namespace="starfleet"})
+        - record: scout:request_duration_seconds:p95_5m
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{namespace="starfleet"}[5m]))

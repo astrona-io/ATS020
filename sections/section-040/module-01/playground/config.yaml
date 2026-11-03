@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+#
+# Measure Delivery With DORA Metrics (PLAYGROUND).
+# A clean sandbox: it starts, installs a trimmed Prometheus, Gitea and
+# Argo CD, makes a delivery history of ten commits (two of them bad), then
+# stays running for free exploration. No task, no grading, no `astrona submit`.
+# This is the heaviest playground in the course: run nothing beside it.
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-playground-040-01
+  docs:
+    guide: docs/overview.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+      - quay.io/prometheus/prometheus:v3.15.0-distroless
+      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+      - gitea/gitea:28.1.0-rootless
+      - quay.io/argoproj/argocd:v3.5.4
+      - public.ecr.aws/docker/library/redis:8.2.3-alpine
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: prepare
+      description: "Install Helm if missing, a trimmed kube-prometheus-stack 92.3.0, Gitea 28.1.0 and Argo CD 3.5.4, then make the delivery history of the Application scout"
+      type: file
+      source: bootstrap/prepare.sh
+  manifests:
+    - name: lab-start
+      description: "The shuttle client in starfleet"
+      type: file
+      source: manifests/lab-start.yaml
+  waitFor:
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+teardown:
+  keepCluster: false

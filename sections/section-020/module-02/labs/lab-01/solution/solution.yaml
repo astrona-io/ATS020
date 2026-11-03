@@ -1,0 +1,31 @@
+# Reference end state. The fix has two parts: give the Collector's service
+# account the ClusterRole it needs, and give the ServiceMonitor the label
+# the Prometheus resource selects.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: logs-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: logs-collector
+subjects:
+  - kind: ServiceAccount
+    name: logs-collector
+    namespace: monitoring
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: logs-collector
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: monitoring.logs
+      operator.opentelemetry.io/collector-service-type: base
+  endpoints:
+    - port: prometheus
+      interval: 15s

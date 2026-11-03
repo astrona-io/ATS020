@@ -1,0 +1,73 @@
+# The faulty monitoring objects for `scout` in `frontier`. Three independent
+# problems keep the alert from reaching the receiver:
+#   1. the ServiceMonitor has the label release: prometheus (the Prometheus
+#      resource selects release: kps) and selects app: frontier-scout (the
+#      Service has app: scout), so there is no target,
+#   2. the recording rule matches status="5xx" (no series has that value) and
+#      the alert compares the ratio with 5 instead of 0.05 and waits 10m,
+#   3. the AlertmanagerConfig matches severity=critical (the alert has
+#      severity: warning) and posts to port 80 (the receiver listens on 8080).
+# The fault is the material. Never fix it in the bootstrap.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scout
+  namespace: frontier
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: frontier-scout
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: scout
+  namespace: frontier
+  labels:
+    release: kps
+spec:
+  groups:
+    - name: scout
+      interval: 15s
+      rules:
+        - record: namespace:http_requests_error_ratio:rate1m
+          expr: |
+            sum by (namespace) (rate(http_requests_total{job="scout", status="5xx"}[1m]))
+            /
+            sum by (namespace) (rate(http_requests_total{job="scout"}[1m]))
+        - alert: ScoutHighErrorRatio
+          expr: namespace:http_requests_error_ratio:rate1m > 5
+          for: 10m
+          labels:
+            severity: warning
+            team: frontier
+          annotations:
+            summary: "scout in {{ $labels.namespace }} fails more than 5% of requests"
+---
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: frontier
+  namespace: frontier
+spec:
+  route:
+    receiver: frontier-webhook
+    matchers:
+      - name: severity
+        value: critical
+        matchType: "="
+    groupBy: ["alertname"]
+    groupWait: 10s
+    groupInterval: 30s
+    repeatInterval: 1m
+  receivers:
+    - name: frontier-webhook
+      webhookConfigs:
+        - url: http://alert-receiver.monitoring:80/
+          sendResolved: true

@@ -1,0 +1,432 @@
+# Knowledge check for section 010. Listed in astrona.yaml as a `type: quiz` entry after the capstone lab.
+schema_version: 1
+kind: question_bank
+id: ats020-010
+course_id: ATS020
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-010
+  title: Metrics And Alerting With Prometheus
+questions:
+- id: ats020-010-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Read the Prometheus targets page and the `up` metric to say which targets are scraped and which fail
+  source_readings:
+  - sections/section-010/module-01/course-01-targets-and-the-up-metric.md
+  prompt: A team deployed a new service and asks why `up{namespace="billing"}` returns nothing at all. Which statement is correct?
+  options:
+  - id: a
+    text: Prometheus has no target for the service, so it has never tried to scrape it.
+    explanation: Correct. `up` is `0` when Prometheus tried and failed. When no `up` series exists, no monitor produced a target, so Prometheus never tried.
+  - id: b
+    text: Prometheus tried to scrape the service and every scrape failed.
+    explanation: A failed scrape stores `up` with the value `0`. It does not remove the series.
+  - id: c
+    text: The service returned HTTP status 500 on `/metrics`.
+    explanation: A failed scrape (for example HTTP status 500) also stores `up` with the value `0`.
+  - id: d
+    text: The `up` metric is only stored for pods in the `monitoring` namespace.
+    explanation: "`up` exists for every target in every namespace."
+  correct_option: a
+  explanation: "`up` is `0` when Prometheus tried and failed. When no `up` series exists, no monitor produced a target, so Prometheus never tried."
+- id: ats020-010-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write a ServiceMonitor that selects a Service by label and scrapes a named port and path
+  source_readings:
+  - sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+  prompt: 'A Service `scout` has the label `app: scout` and the port `name: http` (`9898`). Which `endpoints` entry in a ServiceMonitor scrapes it on `/metrics`?'
+  options:
+  - id: a
+    text: '`- port: "9898"` and `path: /metrics`'
+    explanation: "`endpoints[].port` takes the name of the port, not the number."
+  - id: b
+    text: "`- targetPort: scout` and `path: /metrics`"
+    explanation: "`targetPort` is for container ports the Service does not name, and `scout` is not a port name."
+  - id: c
+    text: "`- port: http` and `path: /metrics`"
+    explanation: 'Correct. `endpoints[].port` is the name of a Service port, here `http`. `spec.selector` matches the labels of the Service, here `app: scout`.'
+  - id: d
+    text: "`- port: http` and `path: /metrics`, with `spec.selector.matchLabels` set to `name: http`"
+    explanation: "`spec.selector` matches Service labels, not port names. `app: scout` is the label."
+  correct_option: c
+  explanation: "`endpoints[].port` is the name of a Service port, here `http`. `spec.selector` matches the labels of the Service, here `app: scout`."
+- id: ats020-010-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
+  source_readings:
+  - sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+  prompt: 'You apply a correct ServiceMonitor in `starfleet`. `kubectl apply` prints `created`, but no job for it appears in Prometheus after five minutes. The Prometheus resource has `serviceMonitorNamespaceSelector: {}` and `serviceMonitorSelector.matchLabels: {release: kps}`. What is the most likely cause?'
+  options:
+  - id: a
+    text: The empty `serviceMonitorNamespaceSelector` blocks every namespace except `monitoring`.
+    explanation: An empty namespace selector matches every namespace.
+  - id: b
+    text: 'The ServiceMonitor does not carry the label `release: kps`, so Prometheus ignores it.'
+    explanation: 'Correct. `serviceMonitorSelector` only matches ServiceMonitors with the label `release: kps`. A monitor without it is ignored with no error. An empty namespace selector matches every namespace.'
+  - id: c
+    text: The operator writes an error into the ServiceMonitor status, which you must clear first.
+    explanation: A ServiceMonitor has no status that reports this problem, and the operator logs nothing.
+  - id: d
+    text: ServiceMonitors only work in the `monitoring` namespace.
+    explanation: A ServiceMonitor may live in any namespace the namespace selector matches.
+  correct_option: b
+  explanation: "`serviceMonitorSelector` only matches ServiceMonitors with the label `release: kps`. A monitor without it is ignored with no error. An empty namespace selector matches every namespace."
+- id: ats020-010-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write a PodMonitor for pods that have no Service
+  source_readings:
+  - sections/section-010/module-01/course-03-scrape-pods-with-a-podmonitor.md
+  prompt: 'The pods `app: scout` in `outpost` have no Service. Their container port is named `http`. Which resource scrapes them?'
+  options:
+  - id: a
+    text: 'A ServiceMonitor with `endpoints[].port: http` and the label `release: kps`.'
+    explanation: A ServiceMonitor follows Services. With no Service there are no endpoints to scrape.
+  - id: b
+    text: 'A PodMonitor with `podMetricsEndpoints[].port: 9898` and no labels.'
+    explanation: The port field takes the container port name, and without the selector label Prometheus ignores the monitor.
+  - id: c
+    text: 'A PrometheusRule with the label `app: scout`.'
+    explanation: A PrometheusRule holds rules. It does not scrape anything.
+  - id: d
+    text: 'A PodMonitor with `spec.selector.matchLabels: {app: scout}`, `podMetricsEndpoints[].port: http` and the label `release: kps`.'
+    explanation: Correct. A PodMonitor selects pods directly and names a container port. It still needs the label that the `podMonitorSelector` of the Prometheus resource matches.
+  correct_option: d
+  explanation: A PodMonitor selects pods directly and names a container port. It still needs the label that the `podMonitorSelector` of the Prometheus resource matches.
+- id: ats020-010-q05
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
+  source_readings:
+  - sections/section-010/module-01/course-04-finding-a-missing-target.md
+  prompt: After a change to a ServiceMonitor, `show_targets` lists no `scout` targets and `up` has no series for `starfleet`. The job `serviceMonitor/starfleet/scout/0` exists in the Prometheus configuration. Which check finds the cause fastest?
+  options:
+  - id: a
+    text: Run `up == 0` and read `lastError`.
+    explanation: There is no `up` series, so there is no target with a `lastError`. Only a target that was tried can have an error.
+  - id: b
+    text: Delete the Prometheus pod so it reloads.
+    explanation: A restart does not change a wrong port name.
+  - id: c
+    text: List the dropped targets with `/api/v1/targets?state=dropped` and compare the port name Prometheus saw with the one in the ServiceMonitor.
+    explanation: Correct. The job exists, so Prometheus reads the monitor. No target means every endpoint was dropped, for example because the port name does not exist. The dropped targets show the real port name.
+  - id: d
+    text: Raise the scrape `interval` of the endpoint.
+    explanation: The interval changes how often a scrape runs, not which endpoints are selected.
+  correct_option: c
+  explanation: The job exists, so Prometheus reads the monitor. No target means every endpoint was dropped, for example because the port name does not exist. The dropped targets show the real port name.
+- id: ats020-010-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Select time series by metric name and label matchers, including regex matchers
+  source_readings:
+  - sections/section-010/module-02/course-01-selecting-time-series.md
+  prompt: Which query selects the series of `http_requests_total` for every `5xx` status code in `starfleet`?
+  options:
+  - id: a
+    text: '`http_requests_total{namespace="starfleet", status=~"5"}`'
+    explanation: A regular expression must match the whole value, and no status is exactly `5`.
+  - id: b
+    text: '`http_requests_total{namespace="starfleet", status="5.."}`'
+    explanation: The operator `=` compares the exact text `5..`, which no status has.
+  - id: c
+    text: '`http_requests_total{namespace="starfleet"}[5xx]`'
+    explanation: Square brackets set a time range, not a label filter.
+  - id: d
+    text: '`http_requests_total{namespace="starfleet", status=~"5.."}`'
+    explanation: Correct. The `=~` operator matches a regular expression against the whole label value, so `5..` matches `500` and `503`.
+  correct_option: d
+  explanation: The `=~` operator matches a regular expression against the whole label value, so `5..` matches `500` and `503`.
+- id: ats020-010-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate a per-second request rate from a counter with `rate()` and explain why `rate` is not used on a gauge
+  source_readings:
+  - sections/section-010/module-02/course-02-counters-gauges-and-rate.md
+  prompt: A teammate runs `rate(go_goroutines[5m])`. `go_goroutines` is a gauge. What happens?
+  options:
+  - id: a
+    text: The query returns numbers, but they are not meaningful, and the API adds an info note that the metric might not be a counter.
+    explanation: Correct. `rate()` assumes a counter that only goes up. On a gauge it still runs, but a drop in value is read as a counter reset, so the result is wrong.
+  - id: b
+    text: Prometheus rejects the query with a syntax error.
+    explanation: The query is valid PromQL, so it runs.
+  - id: c
+    text: The query returns the current number of goroutines per second.
+    explanation: A gauge shows a level. `rate()` does not return that level.
+  - id: d
+    text: The query returns the same value as `increase(go_goroutines[5m])`.
+    explanation: "`increase()` is the total growth, not a per-second value, and both are wrong on a gauge."
+  correct_option: a
+  explanation: "`rate()` assumes a counter that only goes up. On a gauge it still runs, but a drop in value is read as a counter reset, so the result is wrong."
+- id: ats020-010-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Aggregate series with `sum by` and `without` to get one value per namespace or per status code
+  source_readings:
+  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  prompt: You need the request rate of `scout` for each HTTP status code across all pods. Which query is correct?
+  options:
+  - id: a
+    text: '`rate(sum by (status) (http_requests_total{namespace="starfleet"})[5m])`'
+    explanation: This is not valid PromQL, and summing counters before `rate()` breaks the reset handling.
+  - id: b
+    text: '`sum by (status) (rate(http_requests_total{namespace="starfleet"}[5m]))`'
+    explanation: Correct. Take the rate of each series first, then aggregate. `by (status)` keeps only the label `status`, so you get one value per status code.
+  - id: c
+    text: '`sum(rate(http_requests_total{namespace="starfleet"}[5m]))`'
+    explanation: This returns one value with no labels, not one per status code.
+  - id: d
+    text: '`sum without (status) (rate(http_requests_total{namespace="starfleet"}[5m]))`'
+    explanation: "`without (status)` removes the status label, so the codes are added together."
+  correct_option: b
+  explanation: Take the rate of each series first, then aggregate. `by (status)` keeps only the label `status`, so you get one value per status code.
+- id: ats020-010-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
+  source_readings:
+  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  prompt: Which query returns the 95th-percentile request duration of `scout` in `starfleet` from the histogram `http_request_duration_seconds`?
+  options:
+  - id: a
+    text: '`histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="starfleet"}[5m])))`'
+    explanation: "`sum` without `by (le)` drops the bucket bounds, so the function has no buckets and returns nothing."
+  - id: b
+    text: '`avg(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{namespace="starfleet"}[5m])))`'
+    explanation: Averaging per-pod percentiles does not give the percentile of the service.
+  - id: c
+    text: '`histogram_quantile(95, sum by (le) (rate(http_request_duration_seconds_bucket{namespace="starfleet"}[5m])))`'
+    explanation: The first argument is a fraction from 0 to 1. `95` is not valid.
+  - id: d
+    text: '`histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{namespace="starfleet"}[5m])))`'
+    explanation: Correct. `histogram_quantile()` needs the bucket rates with the `le` label kept. It takes a fraction between 0 and 1, so `0.95`, and you sum the buckets before the quantile.
+  correct_option: d
+  explanation: "`histogram_quantile()` needs the bucket rates with the `le` label kept. It takes a fraction between 0 and 1, so `0.95`, and you sum the buckets before the quantile."
+- id: ats020-010-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
+  source_readings:
+  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  prompt: A teammate writes `sum by (namespace) (rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))` and gets an empty result. Why?
+  options:
+  - id: a
+    text: The division operator does not work on rates.
+    explanation: Rates can be divided.
+  - id: b
+    text: '`status=~"5.."` is not a valid matcher.'
+    explanation: The matcher is valid and selects `5xx` codes.
+  - id: c
+    text: The two sides have different label sets (`namespace` on the left, none on the right), so no series match.
+    explanation: Correct. Division in PromQL matches series by their labels. Use the same `by (...)` clause on both sides.
+  - id: d
+    text: A ratio needs `increase()` instead of `rate()`.
+    explanation: "`rate()` is fine for a ratio. It gives a per-second value on both sides."
+  correct_option: c
+  explanation: Division in PromQL matches series by their labels. Use the same `by (...)` clause on both sides.
+- id: ats020-010-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Run a query from the command line against the Prometheus HTTP API and read the result with jq
+  source_readings:
+  - sections/section-010/module-02/course-04-running-queries-from-the-command-line.md
+  prompt: You script a check with `curl -s http://127.0.0.1:9090/api/v1/query --data-urlencode 'query=...' | jq '.data.result[0].value[1]'` and want to test that the value is above 0.05. What must the script do?
+  options:
+  - id: a
+    text: Compare the value directly as a number, because the API returns JSON numbers.
+    explanation: The value is a string such as `"0.117"`.
+  - id: b
+    text: Convert the value with `tonumber` first, because the API returns it as a string.
+    explanation: Correct. The API returns each sample value as a string so that `NaN` and `+Inf` survive. Convert it before a numeric comparison. An empty `result` still has `status` equal to `success`.
+  - id: c
+    text: Read `status`, because `success` means the ratio is above 0.05.
+    explanation: "`status` only says that the query ran, not what it returned."
+  - id: d
+    text: Skip the check for an empty `result`, because it means success.
+    explanation: An empty result means no series matched, which is not a pass.
+  correct_option: b
+  explanation: The API returns each sample value as a string so that `NaN` and `+Inf` survive. Convert it before a numeric comparison. An empty `result` still has `status` equal to `success`.
+- id: ats020-010-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write an alerting rule in a PrometheusRule with `expr`, `for`, labels and annotations
+  source_readings:
+  - sections/section-010/module-03/course-01-recording-and-alerting-rules.md
+  prompt: 'A PrometheusRule is created in `starfleet`, but Prometheus does not list its rules, and no error appears. The `ruleSelector` of the Prometheus resource matches `release: kps`. What is the first thing to check?'
+  options:
+  - id: a
+    text: Whether `for` is set to at least `5m`.
+    explanation: "`for` changes when an alert fires, not whether the rule is loaded."
+  - id: b
+    text: Whether the recording rule is placed before the alerting rule.
+    explanation: Order only matters for rules that depend on each other inside a group.
+  - id: c
+    text: Whether Alertmanager has a receiver.
+    explanation: Alertmanager receives alerts after Prometheus loads and evaluates the rule.
+  - id: d
+    text: 'Whether the PrometheusRule carries the label `release: kps`.'
+    explanation: Correct. Like monitors, a PrometheusRule is only read when the label selector of the Prometheus resource matches it, and a rule that does not match is ignored silently.
+  correct_option: d
+  explanation: Like monitors, a PrometheusRule is only read when the label selector of the Prometheus resource matches it, and a rule that does not match is ignored silently.
+- id: ats020-010-q13
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Read an alert's state (inactive, pending, firing) in Prometheus and in Alertmanager
+  source_readings:
+  - sections/section-010/module-03/course-02-the-alert-lifecycle.md
+  prompt: 'An alert has `for: 1m`. The expression has returned a result for 20 seconds. In which state is the alert in Prometheus, and does Alertmanager receive it yet?'
+  options:
+  - id: a
+    text: "`pending`; Alertmanager does not receive it yet."
+    explanation: Correct. The condition is true but has lasted less than `for`, so the alert is `pending`. Prometheus only sends it to Alertmanager when it fires.
+  - id: b
+    text: "`firing`; Alertmanager receives it."
+    explanation: The alert fires only after the condition holds for the whole `for` period.
+  - id: c
+    text: "`inactive`; Alertmanager does not receive it."
+    explanation: The expression returns a result, so the alert is not inactive.
+  - id: d
+    text: "`pending`; Alertmanager receives it and marks it `suppressed`."
+    explanation: "`suppressed` means silenced in Alertmanager. A pending alert is not sent at all."
+  correct_option: a
+  explanation: The condition is true but has lasted less than `for`, so the alert is `pending`. Prometheus only sends it to Alertmanager when it fires.
+- id: ats020-010-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read an alert's state (inactive, pending, firing) in Prometheus and in Alertmanager
+  source_readings:
+  - sections/section-010/module-03/course-02-the-alert-lifecycle.md
+  prompt: "`ScoutHighErrorRatio` shows `firing` in Prometheus, but nobody got a message. What is the best next step?"
+  options:
+  - id: a
+    text: Lower the `for` duration to `0s`.
+    explanation: The alert already fires, so a shorter `for` changes nothing.
+  - id: b
+    text: Delete the PrometheusRule and create it again.
+    explanation: Recreating the rule does not change routing.
+  - id: c
+    text: Read the alert in Alertmanager (`/api/v2/alerts`) and check its state and whether a route matches its labels.
+    explanation: Correct. Firing in Prometheus only means the alert was sent. Alertmanager decides on routing, grouping and silences, so check what Alertmanager shows.
+  - id: d
+    text: Wait for the alert to change to `pending`.
+    explanation: "`pending` comes before `firing`, not after."
+  correct_option: c
+  explanation: Firing in Prometheus only means the alert was sent. Alertmanager decides on routing, grouping and silences, so check what Alertmanager shows.
+- id: ats020-010-q15
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Route alerts by label to a receiver with an AlertmanagerConfig or the Alertmanager configuration
+  source_readings:
+  - sections/section-010/module-03/course-03-routing-alerts-with-alertmanager.md
+  prompt: 'An AlertmanagerConfig in `monitoring` routes `team: frontier` to a webhook. An alert for `team: frontier` fires from a rule in `starfleet`, and the webhook receives nothing. Which cause fits?'
+  options:
+  - id: a
+    text: 'The operator sets `continue: false`, so the alert stops at the root route.'
+    explanation: 'The operator sets `continue: true`, and the real problem is the namespace matcher.'
+  - id: b
+    text: Alertmanager ignores routes with a `team` matcher.
+    explanation: Routes can match any label the alert carries.
+  - id: c
+    text: The webhook receiver must be named `default`.
+    explanation: Receivers can have any name. The operator prefixes it with the namespace and config name.
+  - id: d
+    text: The operator adds a `namespace="monitoring"` matcher to the route, and the alert has `namespace="starfleet"`.
+    explanation: Correct. An AlertmanagerConfig only receives alerts whose `namespace` label equals its own namespace. Put the AlertmanagerConfig in the namespace of the alerts.
+  correct_option: d
+  explanation: An AlertmanagerConfig only receives alerts whose `namespace` label equals its own namespace. Put the AlertmanagerConfig in the namespace of the alerts.
+- id: ats020-010-q16
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Silence an alert for a time window and prove it stops notifying
+  source_readings:
+  - sections/section-010/module-03/course-04-silences-and-inhibition.md
+  prompt: During maintenance you silence `ScoutHighErrorRatio` for 30 minutes. What do you see?
+  options:
+  - id: a
+    text: Prometheus changes the alert to `inactive`, and Alertmanager deletes it.
+    explanation: A silence does not touch Prometheus.
+  - id: b
+    text: The alert stays `firing` in Prometheus, shows as `suppressed` in Alertmanager, and no notification is sent.
+    explanation: Correct. A silence only mutes notifications. Prometheus keeps the alert `firing`, and Alertmanager still tracks it, with the state `suppressed`.
+  - id: c
+    text: The alert shows as `resolved` in Alertmanager and the PrometheusRule is disabled.
+    explanation: The rule keeps working, and the alert is not resolved.
+  - id: d
+    text: Alertmanager stops receiving the alert from Prometheus.
+    explanation: Alertmanager still receives and tracks the alert.
+  correct_option: b
+  explanation: A silence only mutes notifications. Prometheus keeps the alert `firing`, and Alertmanager still tracks it, with the state `suppressed`.
+- id: ats020-010-q17
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Silence an alert for a time window and prove it stops notifying
+  source_readings:
+  - sections/section-010/module-03/course-04-silences-and-inhibition.md
+  prompt: Which silence is safest for muting `ScoutHighErrorRatio` for the `starfleet` team only?
+  options:
+  - id: a
+    text: Matcher `alertname=ScoutHighErrorRatio` only.
+    explanation: A silence with only `alertname` mutes the alert for every namespace and team.
+  - id: b
+    text: Delete the alerting rule and apply it again later.
+    explanation: Deleting the rule hides the problem for everyone and is easy to forget to undo.
+  - id: c
+    text: Matchers `alertname=ScoutHighErrorRatio` and `namespace=starfleet`, with an end time and a comment.
+    explanation: Correct. Match on more than the alert name so other namespaces keep notifying, and set an end time so the silence expires on its own.
+  - id: d
+    text: 'Set `for: 24h` on the alerting rule.'
+    explanation: "`for` delays firing for every namespace and does not mute an alert that already fires."
+  correct_option: c
+  explanation: Match on more than the alert name so other namespaces keep notifying, and set an end time so the silence expires on its own.
+- id: ats020-010-q18
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Prove a scrape works with `up == 1` for every endpoint of the workload
+  source_readings:
+  - sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+  - sections/section-010/module-01/course-04-finding-a-missing-target.md
+  prompt: "`scout` runs two ready pods behind a Service. After you fix a ServiceMonitor, which result proves the scrape works for the whole workload?"
+  options:
+  - id: a
+    text: '`up{namespace="starfleet",job="scout"}` returns two series, each with the value `1`.'
+    explanation: Correct. The proof is one `up` series per endpoint of the workload, each equal to `1`. Two ready pods mean two series.
+  - id: b
+    text: "`kubectl apply` printed `configured`."
+    explanation: "`apply` only says the object was stored."
+  - id: c
+    text: '`up{namespace="starfleet",job="scout"}` returns one series with the value `1`.'
+    explanation: One series means one pod is missing, so the proof is incomplete.
+  - id: d
+    text: The ServiceMonitor status shows no errors.
+    explanation: A ServiceMonitor has no status that reports scrape problems.
+  correct_option: a
+  explanation: The proof is one `up` series per endpoint of the workload, each equal to `1`. Two ready pods mean two series.
+- id: ats020-010-q19
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Write a recording rule and query the new series it creates
+  source_readings:
+  - sections/section-010/module-03/course-01-recording-and-alerting-rules.md
+  prompt: A recording rule named `namespace:http_requests_error_ratio:rate1m` is loaded. An alert must use it. Which alert expression is correct?
+  options:
+  - id: a
+    text: "`record: namespace:http_requests_error_ratio:rate1m > 0.05`"
+    explanation: "`record:` is a field of the rule, not part of an expression."
+  - id: b
+    text: "`namespace:http_requests_error_ratio:rate1m > 0.05`"
+    explanation: Correct. A recording rule stores its result as a normal series under the name in `record`. The alert compares that series with the threshold. `rate()` is for counters, and a fixed value never reflects the real ratio.
+  - id: c
+    text: "`rate(namespace:http_requests_error_ratio:rate1m[5m]) > 0.05`"
+    explanation: The recorded series is already a ratio, not a counter.
+  - id: d
+    text: "`0.06 > 0.05`"
+    explanation: A fixed value does not read the real series.
+  correct_option: b
+  explanation: A recording rule stores its result as a normal series under the name in `record`. The alert compares that series with the threshold. `rate()` is for counters, and a fixed value never reflects the real ratio.

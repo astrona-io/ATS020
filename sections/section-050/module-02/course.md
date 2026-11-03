@@ -1,41 +1,35 @@
 # Diagnose And Fix Broken Platform Components
 
-<!-- astrona:playground -->
-> [!NOTE]
-> This module has a playground — a throwaway environment to run the commands in.
-> ```bash
-> astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-050/module-02/playground
-> ```
+A broken workload shows its failure in its own pod. A broken platform component shows its failure somewhere else. A `kubectl create` fails with an error about a webhook you never touched. A new rule is accepted by the API server and never appears in Prometheus. On the exam these faults cost the most time, because the symptom does not point at the component that caused it.
 
-<!-- TODO(build): opening framing — what this module settles, and the contrast that sharpens its boundary. -->
+This module teaches how to follow a platform symptom back to the component that produces it. You read the error text, name the component that should have done the work, read the object that component owns, and fix the cause without removing the safety it provides. You then prove the fix with the behaviour that was lost, such as a create that works or a Prometheus target that reports `1`.
+
+The module has three parts. **A Webhook Service Without Endpoints** follows an admission webhook error from the API server to a Service that no pod matches. **An Expired Webhook Certificate** reads an `x509` error, checks a certificate with `openssl` and signs a new one. **A Controller Scaled To Zero** finds a stopped Prometheus Operator and ends with a graded lab on all three faults.
 
 ## Learning objectives
 
-- Find a failing admission webhook from the API server error message and fix its Service without deleting it
-- Find an expired webhook serving certificate from the `x509` error text and `openssl`, and replace it
-- Find a stopped or crashing controller from its Deployment, logs and the resources that stop reconciling
-- Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git
-- Prove each fix by the platform behaviour it restores (create succeeds, resource reconciles, sync is Healthy)
+After this module you can:
+
+- Read the error text of a failing admission webhook and name the webhook, the Service and the reason.
+- Fix a webhook Service that has no endpoints by comparing its selector with the pod labels, without deleting the webhook or setting `failurePolicy: Ignore`.
+- Find an expired serving certificate from the `x509` error and `openssl`, sign a new one with the platform CA and restart the webhook server.
+- Find a controller that does not run from its Deployment and events, and explain why the status of its resources can still look healthy.
+- Prove each fix with the behaviour it restores: a create that works, a webhook log line, a target with `up == 1`, a rule loaded in Prometheus.
 
 ## Before you start
 
-<!-- TODO(build): assumed knowledge, and what the playground already provides. -->
+You need to know what a Deployment, a Service and a Secret are, and the commands `kubectl get`, `kubectl describe`, `kubectl logs` and `kubectl exec`. You need `openssl` on your machine. You need to know what a Prometheus target and an alerting rule are.
 
-## Outline
+Your playground is a single-node `kind` cluster running Kubernetes 1.35. A trimmed Prometheus stack is installed in `monitoring`: the Prometheus Operator and one Prometheus. No Alertmanager and no Grafana run, to save memory. The cluster starts broken on purpose, and you fix it step by step in the parts.
 
-<!-- TODO(build): each beat below becomes a section of this module (or a deep-dive part via /astrona-course-deep-dive). Delete this Outline section once written. -->
+| Object | What it is | What is wrong |
+| --- | --- | --- |
+| `starfleet-policy` | A webhook server in `webhook-system` that checks every create of a Deployment in `starfleet` | Its Service has no endpoints, so every create in `starfleet` fails |
+| `outpost-policy` | The same webhook for the namespace `outpost` | Its serving certificate expired, so every create in `outpost` fails |
+| `kps-operator` | The Prometheus Operator in `monitoring` | It is scaled to zero, so the ServiceMonitor and PrometheusRule for `scout` never reach Prometheus |
+| `shuttle`, `drifter` | Client pods with `curl` in `starfleet` and `outpost` | Nothing. You send test requests from them |
+| `scout` | `podinfo` 6.15.0, port `9898` | Nothing. It is the workload that Prometheus should scrape |
 
-- How platform components fail differently from workloads — the symptom shows up somewhere else
-- Admission webhooks — failurePolicy, the error text, and the Service behind it
-- Controllers — reconcile loops that stop, leader election, status conditions
-- GitOps sync failures — OutOfSync, Degraded, sync errors
-- Certificates — the serving certificate behind a webhook, its expiry, and the `caBundle` the API server trusts
+Launch your playground now, and keep it running next to you while you read the parts:
 
-## Diagrams planned
-
-<!-- TODO(build): mermaid `sequence` — kubectl create, API server calls webhook, webhook Service has no endpoints, request is rejected -->
-<!-- TODO(build): mermaid `flowchart` — Symptom to component to the status field that names the cause -->
-
-<!-- playground provides: kind cluster with Argo CD with an Application backed by an in-cluster Git repository (Gitea as plumbing), a trimmed Prometheus stack, and two small validating webhooks. Starts broken on purpose: one webhook's Service selector matches no pod (creates in `starfleet` fail), the other webhook serves an expired certificate (creates in `outpost` fail with an `x509` error), the Prometheus Operator is scaled to zero so a new PrometheusRule never reaches Prometheus, and the Application points at a path that does not exist so it is stuck. Each fault is independent so the reader can fix them in any order. -->
-
-<!-- module section-050/module-02 (Module 2) — stub written by /astrona-course-domain-scaffold, prose written by /astrona-course-domain-build. -->
+<!-- astrona:playground -->

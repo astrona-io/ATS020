@@ -49,4 +49,4 @@ Makes the reader able to show metrics on a Grafana dashboard that is stored as c
 
 ## Ready for Assessment?
 
-*   **[Take the Section 020 Knowledge Check](./quiz.md)**
+*   **[Take the Section 020 Knowledge Check](./quiz.yaml)**
