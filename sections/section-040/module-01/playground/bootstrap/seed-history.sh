@@ -8,6 +8,16 @@
 # time some minutes before the push, so lead time is not zero. Commits 3 and 7
 # use an image tag that does not exist (a bad change). Commits 4 and 8 put the
 # working tag back (the restore).
+#
+# The script makes the history deterministic on a slow or loaded machine:
+#   - A good commit gets a long progressDeadlineSeconds (300), so a slow but
+#     healthy rollout stays Progressing and never turns Degraded by accident.
+#     Only the two bad commits use 30 seconds, so exactly two Degraded
+#     episodes exist.
+#   - After each sync the script waits until Prometheus has scraped the new
+#     value of argocd_app_sync_total (and, for a bad commit, the Degraded
+#     health). A fixed sleep could let two syncs pass between two scrapes, so
+#     the first sample of the counter would be 2 and increase() would be lower.
 set -euo pipefail
 
 GITEA_USER="starfleet"
@@ -23,9 +33,9 @@ if [ "${1:-}" = "init" ]; then
   exit 0
 fi
 
-# push_commit <message> <minutes before the push> <image tag> <ui message> <replicas>
+# push_commit <message> <minutes before the push> <image tag> <ui message> <replicas> <deadline seconds>
 push_commit() {
-  local message="$1" minutes="$2" tag="$3" ui="$4" replicas="$5"
+  local message="$1" minutes="$2" tag="$3" ui="$4" replicas="$5" deadline="$6"
   in_gitea "cd /tmp/work && mkdir -p scout && cat > scout/scout.yaml <<'YAML'
 apiVersion: apps/v1
 kind: Deployment
@@ -36,7 +46,7 @@ metadata:
     app: scout
 spec:
   replicas: $replicas
-  progressDeadlineSeconds: 30
+  progressDeadlineSeconds: $deadline
   selector:
     matchLabels:
       app: scout
@@ -104,13 +114,41 @@ wait_for_sync() {
 
 GOOD="6.15.0"
 BAD="6.15.0-missing"
+
+# prometheus_has <PromQL>: true when the instant query returns a series.
+prometheus_has() {
+  local encoded body
+  encoded="$(jq -rn --arg q "$1" '$q|@uri')"
+  body="$(kubectl get --raw "/api/v1/namespaces/monitoring/services/kps-prometheus:9090/proxy/api/v1/query?query=${encoded}" 2>/dev/null || true)"
+  [ "$(printf '%s' "$body" | jq -r '.data.result | length' 2>/dev/null || echo 0)" -gt 0 ] 2>/dev/null
+}
+
+# wait_for_scrape <number of syncs so far> <expected health>
+wait_for_scrape() {
+  local syncs="$1" want="$2"
+  for _ in $(seq 1 90); do
+    if prometheus_has "sum(argocd_app_sync_total{name=\"scout\",phase=\"Succeeded\"}) >= $syncs"; then
+      if [ "$want" != "Degraded" ] || prometheus_has "argocd_app_info{name=\"scout\",health_status=\"Degraded\"}"; then
+        return 0
+      fi
+    fi
+    sleep 4
+  done
+  echo "[seed] ERROR: Prometheus never showed $syncs syncs (health $want)" >&2
+  return 1
+}
+
+SYNCS=0
+# step <message> <minutes before the push> <image tag> <ui message> <replicas> <expected health>
 step() {
   echo "[seed] $1"
-  local sha
-  sha="$(push_commit "$1" "$2" "$3" "$4" "$5")"
+  local sha deadline=300
+  [ "$3" = "$BAD" ] && deadline=30
+  sha="$(push_commit "$1" "$2" "$3" "$4" "$5" "$deadline")"
   wait_for_sync "$sha" "$6"
-  # Let Prometheus scrape the new counters before the next change.
-  sleep 16
+  SYNCS=$((SYNCS + 1))
+  # Let Prometheus scrape the new counter (and the Degraded health) before the next change.
+  wait_for_scrape "$SYNCS" "$6"
 }
 
 step "Start scout 6.15.0"                      45 "$GOOD" "Welcome aboard" 1 Healthy

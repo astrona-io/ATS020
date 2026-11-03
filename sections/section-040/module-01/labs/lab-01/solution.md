@@ -96,7 +96,7 @@ promql 'dora:change_failure_rate:ratio6h'
 {"metric":{"__name__":"dora:change_failure_rate:ratio6h"},"value":"0.2222222222222222"}
 ```
 
-Two failed deployments out of nine counted deployments give `0.22`. Grade your work with `astrona submit`.
+Two failed deployments out of nine counted deployments give `0.22`. If `increase()` counts eight deployments, the rate is `0.25`; both are accepted. Grade your work with `astrona submit`.
 
 ## What the grader rejects
 

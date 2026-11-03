@@ -134,23 +134,22 @@ items:
   kind: capstone
   what: 'capstone lab: Distributed Tracing Capstone'
   status: done
-  note: 'written; tested: unsolved fails 0/5 as expected, reference solution never run (UNTESTED)'
+  note: 'written; unsolved fails 0/5 as expected. Static fix (not run, UNTESTED): solution/apply.sh no longer guesses the span name; it reads the slow scout span from the Jaeger API at solve time (the leaf span containing delay, delayHandler). validate-slow-call.sh now needs the exact name of a slow scout span from Jaeger; solution.md shows how to list the real names.'
 - key: section-040/module-01/playground
   kind: playground
   what: 'playground for module 1: Measure Delivery With DORA Metrics'
   status: done
-  note: 'written; booted, but numbers (increase()=8, failure rate 0.375) differ from course text (9, 0.22):
-    RE-VERIFY'
+  note: 'written; booted once, numbers differed (increase()=8, rate 0.375, 3 Degraded episodes). Static fix (UNTESTED, seed not rerun): seed-history.sh now gives good commits progressDeadlineSeconds 300 (only the two bad commits use 30, so a slow healthy rollout cannot turn Degraded) and waits until Prometheus has scraped each sync (and the Degraded health) instead of a fixed sleep. Same seed copied into the module lab and the capstone.'
 - key: section-040/module-01/course
   kind: course
   what: 'chapter for module 1: Measure Delivery With DORA Metrics'
   status: done
-  note: 'written: landing + 4 parts + summary; numbers need re-verification against playground'
+  note: 'written: landing + 4 parts + summary; text now says increase() gives 8 or 9 depending on the first scrape, rate 0.22 or 0.25; needs a real rerun to confirm (UNTESTED)'
 - key: section-040/module-01/lab-01
   kind: lab
   what: module lab 01 for section-040 module 01
   status: done
-  note: written; never run (UNTESTED)
+  note: 'written; never run (UNTESTED). Validator range 0.15-0.30 kept (covers 2/8 and 2/9; a third Degraded episode fails); comments, messages and solution.md say eight or nine deployments.'
 - key: section-040/module-02/playground
   kind: playground
   what: 'playground for module 2: Measure Service Levels And Resource Efficiency'
@@ -180,7 +179,7 @@ items:
   kind: capstone
   what: 'capstone lab: Platform Efficiency Capstone'
   status: done
-  note: written; lab never run (UNTESTED)
+  note: 'written; lab never run (UNTESTED). Seed copy updated like the module playground; change failure rate comments and messages say eight to ten counted deployments; deployments range 8-11 unchanged.'
 - key: section-050/module-01/playground
   kind: playground
   what: 'playground for module 1: Triage And Fix Failing Workloads'

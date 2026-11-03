@@ -99,9 +99,13 @@ Open Jaeger:
 kubectl -n observability port-forward svc/jaeger 16686:16686
 ```
 
-Open `http://localhost:16686`, choose the service `relay` and sort the traces by duration. Open the longest trace. The span of `relay` is about one second long, and its child span from `scout` is almost as long. The time is spent in `scout`, in the span for the `/delay` path. Copy the exact span name from Jaeger.
+Open `http://localhost:16686`, choose the service `relay` and sort the traces by duration. Open the longest trace. The span of `relay` is about one second long, and its child span from `scout` is almost as long. Open the trace and click through the spans. Two spans of `scout` last about one second: the server span for the request (its name starts with `GET /delay`) and, below it, a step that has no child span of its own. The step with no child holds the time. Do not type a span name from memory: read it in the Jaeger interface, or list the names of the slow spans of `scout` with the API:
 
-Record it, with your span name as the value of `operation`:
+```sh
+kubectl get --raw "/api/v1/namespaces/observability/services/jaeger:16686/proxy/api/v3/traces?query.service_name=relay&query.duration_min=500ms&query.start_time_min=$(date -u -v-10M +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -d '10 minutes ago' +%Y-%m-%dT%H:%M:%SZ)&query.start_time_max=2100-01-01T00:00:00Z" | grep -o '"name":"[^"]*delay[^"]*"' | sort -u
+```
+
+The grader accepts either span name, as long as it is spelled exactly as Jaeger shows it. Record it, with the span name as the value of `operation`:
 
 ```sh
 kubectl -n starfleet create configmap slow-call --from-literal=service=scout --from-literal=operation="<span name from Jaeger>"

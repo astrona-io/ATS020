@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Grader: the series dora:deployments:increase6h counts the deployments of
-# the Application scout. Argo CD synced ten times and increase() sees nine of
-# them, so the value must be between 8 and 11. The loaded rule must read the
+# the Application scout. Argo CD synced ten times and increase() sees eight or
+# nine of them (it depends on the first scrape and on extrapolation), so the
+# value must be between 8 and 11. The loaded rule must read the
 # sync counter and must not hold a typed-in number. Retries, because a new
 # rule reaches Prometheus after about 60 seconds.
 set -uo pipefail

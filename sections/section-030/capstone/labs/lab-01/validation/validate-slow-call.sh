@@ -2,8 +2,9 @@
 # Grader: the learner read Jaeger and recorded the slow call. The ConfigMap
 # `slow-call` in `starfleet` must name the service that holds the time
 # (`scout`) and an operation that contains `delay`. The answer is checked
-# against Jaeger: the longest span of a recent relay trace must belong to
-# the service the learner named.
+# against Jaeger: the operation must be the exact name of a span of `scout`
+# that contains `delay` and lasts about one second in a recent relay trace.
+# That accepts both the server span (the whole request) and the inner step.
 set -uo pipefail
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
@@ -18,7 +19,7 @@ for attempt in $(seq 1 24); do
   BODY="$(kubectl get --raw "/api/v1/namespaces/observability/services/jaeger:16686/proxy/api/v3/traces?query.service_name=relay&query.start_time_min=${START}&query.start_time_max=2100-01-01T00:00:00Z&query.search_depth=40" 2>/dev/null || true)"
   FOUND="$(printf '%s' "$BODY" | python3 -c '
 import json, sys
-best = (0, "", "")
+names = set()
 for line in sys.stdin.read().splitlines():
     try:
         doc = json.loads(line)
@@ -32,12 +33,16 @@ for line in sys.stdin.read().splitlines():
                 if s["name"] == "GET /readyz":
                     continue
                 d = int(s["endTimeUnixNano"]) - int(s["startTimeUnixNano"])
-                if svc == "scout" and "delay" in s["name"] and d > best[0]:
-                    best = (d, svc, s["name"])
-print(best[2] if best[0] > 900_000_000 else "")' 2>/dev/null)"
+                if svc == "scout" and "delay" in s["name"] and d > 900_000_000:
+                    names.add(s["name"])
+for name in sorted(names):
+    print(name)' 2>/dev/null)"
   if [ -n "$FOUND" ]; then
-    echo "PASS: slow-call names scout and '$OPERATION'; Jaeger holds a scout span '$FOUND' of about one second"
-    exit 0
+    if printf '%s\n' "$FOUND" | grep -qxF -- "$OPERATION"; then
+      echo "PASS: slow-call names scout and '$OPERATION'; Jaeger holds a scout span with that name of about one second"
+      exit 0
+    fi
+    fail "slow-call says the slow operation is '$OPERATION'; Jaeger shows these slow scout spans: $(printf '%s' "$FOUND" | tr '\n' ';'). Copy one span name exactly"
   fi
   sleep 5
 done

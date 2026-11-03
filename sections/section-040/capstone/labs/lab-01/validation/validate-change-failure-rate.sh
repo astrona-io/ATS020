@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Grader: the series dora:change_failure_rate:ratio6h returns the real change
-# failure rate of scout: two failed deployments out of nine counted ones, so
-# about 0.22. It must be above 0.15 and below 0.30. Zero (a rule that counts
+# failure rate of scout: two failed deployments out of eight to ten counted
+# ones (increase() depends on the first scrape), so 0.20 to 0.25. It must be above 0.15 and below 0.30. Zero (a rule that counts
 # failed sync phases) and one both fail. The loaded rules that make the rate
 # must read the Degraded health from argocd_app_info, must not rely on the
 # sync phases Failed or Error and must not use vector().
@@ -23,7 +23,7 @@ for attempt in $(seq 1 36); do
 done
 [ -n "$VALUE" ] || fail "the series dora:change_failure_rate:ratio6h has no data"
 awk -v v="$VALUE" 'BEGIN {exit !(v > 0.15 && v < 0.30)}' \
-  || fail "dora:change_failure_rate:ratio6h is $VALUE, expected a value between 0.15 and 0.30 (two failed deployments out of nine)"
+  || fail "dora:change_failure_rate:ratio6h is $VALUE, expected a value between 0.15 and 0.30 (two failed deployments out of eight to ten counted ones)"
 
 ALL="$(prom 'rules?type=record' | jq -r '[.data.groups[].rules[] | select(.name | startswith("dora:")) | .query] | join(" ")' | tr -d ' ')"
 case "$ALL" in *argocd_app_info*) ;; *) fail "no dora: rule reads argocd_app_info";; esac

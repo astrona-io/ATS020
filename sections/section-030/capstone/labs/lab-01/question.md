@@ -11,7 +11,7 @@ The platform team wants distributed tracing. Jaeger already runs in the namespac
 1. Create an OpenTelemetryCollector named `otel` in the namespace `observability`, in `deployment` mode. It receives OTLP on ports `4317` and `4318`, batches the spans and exports them to Jaeger.
 2. `scout` sends its spans to the wrong port. Find out why they do not arrive and fix the exporter endpoint of `scout`. It must use OTLP over gRPC.
 3. Instrument `relay` without a code change. Create an Instrumentation for Node.js, annotate `relay` so that the Operator injects the agent, and make sure the trace context travels from `relay` to `scout`.
-4. Open a slow trace in Jaeger and find the span that holds the time. Record the answer in a ConfigMap named `slow-call` in the namespace `starfleet`, with the key `service` (the service that owns the slowest span) and the key `operation` (the name of that span).
+4. Open a slow trace in Jaeger and find the span that holds the time. Record the answer in a ConfigMap named `slow-call` in the namespace `starfleet`, with the key `service` (the service that owns the slowest span) and the key `operation` (the name of that span, spelled exactly as Jaeger shows it).
 
 ## Constraints
 

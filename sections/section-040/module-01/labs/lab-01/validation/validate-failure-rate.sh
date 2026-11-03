@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Grader: Prometheus returns the change failure rate that the delivery
-# history holds. Two of the nine counted deployments went Degraded, so the
-# ratio is about 0.22. It must be above 0.15 and below 0.30. Zero (the faulty
+# history holds. Two deployments went Degraded. increase() counts eight or
+# nine of the ten syncs (it depends on the first scrape and on extrapolation),
+# so the ratio is 0.25 or 0.22. It must be above 0.15 and below 0.30; a third
+# Degraded episode (0.33 or more) fails on purpose. Zero (the faulty
 # rule) and one (a rule that counts everything) both fail. Retries, because a
 # changed rule reaches Prometheus after about 60 seconds and is then
 # evaluated every 15 seconds.
@@ -22,4 +24,4 @@ for attempt in $(seq 1 36); do
   fi
   sleep 5
 done
-fail "dora:change_failure_rate:ratio6h is '${VALUE:-no data}', expected a value between 0.15 and 0.30 (two failed deployments out of nine)"
+fail "dora:change_failure_rate:ratio6h is '${VALUE:-no data}', expected a value between 0.15 and 0.30 (two failed deployments out of eight to ten counted ones)"

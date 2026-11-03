@@ -45,7 +45,7 @@ promql 'increase(argocd_app_sync_total{name="scout",phase="Succeeded"}[6h])'
 {"metric":{"name":"scout","phase":"Succeeded"},"value":"9.092066666666666"}
 ```
 
-The result is `9.09`, not `10`. Two things cause it. First, the series starts when Prometheus first sees it, with a value of `1` after the first sync, so Prometheus sees growth from `1` to `10`, which is `9`. It has no earlier sample at `0`. Second, `increase()` extrapolates the growth to the edges of the window, which adds a small fraction. The value also changes a little each time you run the query, because the window moves.
+The result is `9.09`, not `10`. Two things cause it. First, the series starts when Prometheus first sees it, with a value of `1` after the first sync, so Prometheus sees growth from `1` to `10`, which is `9`. It has no earlier sample at `0`. Second, `increase()` extrapolates the growth to the edges of the window, which adds a small fraction. The value also changes a little each time you run the query, because the window moves. Your number can differ from this output: `increase()` works only with the samples Prometheus holds. If the first scrape happened after the second sync, the first sample would be `2` and the result would be about `8`. The playground waits for a scrape after every sync, so expect a value from `9` to `9.5` here.
 
 For a count of whole events, wrap the result in `round()`. Add `sum()` to remove the labels. Without the `name` filter, `sum()` would also add the deployments of every Application into one number:
 
@@ -57,7 +57,7 @@ promql 'round(sum(increase(argocd_app_sync_total{name="scout",phase="Succeeded"}
 {"metric":{},"value":"9"}
 ```
 
-The result is `9` deployments in the window. It is one lower than the counter, for the reason above. In a real platform the counter has existed for weeks, so the first sample no longer matters. The same query with `[7d]` then gives deployments per week, and `[1d]` gives deployments per day.
+The result is `9` deployments in the window. It is one lower than the counter, for the reason above. Treat the number as `9`, give or take one, and not as an exact count. In a real platform the counter has existed for weeks, so the first sample no longer matters. The same query with `[7d]` then gives deployments per week, and `[1d]` gives deployments per day.
 
 The `phase="Succeeded"` filter matters. Without it, the query counts syncs that failed to apply, which are attempts and not deployments.
 
@@ -99,7 +99,7 @@ promql 'dora:deployments:increase6h'
 
 The new series `dora:deployments:increase6h` holds `9`. If the query returns nothing, wait another minute and run it again. The name follows the convention `level:metric:operations`: the part before the first colon says what the series aggregates, the middle says which metric it comes from, and the last says the operation.
 
-You can now count deployments from the sync counter and keep the count as a series. The metric says nothing about whether those nine deployments worked. Two of them did not, and the next part shows that the sync counter cannot find them.
+You can now count deployments from the sync counter and keep the count as a series. The metric says nothing about whether those deployments worked. Two of them did not, and the next part shows that the sync counter cannot find them.
 
 ## Common pitfalls
 

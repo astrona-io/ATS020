@@ -109,7 +109,7 @@ promql 'dora:change_failure_rate:ratio6h'
 {"metric":{"__name__":"dora:change_failure_rate:ratio6h"},"value":"0.2222222222222222"}
 ```
 
-The change failure rate is `0.22`: two failures out of nine counted deployments. The count is nine and not ten because `increase()` sees the counter grow from `1` to `10`, and it has no sample at `0`. If the query returns nothing, wait another minute. 
+The change failure rate is `0.22`: two failures out of nine counted deployments. The count is nine and not ten because `increase()` sees the counter grow from `1` to `10`, and it has no sample at `0`. If a scrape was late and the counter started at `2`, the count is eight and the rate is `0.25`. Both values are correct for the samples Prometheus holds, so read the rate as about `0.2` to `0.25`. A rate near `0.33` or higher means a third deployment went `Degraded`, and that is a different problem: the seed history has exactly two bad commits. If the query returns nothing, wait another minute.
 
 You can now measure the change failure rate and you know why the sync phase cannot do it. Two deployments failed, and the health gauge recorded both. The time-based metrics are still open: how long a change waits before it runs, and how long a failure lasts.
 
