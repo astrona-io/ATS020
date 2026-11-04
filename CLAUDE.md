@@ -234,9 +234,11 @@ section is only true for this one.
   means Prometheus (with the Prometheus Operator and Alertmanager), Grafana,
   OpenTelemetry, Jaeger, Argo CD and Flux, and Kubernetes itself. Any other
   tool (Helm, cert-manager, metrics-server, Gitea) is plumbing: a playground
-  may install it, but no page teaches it. There is no Loki and no LogQL in
-  this course; logs are collected and processed with the OpenTelemetry
-  Collector and counted into Prometheus metrics.
+  may install it, but no page teaches it. The one exception is Loki with
+  LogQL, taught in one compact module in section 020 because the CNPE
+  simulator tests it (user decision, 2026-11-04). Elsewhere, logs are
+  collected and processed with the OpenTelemetry Collector and counted into
+  Prometheus metrics.
 - **The sections:** the order is collect first, then show, then trace, then
   measure the platform, then fix it. Each section stands on its own.
 
