@@ -1,6 +1,14 @@
 # Solution
 
-Prometheus shows no `scout` target because of three separate mistakes in the ServiceMonitor `scout`. The first hides the whole object, the second drops every endpoint, and the third makes the target fail with an error. You find them in this order, because each one hides the next. Prometheus needs about a minute to read a changed monitor, so wait before each check. After each fix you can run `astrona submit` to see the checks change.
+Prometheus shows no `scout` target because of three separate mistakes in the ServiceMonitor `scout`. The first hides the whole object, the second drops every endpoint, and the third makes the target fail with an error. You find them in this order, because each one hides the next. Prometheus needs about a minute to read a changed monitor, so wait before each check.
+
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-010/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 ## Find the first mistake
 
@@ -131,7 +139,13 @@ scout	scout-674cfb4855-776xt	1
 scout	scout-674cfb4855-xcwdj	1
 ```
 
-Both targets are `up` and both `up` series are `1`. Grade your work with `astrona submit`.
+Both targets are `up` and both `up` series are `1`.
+
+Press Ctrl-C to stop the watch, then grade your work once:
+
+```sh
+astrona submit -c sections/section-010/module-01/labs/lab-01
+```
 
 ## What the grader rejects
 

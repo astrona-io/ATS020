@@ -1,6 +1,14 @@
 # Solution
 
-Solve this lab on `terminal`. The three objects have three independent faults. The ServiceMonitor `scout` has the wrong label and the wrong selector, so Prometheus has no target. The PrometheusRule `scout` matches a status that no request has and compares the ratio with `5` instead of `0.05`, and it waits ten minutes. The AlertmanagerConfig `frontier` routes on the wrong label and posts to the wrong port. Fix them in the order below, because each fix makes the next result visible. A changed object reaches Prometheus and Alertmanager after about a minute, so wait before each check. After each step you can run `astrona submit` to see which checks turn green.
+Solve this lab on `terminal`. The three objects have three independent faults. The ServiceMonitor `scout` has the wrong label and the wrong selector, so Prometheus has no target. The PrometheusRule `scout` matches a status that no request has and compares the ratio with `5` instead of `0.05`, and it waits ten minutes. The AlertmanagerConfig `frontier` routes on the wrong label and posts to the wrong port. Fix them in the order below, because each fix makes the next result visible. A changed object reaches Prometheus and Alertmanager after about a minute, so wait before each check.
+
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-010/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 ## Step 1: Get scout scraped
 
@@ -178,6 +186,8 @@ frontier/frontier/frontier-webhook firing ScoutHighErrorRatio namespace=frontier
 The receiver name starts with `frontier/frontier/` because the Prometheus Operator adds the namespace of the AlertmanagerConfig to the name. The check `alert-delivered` passes.
 
 ## Step 4: Submit
+
+Press Ctrl-C to stop the watch, then submit once:
 
 ```sh
 astrona submit -c sections/section-010/capstone/labs/lab-01

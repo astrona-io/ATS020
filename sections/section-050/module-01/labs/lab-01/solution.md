@@ -2,6 +2,14 @@
 
 The four pods fail for four different reasons. `scout` asks for a node label that no node has, so the scheduler cannot place it. `probe` has a liveness probe on a port the server does not open, so the kubelet restarts it. `cargo` has a memory limit that is too low, so the kernel stops it. `beacon` names an image tag that does not exist, so the kubelet cannot pull it.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-050/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Read the state of the pods
 
 List the pods:
@@ -55,13 +63,7 @@ kubectl -n starfleet patch deploy scout --type=json \
   -p '[{"op":"remove","path":"/spec/template/spec/nodeSelector"}]'
 ```
 
-Submit to check:
-
-```sh
-astrona submit -c sections/section-050/module-01/labs/lab-01
-```
-
-The check `scout-running` now passes. The others still fail.
+The watch terminal now shows the check `scout-running` passing. The others still fail.
 
 ## Step 2: Fix probe
 
@@ -137,7 +139,7 @@ for target in scout:9898 probe:8080 cargo:8080 beacon:9898; do
 done
 ```
 
-Each line must end in `200`. Then submit:
+Each line must end in `200`. Press Ctrl-C to stop the watch, then submit once:
 
 ```sh
 astrona submit -c sections/section-050/module-01/labs/lab-01

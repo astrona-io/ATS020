@@ -2,6 +2,14 @@
 
 Solve this lab on `terminal`. Every value below is calculated by Prometheus from the data of the lab, so read your own results and compare them with the ranges in the task.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-040/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: Save the rules
 
 Save this as `platform-efficiency.yaml`. The full file is in `solution/solution.yaml`.
@@ -78,10 +86,10 @@ kubectl -n starfleet set resources deployment/beacon --requests=cpu=10m,memory=6
 kubectl -n starfleet rollout status deployment/beacon
 ```
 
-Then check:
+Then press Ctrl-C to stop the watch and submit once:
 
 ```sh
 astrona submit
 ```
 
-All six checks pass after the alert has been firing for two minutes.
+The watch terminal shows all six checks passing after the alert has been firing for two minutes.

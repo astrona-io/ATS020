@@ -2,6 +2,14 @@
 
 The three failures are independent. The Service `starfleet-policy` sends traffic to port `8444`, and the webhook server listens on `8443`, so the API server gets `connection refused`. The serving certificate of `outpost-policy` ended on 2025-01-08, so the API server rejects it. The Prometheus Operator is scaled to zero, so the ServiceMonitor and the PrometheusRule never reach Prometheus. Fix them in any order.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-050/module-02/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Step 1: Fix the Service starfleet-policy
 
 Create a Deployment in `starfleet` and read the error:
@@ -73,13 +81,7 @@ POST /validate?timeout=5s uid=adb36306-5278-4978-9246-2e38824c7e0d allowed
 deployment.apps "test" deleted from starfleet namespace
 ```
 
-Submit to check:
-
-```sh
-astrona submit -c sections/section-050/module-02/labs/lab-01
-```
-
-The check `starfleet-creates` now passes. The checks for `outpost` and `scout` still fail.
+The watch terminal now shows the check `starfleet-creates` passing. The checks for `outpost` and `scout` still fail.
 
 ## Step 2: Replace the certificate of outpost-policy
 
@@ -152,7 +154,7 @@ deployment.apps/test created
 deployment.apps "test" deleted from outpost namespace
 ```
 
-Submit again. The check `outpost-creates` now passes.
+The watch terminal now shows the check `outpost-creates` passing.
 
 ## Step 3: Bring the Prometheus Operator back
 
@@ -186,7 +188,7 @@ deployment "kps-operator" successfully rolled out
 
 Wait about a minute for Prometheus to load the configuration, then repeat the two queries from the start of this step. The first answer returns the series with the value `"1"`, and the second lists the rule `ScoutDown`.
 
-Submit a last time. All four checks pass.
+The watch terminal shows all four checks passing. Press Ctrl-C to stop the watch, then submit once:
 
 ```sh
 astrona submit -c sections/section-050/module-02/labs/lab-01

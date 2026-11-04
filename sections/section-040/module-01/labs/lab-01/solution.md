@@ -2,6 +2,14 @@
 
 The change failure rate is `0` because the rule for the failed deployments counts the wrong signal. It counts sync operations that ended in the phase `Failed` or `Error`. Argo CD never records one for a bad image tag, because it applied the manifest successfully. The failure shows in the health status of the Application instead.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-040/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Find the fault
 
 Open a second terminal and leave a port-forward to Prometheus running:
@@ -96,7 +104,13 @@ promql 'dora:change_failure_rate:ratio6h'
 {"metric":{"__name__":"dora:change_failure_rate:ratio6h"},"value":"0.2222222222222222"}
 ```
 
-Two failed deployments out of nine counted deployments give `0.22`. If `increase()` counts eight deployments, the rate is `0.25`; both are accepted. Grade your work with `astrona submit`.
+Two failed deployments out of nine counted deployments give `0.22`. If `increase()` counts eight deployments, the rate is `0.25`; both are accepted.
+
+Press Ctrl-C to stop the watch, then grade your work once:
+
+```sh
+astrona submit -c sections/section-040/module-01/labs/lab-01
+```
 
 ## What the grader rejects
 

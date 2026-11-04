@@ -1,6 +1,14 @@
 # Solution
 
-This walkthrough finds why `log_error_lines_total` is missing its `probe` labels in Prometheus, and fixes both faults. A DaemonSet is a workload that runs one pod on every node. Here that pod is the Collector, which reads the container log files and exports a metric. Run each step, then run `astrona submit -c sections/section-020/module-02/labs/lab-01` to see which checks pass.
+This walkthrough finds why `log_error_lines_total` is missing its `probe` labels in Prometheus, and fixes both faults. A DaemonSet is a workload that runs one pod on every node. Here that pod is the Collector, which reads the container log files and exports a metric. Run each step.
+
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-020/module-02/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 ## Step 1: Look at what exists
 
@@ -161,6 +169,12 @@ You should see a value that rises. Your numbers will differ:
 ```
 
 The value grows by about 8 in 30 seconds, because `probe` logs one `level=ERROR` line every 4 seconds. The labels `k8s_namespace_name` and `k8s_deployment_name` are there because the `k8s_attributes` processor can read pods now.
+
+The watch terminal shows the checks passing. Press Ctrl-C to stop the watch, then submit once:
+
+```sh
+astrona submit -c sections/section-020/module-02/labs/lab-01
+```
 
 ## Wrong fixes the grader rejects
 

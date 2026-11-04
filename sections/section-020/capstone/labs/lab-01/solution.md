@@ -1,6 +1,14 @@
 # Solution
 
-Work in order. After each step run `astrona submit` and read which checks still fail. A new ServiceMonitor reaches Prometheus after about a minute, so wait before you decide a fix did not work.
+Work in order. A new ServiceMonitor reaches Prometheus after about a minute, so wait before you decide a fix did not work.
+
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-020/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 ## Step 1: Permission and Collector
 
@@ -150,4 +158,8 @@ The ConfigMap `dashboard-outpost-overview` has two faults:
 1. It has no label `grafana_dashboard: "1"`, so the Grafana sidecar ignores it. Add the label.
 2. The panel `Error log lines` filters on `k8s_deploy="probe"`. The label that the Collector adds is `k8s_deployment_name`. Change the expression to use `k8s_deployment_name="probe"`.
 
-Apply the corrected ConfigMap and wait a few seconds. Run `astrona submit`. All six checks must pass.
+Apply the corrected ConfigMap and wait a few seconds. The watch terminal shows all six checks passing. Press Ctrl-C to stop the watch, then submit once:
+
+```sh
+astrona submit -c sections/section-020/capstone/labs/lab-01
+```

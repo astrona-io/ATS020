@@ -13,11 +13,13 @@ then save five traces to a file. Jaeger stays untouched. The third workload,
 
 ## The feedback loop
 
-Run grading from the host terminal where you started the lab:
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-01/labs/lab-02
+astrona submit --watch --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-01/labs/lab-02
 ```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 Before you change anything, expect `delay-reduced`, `capacity-increased`,
 `export-count` and `export-live` to fail. Nothing is changed yet, and the file
@@ -69,7 +71,7 @@ kubectl -n starfleet rollout status deployment/scout --timeout=180s
 Kubernetes replaces the pod, because the pod template changed. Jaeger keeps the
 older traces, so the service still has them after the rollout.
 
-**Run the check:** rerun `astrona submit`. `delay-reduced` should pass.
+**Run the check:** the watch terminal shows `delay-reduced` passing.
 
 ## Step 3: Scale probe
 
@@ -84,7 +86,7 @@ kubectl -n starfleet get deployments scout probe shuttle
 Look for three ready `probe` replicas and one ready replica each for `scout` and
 `shuttle`.
 
-**Run the check:** rerun `astrona submit`. `capacity-increased` should pass.
+**Run the check:** the watch terminal shows `capacity-increased` passing.
 
 ## Step 4: Export exactly five traces
 
@@ -106,7 +108,8 @@ jq -r '[.result.resourceSpans[].resource.attributes[] | select(.key == "service.
 The first command must print `5`, and the second must print only `scout`. If the
 first prints less than `5`, wait a few seconds and run the export again.
 
-**Run the check:** all four checks should now pass:
+**Run the check:** the watch terminal shows all four checks passing. Press Ctrl-C to
+stop the watch, then submit once:
 
 ```sh
 astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-01/labs/lab-02

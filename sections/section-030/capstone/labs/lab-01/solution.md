@@ -1,6 +1,14 @@
 # Solution
 
-Work in order. After each step run `astrona submit` and read which checks still fail. Telemetry arrives late, so wait about a minute after a fix before you look in Jaeger.
+Work in order. Telemetry arrives late, so wait about a minute after a fix before you look in Jaeger.
+
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-030/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 ## Step 1: Create the Collector
 
@@ -111,4 +119,8 @@ The grader accepts either span name, as long as it is spelled exactly as Jaeger 
 kubectl -n starfleet create configmap slow-call --from-literal=service=scout --from-literal=operation="<span name from Jaeger>"
 ```
 
-Run `astrona submit`. All five checks must pass.
+The watch terminal shows all five checks passing. Press Ctrl-C to stop the watch, then submit once:
+
+```sh
+astrona submit -c sections/section-030/capstone/labs/lab-01
+```

@@ -2,6 +2,14 @@
 
 The four faults are independent. `cargo` has a memory limit of `48Mi` and the process holds about `150Mi`, so the kernel stops it. `beacon` names the image tag `v6.15.0`, which does not exist. `probe` has a liveness probe on port `8081`, and the server listens on `8080`. The Service `starfleet-policy` selects pods with the label `app=starfleet-policy-v2`, and the webhook pod has the label `app=starfleet-policy`, so the Service has no endpoints. Fix them in any order.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-050/capstone/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Read the state of the pods
 
 List the pods and the warning events of the namespace:
@@ -123,4 +131,10 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s -o /dev/null -w '%{http_code
 kubectl -n starfleet get pods
 ```
 
-Each request prints `200`. All pods are `Ready` and the restart counts stay the same when you run `kubectl get pods` again after about 30 seconds. Submit your work for grading with `astrona submit`.
+Each request prints `200`. All pods are `Ready` and the restart counts stay the same when you run `kubectl get pods` again after about 30 seconds.
+
+Press Ctrl-C to stop the watch, then submit your work for grading once:
+
+```sh
+astrona submit -c sections/section-050/capstone/labs/lab-01
+```

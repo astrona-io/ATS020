@@ -2,6 +2,14 @@
 
 The `relay` pod has no agent, and the setup has three faults. Each fault alone keeps `relay` out of the trace. This walkthrough finds them one by one and fixes them together.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-030/module-02/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Find the faults
 
 Start with the pod. The Operator adds an init container named `opentelemetry-auto-instrumentation-nodejs` to every pod it instruments. List the init containers of `relay`:
@@ -148,3 +156,9 @@ The annotation value can name the Instrumentation with `<namespace>/<name>`. Wit
 - Replacing the exporter of the Collector with a `debug` exporter. The second check fails, and no trace reaches Jaeger.
 - Deleting the Deployment `relay` and creating a new one with another design. The second check fails.
 - Fixing the resources but not creating a new pod. The first check fails, because the running pod has no init container.
+
+When the watch terminal shows every check passing, press Ctrl-C to stop the watch, then submit once:
+
+```sh
+astrona submit -c sections/section-030/module-02/labs/lab-01
+```

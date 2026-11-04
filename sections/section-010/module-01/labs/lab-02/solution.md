@@ -14,11 +14,13 @@ as `prometheus.yml` through a mounted directory.
 
 ## The feedback loop
 
-Run grading from the host terminal where you started the lab:
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
 ```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-01/labs/lab-02
+astrona submit --watch --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-01/labs/lab-02
 ```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 Before making changes, expect `targets-up` and `busiest-scaled` to fail:
 reserve Pods are missing, and no Deployment has three replicas.
@@ -103,8 +105,8 @@ healthy target for each selected Pod. Wait for discovery and a scrape if a
 target has not appeared yet. This restart replaces the lab's temporary data
 volume, so wait for fresh samples before querying.
 
-**Run the check:** rerun `astrona submit` from the host terminal.
-`targets-up` should pass; `busiest-scaled` still needs the scaling step.
+**Run the check:** the watch terminal shows `targets-up` passing;
+`busiest-scaled` still needs the scaling step.
 
 ## Step 3: Query and scale the busiest workload
 
@@ -138,7 +140,8 @@ Deployment. The gauge stays fixed per Pod in this exercise; scaling does not
 simulate draining a real queue. New Pods need discovery and a successful
 scrape before the target list is complete.
 
-**Run the check:** both checks should now pass:
+**Run the check:** the watch terminal shows both checks passing. Press Ctrl-C to
+stop the watch, then submit once:
 
 ```sh
 astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-01/labs/lab-02

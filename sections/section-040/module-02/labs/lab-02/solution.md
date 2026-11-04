@@ -1,6 +1,14 @@
 # Solution
 
-This walkthrough measures the usage of `scout` and `probe`, compares it with their requests, and changes both Deployments. After each step you can run `astrona submit -c sections/section-040/module-02/labs/lab-02` to see which checks pass. Values in the output differ a little in your cluster.
+This walkthrough measures the usage of `scout` and `probe`, compares it with their requests, and changes both Deployments. Values in the output differ a little in your cluster.
+
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-040/module-02/labs/lab-02
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 ## Step 1: Compare the requests with the usage now
 
@@ -135,7 +143,11 @@ The last two rows are the old pods. They are `Terminating` and disappear. The no
   memory             1010Mi (4%)  1524Mi (6%)
 ```
 
-Now run `astrona submit` again. All three checks pass.
+The watch terminal now shows all three checks passing. Press Ctrl-C to stop the watch, then submit once:
+
+```sh
+astrona submit -c sections/section-040/module-02/labs/lab-02
+```
 
 ## Why the plausible shortcuts fail
 

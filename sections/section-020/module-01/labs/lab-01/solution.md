@@ -1,6 +1,16 @@
 # Solution
 
-This walkthrough finds why the dashboard `scout-overview` is missing and why its panels would have no data, then fixes both faults in the ConfigMap. Run each step, then run `astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-01/labs/lab-01` to see which checks pass. In a second terminal, keep a port-forward to Grafana running:
+This walkthrough finds why the dashboard `scout-overview` is missing and why its panels would have no data, then fixes both faults in the ConfigMap. Run each step.
+
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
+In a third terminal, keep a port-forward to Grafana running:
 
 ```sh
 kubectl -n monitoring port-forward svc/kps-grafana 3300:80
@@ -138,7 +148,11 @@ You should see three numbers: the request rate, the error ratio and the p99 late
 2.2286548525878933
 ```
 
-Each panel query returns data, so the panels draw lines and numbers. Run `astrona submit` now: all three checks pass.
+Each panel query returns data, so the panels draw lines and numbers. The watch terminal now shows all three checks passing. Press Ctrl-C to stop the watch, then submit once:
+
+```sh
+astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-01/labs/lab-01
+```
 
 ## Wrong fixes the grader rejects
 

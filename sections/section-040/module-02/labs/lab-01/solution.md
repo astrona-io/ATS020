@@ -1,6 +1,14 @@
 # Solution
 
-This walkthrough fixes the PrometheusRule `scout-slo` step by step. After each step you can run `astrona submit -c sections/section-040/module-02/labs/lab-01` to see which checks pass. Values in the output differ a little in your cluster.
+This walkthrough fixes the PrometheusRule `scout-slo` step by step. Values in the output differ a little in your cluster.
+
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-040/module-02/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
 ## Step 1: See that the alert is not active
 
@@ -136,7 +144,11 @@ Run the command again after two minutes:
 {"alertname":"ScoutErrorBudgetBurn","state":"firing"}
 ```
 
-Now run `astrona submit` again. All three checks pass.
+The watch terminal now shows all three checks passing. Press Ctrl-C to stop the watch, then submit once:
+
+```sh
+astrona submit -c sections/section-040/module-02/labs/lab-01
+```
 
 ## Why the plausible shortcuts fail
 

@@ -2,6 +2,14 @@
 
 The pod of the Collector is `Running`, but its exporter cannot reach Jaeger. The exporter has two faults, one behind the other. The first fault hides the second.
 
+Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+
+```sh
+astrona submit --watch -c sections/section-030/module-01/labs/lab-01
+```
+
+Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
+
 ## Find the first fault
 
 Read the log of the Collector for the exporter errors:
@@ -113,3 +121,9 @@ kubectl exec -n starfleet deploy/shuttle -- curl -s jaeger.observability:16686/a
 - Changing `OTEL_EXPORTER_OTLP_ENDPOINT` on `scout` to `jaeger.observability:4317`. Spans arrive in Jaeger, but the Collector is bypassed, and the first check fails.
 - Deleting the Collector, or changing its mode. The first check fails.
 - Replacing the exporter with a `debug` exporter. The log shows spans, but nothing reaches Jaeger, and the second and third checks fail.
+
+When the watch terminal shows every check passing, press Ctrl-C to stop the watch, then submit once:
+
+```sh
+astrona submit -c sections/section-030/module-01/labs/lab-01
+```
