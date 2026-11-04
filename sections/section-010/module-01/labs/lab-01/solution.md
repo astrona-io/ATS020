@@ -12,7 +12,7 @@ Use `--watch` until the end, because a plain `astrona submit` finishes the attem
 
 ## Find the first mistake
 
-Open a second terminal and leave a port-forward to Prometheus running:
+Open another terminal and leave a port-forward to Prometheus running:
 
 ```sh
 kubectl -n monitoring port-forward svc/kps-prometheus 9090:9090

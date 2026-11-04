@@ -124,7 +124,7 @@ relay-56747969d8-mjzxx   opentelemetry-auto-instrumentation-nodejs
 tracecontext,baggage
 ```
 
-Second, wait about a minute, because the agent and the Collector batch spans. Then ask Jaeger for its services. In a second terminal, run `kubectl -n observability port-forward svc/jaeger 16686:16686` first:
+Second, wait about a minute, because the agent and the Collector batch spans. Then ask Jaeger for its services. In another terminal, run `kubectl -n observability port-forward svc/jaeger 16686:16686` first:
 
 ```sh
 curl -fsS http://127.0.0.1:16686/api/v3/services | jq -c .services

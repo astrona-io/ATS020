@@ -89,7 +89,7 @@ The Collector does not need a restart. Its processor retries, and the errors sto
 
 ## Step 4: Find out why Prometheus has no target
 
-Open a port-forward to Prometheus in a second terminal:
+Open a port-forward to Prometheus in another terminal:
 
 ```sh
 kubectl -n monitoring port-forward svc/kps-prometheus 9090:9090
