@@ -4,7 +4,7 @@ kind: question_bank
 id: ats020-020
 course_id: ATS020
 exam_code: CNPE
-status: draft
+status: alpha
 provenance: Original practice material written for this course; not official exam questions.
 scope:
   type: section
