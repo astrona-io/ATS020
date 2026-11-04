@@ -12,7 +12,7 @@ The exam is hands-on. You get a set of hosts, a terminal and 15 to 20 tasks in t
 
 The first topic is **implementing monitoring, alerting, logging and tracing**. You will learn to:
 
-- Get a workload's metrics into Prometheus with a `ServiceMonitor` or `PodMonitor`, and find out why a target does not appear.
+- Get a workload's metrics into Prometheus with a `ServiceMonitor`, `PodMonitor` or raw scrape configuration, and find out why a target does not appear.
 - Write PromQL queries for request rate, error rate and latency.
 - Write alerting rules in a `PrometheusRule`, and route the alerts to a receiver with Alertmanager.
 - Build a Grafana dashboard, and collect pod logs with the OpenTelemetry Collector and turn error lines into a metric.

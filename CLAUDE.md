@@ -267,6 +267,7 @@ section is only true for this one.
   | Flux (section 040 only) | 2.9.6 |
   | Gitea (section 040 only, plumbing) | 28.1.0 |
   | Helm | 4.3.0 |
+  | Python metric fixture (section 010 module 01 lab 02 image) | 3.13.18-alpine3.24 |
 
   Do not teach fields, flags or output from other versions without saying so.
 - **The main sources:** the Prometheus and Prometheus Operator documentation,

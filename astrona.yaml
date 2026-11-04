@@ -64,7 +64,7 @@ modules:
     title: "Metrics And Alerting With Prometheus"
     description: >
       Makes the reader able to get any workload's metrics into
-      Prometheus through the Prometheus Operator, query them with
+      Prometheus through the Prometheus Operator or raw scrape configuration, query them with
       PromQL, and turn a query into an alert that reaches a receiver.
       It comes first because every later section (dashboards, SLOs,
       DORA metrics, incident triage) reads these metrics.
@@ -100,8 +100,33 @@ modules:
         topic: metrics-and-alerting
         task_kind: troubleshooting
       - type: reading
+        title: "Scrape Pods With Raw Prometheus Configuration"
+        path: sections/section-010/module-01/course-05-raw-prometheus-configuration.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-01/labs/lab-02/question.md
+      - type: lab
+        title: "Extend Raw Prometheus Discovery And Scale A Workload Lab"
+        path: sections/section-010/module-01/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: metrics
+        task_kind: troubleshooting
+        tags: [prometheus, scrape-target, label-selector, promql]
+        learning_goals:
+          - Extend a Pod discovery keep rule to include another label value
+          - Load the changed configuration and prove all selected Pods are healthy targets
+          - Compare workload totals with sum by and scale the busiest Deployment
+        resources:
+          - name: "Prometheus 3.15: scrape configuration and Kubernetes discovery"
+            url: https://github.com/prometheus/prometheus/blob/v3.15.0/docs/configuration/configuration.md
+          - name: "Prometheus 3.15: configuration reload"
+            url: https://github.com/prometheus/prometheus/blob/v3.15.0/docs/management_api.md
+          - name: "Prometheus 3.15: aggregation operators"
+            url: https://github.com/prometheus/prometheus/blob/v3.15.0/docs/querying/operators.md
+      - type: reading
         title: Summary
-        path: sections/section-010/module-01/course-05-summary.md
+        path: sections/section-010/module-01/course-06-summary.md
 
       - type: reading
         title: "Query Metrics With PromQL"

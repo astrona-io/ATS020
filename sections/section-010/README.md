@@ -1,6 +1,6 @@
 # Section 010: Metrics And Alerting With Prometheus
 
-Makes the reader able to get any workload's metrics into Prometheus through the Prometheus Operator, query them with PromQL, and turn a query into an alert that reaches a receiver. It comes first because every later section (dashboards, SLOs, DORA metrics, incident triage) reads these metrics.
+Makes the reader able to get any workload's metrics into Prometheus through the Prometheus Operator or raw scrape configuration, query them with PromQL, and turn a query into an alert that reaches a receiver. It comes first because every later section (dashboards, SLOs, DORA metrics, incident triage) reads these metrics.
 
 **Curriculum item covered:** Implementing Monitoring, Alerting, Logging, and Tracing Solutions
 
@@ -13,6 +13,7 @@ Makes the reader able to get any workload's metrics into Prometheus through the 
 - Write a PodMonitor for pods that have no Service
 - Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
 - Prove a scrape works with `up == 1` for every endpoint of the workload
+- Extend raw Pod discovery with a keep rule, reload Prometheus and scale a Deployment chosen with `sum by`
 - Select time series by metric name and label matchers, including regex matchers
 - Calculate a per-second request rate from a counter with `rate()` and explain why `rate` is not used on a gauge
 - Aggregate series with `sum by` and `without` to get one value per namespace or per status code
@@ -34,6 +35,8 @@ Makes the reader able to get any workload's metrics into Prometheus through the 
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-01/playground
     ```
+
+*   **Raw configuration reading and lab:** Extend a Pod discovery job in `prometheus.yml`, load it and query a synthetic queue gauge to choose which Deployment to scale. The separate lab runs without an Operator: `sections/section-010/module-01/labs/lab-02` (20 minutes).
 
 ### 2. Query Metrics With PromQL
 *   **Module Reader:** **[Module 2: Query Metrics With PromQL](./module-02/course.md)**

@@ -1,6 +1,6 @@
 # Summary
 
-Prometheus only collects what it is told to collect, and on Kubernetes the Prometheus Operator decides that from monitor resources. This module showed how those resources connect a workload to Prometheus and how to tell why a workload is missing.
+Prometheus only collects what it is told to collect. The Prometheus Operator can generate its configuration from monitor resources, or a directly managed server can read scrape jobs from a file. Both styles connect workload endpoints to Prometheus and provide ways to find why a target is missing.
 
 ## What you learned
 
@@ -16,5 +16,9 @@ Mistakes in how to scrape, such as a wrong path, leave a target that is `down` w
 - `endpoints[].port` is a Service port name; `podMetricsEndpoints[].port` is a container port name.
 - A target that is `down` has a last error; a target that is missing needs the chain walked.
 - The proof of a working scrape is one `up == 1` series per endpoint of the workload.
+
+Raw configuration uses `kubernetes_sd_configs` to discover Pods and `relabel_configs` to filter targets and copy labels. An `action: keep` rule accepts only targets that match its expression. Extend that expression to include another label value without collecting disabled workloads. Apply the ConfigMap, then restart Prometheus or reload it after the mounted file updates. Check the running configuration and target list before trusting a query.
+
+A `sum by (deployment)` query combines per-Pod gauge values into workload totals. Compare all selected workloads before choosing which Deployment to scale, then check its ready replicas. Operator resources suit a controller-managed server; raw scrape jobs suit a server managed directly from a configuration file.
 
 <!-- astrona:playground:destroy -->

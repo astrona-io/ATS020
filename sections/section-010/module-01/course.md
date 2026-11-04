@@ -4,9 +4,9 @@ A dashboard, an alert or a service level objective is only as good as the metric
 
 Prometheus is an open source monitoring system that collects numbers from programs over HTTP and stores them as time series. On Kubernetes it is usually run by the **Prometheus Operator**: a controller that runs Prometheus and turns a few custom resources into Prometheus configuration. Two of those resources decide what Prometheus collects. A **ServiceMonitor** points Prometheus at the endpoints behind a Service, and a **PodMonitor** points it at pods directly.
 
-Keep one sentence in mind for this module: **Prometheus only scrapes what a monitor selects, and only reads monitors that its own selector selects.** Most "my metrics are missing" problems are one of those two selections failing.
+Prometheus only scrapes targets selected by its loaded configuration. With the Operator, check both the monitor selector and the targets that monitor selects. With a directly managed server, check discovery and relabeling in `prometheus.yml`.
 
-The module has four parts. **Targets And The up Metric** shows what Prometheus collects, how to list its targets, and how the `up` metric reports each one. **Select A Service With A ServiceMonitor** writes a ServiceMonitor for `scout`, shows why the first version is ignored, and fixes it. **Scrape Pods Without A Service With A PodMonitor** collects a copy of `scout` that has no Service. **Finding A Missing Target** breaks a monitor in the two most common ways and reads where each mistake shows up.
+The module has five parts. **Targets And The up Metric** shows what Prometheus collects, how to list its targets, and how the `up` metric reports each one. **Select A Service With A ServiceMonitor** writes a ServiceMonitor for `scout`, shows why the first version is ignored, and fixes it. **Scrape Pods Without A Service With A PodMonitor** collects a copy of `scout` that has no Service. **Finding A Missing Target** breaks a monitor in the two most common ways and reads where each mistake shows up. **Scrape Pods With Raw Prometheus Configuration** uses a separate lab without an Operator to extend a Pod discovery job, load the file, query workload totals and scale the busiest Deployment.
 
 ## Learning objectives
 
@@ -17,6 +17,7 @@ After this module you can:
 - Write a PodMonitor for pods that have no Service.
 - Find why a new monitor produces no target: the Prometheus selector label, the namespace selector, the port name or the path.
 - Prove a scrape works with `up == 1` for every endpoint of the workload.
+- Extend a raw Pod discovery keep rule, load the changed ConfigMap and use a `sum by` query to choose a Deployment to scale.
 
 ## Before you start
 
@@ -32,7 +33,7 @@ The Starfleet workloads run in two namespaces:
 | `starfleet` | `shuttle` | A client pod with `curl` |
 | `outpost` | `scout` | One more `podinfo` pod with the label `app: scout`, and **no Service** |
 
-No ServiceMonitor or PodMonitor exists for the Starfleet workloads yet, so at the start Prometheus only scrapes itself and the operator. Every command in the parts runs against the playground cluster, and `kubectl` already points at it.
+No ServiceMonitor or PodMonitor exists for the Starfleet workloads yet, so at the start Prometheus only scrapes itself and the operator. The Operator examples run against the playground cluster, and `kubectl` already points at it. The raw configuration example pauses this playground and uses a separate lab with plain Prometheus and synthetic queue metrics.
 
 Launch your playground now, and keep it running next to you while you read the parts:
 

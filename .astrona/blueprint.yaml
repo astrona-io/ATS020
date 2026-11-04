@@ -68,7 +68,7 @@ sections:
     curriculum_item: "Implementing Monitoring, Alerting, Logging, and Tracing Solutions"
     description: >
       Makes the reader able to get any workload's metrics into Prometheus
-      through the Prometheus Operator, query them with PromQL, and turn a query
+      through the Prometheus Operator or raw scrape configuration, query them with PromQL, and turn a query
       into an alert that reaches a receiver. It comes first because every later
       section (dashboards, SLOs, DORA metrics, incident triage) reads these
       metrics.
@@ -79,6 +79,7 @@ sections:
           - Read the Prometheus targets page and the `up` metric to say which targets are scraped and which fail
           - Write a ServiceMonitor that selects a Service by label and scrapes a named port and path
           - Write a PodMonitor for pods that have no Service
+          - Extend raw Pod discovery, load the configuration and scale the workload with the highest query total
           - Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
           - Prove a scrape works with `up == 1` for every endpoint of the workload
         outline:
@@ -87,6 +88,7 @@ sections:
           - ServiceMonitor anatomy — selector, namespaceSelector, endpoints[].port and path, and how it maps to the Service
           - PodMonitor for workloads without a Service, and when to choose it
           - Debugging a missing target from the Prometheus UI and the operator's generated configuration
+          - Raw prometheus.yml Pod discovery, keep-rule alternatives, restart or reload, and sum by totals used to scale a Deployment
         diagrams:
           - type: flowchart
             shows: Prometheus resource selects ServiceMonitor, which selects Service, which selects endpoints Prometheus scrapes

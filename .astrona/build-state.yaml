@@ -12,7 +12,7 @@ items:
   kind: course
   what: 'chapter for module 1: Scrape Workloads With ServiceMonitor And PodMonitor'
   status: done
-  note: landing + 4 parts + summary; output from real runs (two playground runs, noted on page)
+  note: "untested: built without booting 2026-11-04; added raw configuration part, updated landing and summary; existing Operator parts retain prior runtime evidence"
 - key: section-010/module-01/lab-01
   kind: lab
   what: module lab 01 for section-010 module 01
@@ -226,3 +226,8 @@ items:
   what: final domain quiz across every section
   status: done
   note: 'written: sections/final-domain-quiz.yaml, 38 single-choice questions drawn from the section quizzes (q37-q38 added for the section-050 GitOps part)'
+- key: section-010/module-01/lab-02
+  kind: lab
+  what: Extend raw Prometheus Pod discovery and scale the busiest workload
+  status: done
+  note: "untested: built without booting 2026-11-04; plain Prometheus 3.15.0, ConfigMap discovery filter, live targets and query-based scaling validators; skill structural, YAML and shell checks pass; astrona validate blocked by sandbox denial writing ~/.astrona/.maintenance.lock"
