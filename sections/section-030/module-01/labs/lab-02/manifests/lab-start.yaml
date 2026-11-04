@@ -1,0 +1,248 @@
+# Synthetic trace workloads; each iteration sends one root span with a new trace ID.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger
+  namespace: observability
+  labels:
+    app: jaeger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger
+  template:
+    metadata:
+      labels:
+        app: jaeger
+    spec:
+      containers:
+      - name: jaeger
+        image: jaegertracing/jaeger:2.22.0
+        ports:
+        - name: otlp-grpc
+          containerPort: 4317
+        - name: otlp-http
+          containerPort: 4318
+        - name: ui
+          containerPort: 16686
+        readinessProbe:
+          httpGet:
+            path: /
+            port: ui
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger
+  namespace: observability
+  labels:
+    app: jaeger
+spec:
+  selector:
+    app: jaeger
+  ports:
+  - name: otlp-grpc
+    port: 4317
+    targetPort: otlp-grpc
+  - name: otlp-http
+    port: 4318
+    targetPort: otlp-http
+  - name: ui
+    port: 16686
+    targetPort: ui
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trace-emitter
+  namespace: starfleet
+data:
+  emitter.py: |
+    """Send one synthetic trace per iteration using OpenTelemetry Protocol JSON."""
+    import json
+    import os
+    import secrets
+    import time
+    import urllib.request
+
+    service = os.environ["TRACE_SERVICE"]
+    while True:
+        delay_ms = int(os.environ.get("RESPONSE_DELAY_MS", "20"))
+        started = time.time_ns()
+        time.sleep(delay_ms / 1000)
+        attributes = {
+            "incident.code": os.environ["INCIDENT_CODE"],
+            "response.delay_ms": str(delay_ms),
+            "workload.name": service,
+        }
+        span = {
+            "traceId": secrets.token_hex(16),
+            "spanId": secrets.token_hex(8),
+            "name": "process-probe",
+            "kind": 2,
+            "startTimeUnixNano": str(started),
+            "endTimeUnixNano": str(time.time_ns()),
+            "attributes": [{"key": key, "value": {"stringValue": value}}
+                           for key, value in attributes.items()],
+        }
+        payload = {"resourceSpans": [{
+            "resource": {"attributes": [{"key": "service.name", "value": {"stringValue": service}}]},
+            "scopeSpans": [{"scope": {"name": "astrona-trace-fixture"}, "spans": [span]}],
+        }]}
+        request = urllib.request.Request(
+            "http://jaeger.observability:4318/v1/traces",
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=5) as response:
+                response.read()
+        except OSError as error:
+            print(f"Span export failed: {error}", flush=True)
+        time.sleep(2)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+      - name: scout
+        image: python:3.13.18-alpine3.24
+        command:
+        - python3
+        - /emitter/emitter.py
+        env:
+        - name: TRACE_SERVICE
+          value: scout
+        - name: INCIDENT_CODE
+          value: retry-storm
+        - name: RESPONSE_DELAY_MS
+          value: '800'
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 48Mi
+        volumeMounts:
+        - name: emitter
+          mountPath: /emitter
+          readOnly: true
+      volumes:
+      - name: emitter
+        configMap:
+          name: trace-emitter
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+      - name: probe
+        image: python:3.13.18-alpine3.24
+        command:
+        - python3
+        - /emitter/emitter.py
+        env:
+        - name: TRACE_SERVICE
+          value: probe
+        - name: INCIDENT_CODE
+          value: queue-pressure
+        - name: RESPONSE_DELAY_MS
+          value: '20'
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 48Mi
+        volumeMounts:
+        - name: emitter
+          mountPath: /emitter
+          readOnly: true
+      volumes:
+      - name: emitter
+        configMap:
+          name: trace-emitter
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+      - name: shuttle
+        image: python:3.13.18-alpine3.24
+        command:
+        - python3
+        - /emitter/emitter.py
+        env:
+        - name: TRACE_SERVICE
+          value: shuttle
+        - name: INCIDENT_CODE
+          value: none
+        - name: RESPONSE_DELAY_MS
+          value: '20'
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 48Mi
+        volumeMounts:
+        - name: emitter
+          mountPath: /emitter
+          readOnly: true
+      volumes:
+      - name: emitter
+        configMap:
+          name: trace-emitter

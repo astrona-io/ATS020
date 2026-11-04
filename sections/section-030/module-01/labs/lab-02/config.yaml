@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-030-01-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+    # Compatibility aliases for the skill's structural checker.
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - jaegertracing/jaeger:2.22.0
+      - python:3.13.18-alpine3.24
+bootstrap:
+  init:
+    - name: prepare
+      description: Check that the terminal has kubectl, curl and jq, and remove an export file left by an earlier attempt
+      type: file
+      source: bootstrap/01-prepare.sh
+  manifests:
+    - name: lab-start
+      description: Jaeger 2.22.0 with in-memory storage and three workloads that send spans with distinct incident.code tags
+      type: file
+      source: manifests/lab-start.yaml
+  waitFor:
+    - resource: deploy/jaeger
+      namespace: observability
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+testing:
+  init:
+    - name: wait-for-traces
+      description: Wait until Jaeger holds traces from all three services
+      type: file
+      source: testing/wait-for-traces.sh
+    - name: solution
+      description: Find both services by tag, change their Deployments and export five traces
+      type: file
+      source: solution/apply.sh
+validation:
+  scripts:
+    - name: delay-reduced
+      description: The Deployment behind incident.code=retry-storm runs with RESPONSE_DELAY_MS=20 and one ready replica
+      type: file
+      source: validation/validate-delay-reduced.sh
+    - name: capacity-increased
+      description: The Deployment behind incident.code=queue-pressure has three ready replicas, and shuttle keeps one
+      type: file
+      source: validation/validate-capacity-increased.sh
+    - name: export-count
+      description: The export file holds one Jaeger API response with exactly five distinct trace IDs, all from the requested service
+      type: file
+      source: validation/validate-export-count.sh
+    - name: export-live
+      description: Every exported trace exists in the running Jaeger with the same spans and service
+      type: file
+      source: validation/validate-export-live.sh
+teardown:
+  keepCluster: false

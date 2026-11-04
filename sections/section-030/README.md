@@ -13,6 +13,8 @@ Makes the reader able to run an OpenTelemetry Collector with the OpenTelemetry O
 - Choose the Collector mode (deployment, daemonset, sidecar) for a given need
 - Send a test trace over OTLP and find it in the Jaeger UI and API
 - Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)
+- Find a service by a span tag in the Jaeger UI and the `/api/v3` query API, and act on the result by changing an environment variable and scaling a Deployment
+- Export an exact number of traces for a service as JSON to a named file, and count them by distinct trace ID
 - Write an Instrumentation resource with the exporter endpoint, propagators and sampler
 - Annotate a Deployment so the operator injects the language agent, and restart it so the change takes effect
 - Read the injected init container and environment variables to prove injection happened
@@ -29,6 +31,7 @@ Makes the reader able to run an OpenTelemetry Collector with the OpenTelemetry O
     ```bash
     astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-01/playground
     ```
+*   **Tag search reading and lab:** Find services by a span tag, change one Deployment's environment variable, scale another and export five traces: `sections/section-030/module-01/labs/lab-02` (20 minutes).
 
 ### 2. Add Tracing Without Code Changes Using Auto-Instrumentation
 *   **Module Reader:** **[Module 2: Add Tracing Without Code Changes Using Auto-Instrumentation](./module-02/course.md)**

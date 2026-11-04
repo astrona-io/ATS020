@@ -12,12 +12,18 @@ A trace is the set of spans of one request. The spans share one trace ID, each s
 
 The `mode` field decides where the Collector runs. A `deployment` is a shared gateway, a `daemonset` is an agent on each node, and a `sidecar` is a container injected into a pod that carries the `sidecar.opentelemetry.io/inject` annotation. The mode of an existing Collector cannot change; delete the resource and create it again.
 
-A Collector in `Running` can still be broken. Read the Service ports, the startup lines in the log, the retry lines of the exporter and the counters `otelcol_receiver_accepted_spans` and `otelcol_exporter_sent_spans`. The proof of a fix is that `scout` appears in Jaeger and both counters rise together. The key facts to remember are these:
+A Collector in `Running` can still be broken. Read the Service ports, the startup lines in the log, the retry lines of the exporter and the counters `otelcol_receiver_accepted_spans` and `otelcol_exporter_sent_spans`. The proof of a fix is that `scout` appears in Jaeger and both counters rise together.
+
+A span can also carry tags, which OpenTelemetry calls attributes, and a tag can lead you to a service you could not name. The web interface of Jaeger 2.22 takes tags in its Attributes field. Its version 3 API takes them as a JSON object in `query.attributes`, together with a required time range, and older guides show a legacy search form that this release no longer serves. The service name is on the resource and not on the span. To save an exact number of traces, limit the search with `query.searchDepth` and write the response to a file. One trace can fill more than one `resourceSpans` entry, so count distinct trace IDs.
+
+The key facts to remember are these:
 
 - The Operator needs cert-manager first, and its webhook must answer before you create a Collector.
 - A part that no pipeline lists does not run.
 - Port `4317` is OTLP over gRPC and port `4318` is OTLP over HTTP.
 - A Collector mode cannot be changed in place.
 - A fix is proved by a trace in Jaeger, not by a `Running` pod.
+- A trace search through the API needs a time range, and a `404` means that no trace matched.
+- Count traces in an API response by distinct trace IDs, not by `resourceSpans` entries.
 
 <!-- astrona:playground:destroy -->

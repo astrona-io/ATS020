@@ -256,11 +256,14 @@ sections:
           - Choose the Collector mode (deployment, daemonset, sidecar) for a given need
           - Send a test trace over OTLP and find it in the Jaeger UI and API
           - Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)
+          - Find a service by a span tag in the Jaeger UI and the /api/v3 query API, then change one Deployment's environment variable and scale another
+          - Export an exact number of traces for a service as JSON to a named file
         outline:
           - Traces and spans, trace IDs and context propagation through the `traceparent` header
           - The OpenTelemetry Operator and its OpenTelemetryCollector resource
           - Receivers, processors, exporters and pipelines for traces
           - Jaeger 2 as the trace backend, and reading a trace in its UI
+          - Searching Jaeger by span tag, acting on the result, and exporting traces as JSON
         diagrams:
           - type: sequence
             shows: A request crosses two services, each creates a span with the same trace ID and exports it over OTLP

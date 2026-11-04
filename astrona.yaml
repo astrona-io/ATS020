@@ -323,8 +323,35 @@ modules:
         topic: distributed-tracing
         task_kind: troubleshooting
       - type: reading
+        title: "Finding A Service By Tag And Acting On It"
+        path: sections/section-030/module-01/course-06-finding-a-service-by-tag-and-acting-on-it.md
+      - type: reading
+        title: Question
+        path: sections/section-030/module-01/labs/lab-02/question.md
+      - type: lab
+        title: "Find Tagged Traces And Remediate Deployments Lab"
+        path: sections/section-030/module-01/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: tracing
+        task_kind: troubleshooting
+        tags: [jaeger, opentelemetry, otlp, instrumentation]
+        learning_goals:
+          - Find a service by a span tag in the Jaeger web interface and through the /api/v3 query API
+          - Change an environment variable on one Deployment and scale another from the search result
+          - Export an exact number of traces for a service as JSON and count them by distinct trace ID
+        resources:
+          - name: "Jaeger 2.22: APIs"
+            url: https://www.jaegertracing.io/docs/2.22/architecture/apis/
+          - name: "Jaeger 2.22.0: api_v3 query parameters"
+            url: https://github.com/jaegertracing/jaeger/blob/v2.22.0/cmd/jaeger/internal/extension/jaegerquery/internal/apiv3/query_parser.go
+          - name: "Kubernetes: kubectl set env"
+            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
+          - name: "Kubernetes: kubectl scale"
+            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
+      - type: reading
         title: Summary
-        path: sections/section-030/module-01/course-06-summary.md
+        path: sections/section-030/module-01/course-07-summary.md
 
       - type: reading
         title: "Add Tracing Without Code Changes Using Auto-Instrumentation"
