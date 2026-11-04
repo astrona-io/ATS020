@@ -85,6 +85,26 @@ items:
   what: module lab 01 for section-020 module 02
   status: done
   note: 'written; tested: astrona test 3/3 pass'
+- key: section-020/module-03/playground
+  kind: playground
+  what: 'playground for module 3: Query Logs With Loki And LogQL'
+  status: done
+  note: 'untested: built without booting 2026-11-04; astrona validate passes'
+- key: section-020/module-03/course
+  kind: course
+  what: 'chapter for module 3: Query Logs With Loki And LogQL'
+  status: done
+  note: 'untested: built without booting 2026-11-04; landing + 3 parts + summary; commands not run against a live playground'
+- key: section-020/module-03/lab-01
+  kind: lab
+  what: module lab 01 for section-020 module 03
+  status: done
+  note: 'untested: built without booting 2026-11-04; astrona validate passes'
+- key: section-020/module-03/quiz
+  kind: quiz
+  what: 'knowledge check for section-020 module 03: Query Logs With Loki And LogQL'
+  status: done
+  note: 'untested: built without booting 2026-11-04; quiz.yaml, 10 questions'
 - key: section-020/quiz
   kind: quiz
   what: 'knowledge check for section-020: Dashboards And Logs'
@@ -95,6 +115,11 @@ items:
   what: 'capstone lab: Dashboards And Logs Capstone'
   status: done
   note: written; lab never run (UNTESTED)
+- key: section-020/capstone/lab-02
+  kind: capstone
+  what: 'capstone lab: Trace One Incident Through Grafana, Prometheus And Loki'
+  status: done
+  note: 'untested: built without booting 2026-11-04; astrona validate passes'
 - key: section-030/module-01/playground
   kind: playground
   what: 'playground for module 1: Run An OpenTelemetry Collector With The Operator'

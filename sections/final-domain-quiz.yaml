@@ -847,3 +847,47 @@ questions:
     explanation: "That hides the fault and breaks the service."
   correct_option: c
   explanation: "Correct. Git is the source of truth, and the proof is the status of the Application and ready pods."
+- id: ats020-final-q39
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Write LogQL stream selectors, line filters and metric queries
+  source_readings:
+  - sections/section-020/module-03/course-02-query-logs-with-logql.md
+  prompt: "Which LogQL query counts how many streams in `outpost` wrote a line containing `ERROR` in the last five minutes?"
+  options:
+  - id: a
+    text: "`sum(count_over_time({namespace=\"outpost\"} |= \"ERROR\" [5m]))`"
+    explanation: "This counts lines, not streams."
+  - id: b
+    text: "`{namespace=\"outpost\"} |= \"ERROR\"`"
+    explanation: "This is a log query, which returns the lines and no count."
+  - id: c
+    text: "`count(rate({namespace=\"outpost\"} |= \"ERROR\" [5m]))`"
+    explanation: "Correct. `rate` returns one series per matching stream, and `count` counts them."
+  - id: d
+    text: "`count({namespace=\"outpost\", text=\"ERROR\"})`"
+    explanation: "An aggregation needs a range result, and `text` is not a label."
+  correct_option: c
+  explanation: "Correct. `rate` returns one series per matching stream, and `count` counts them."
+- id: ats020-final-q40
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Change jsonData.maxLines through the Grafana data source API
+  source_readings:
+  - sections/section-020/module-03/course-01-connect-grafana-to-loki.md
+  prompt: "How do you change Maximum lines on an editable Loki data source through the Grafana API?"
+  options:
+  - id: a
+    text: "Send `PUT /api/datasources/uid/loki` with only the field `maxLines`."
+    explanation: "A `PUT` replaces the data source, so a partial body loses the other fields."
+  - id: b
+    text: "Read the data source, set `jsonData.maxLines`, and send the whole object back with `PUT /api/datasources/uid/loki`."
+    explanation: "Correct. The setting is stored in `jsonData`, and the `PUT` body is the full object."
+  - id: c
+    text: "Send `POST /api/dashboards/db` with the new value."
+    explanation: "That route saves dashboards, not data sources."
+  - id: d
+    text: "Restart the Loki Deployment with an environment variable."
+    explanation: "Maximum lines is a setting in Grafana, not in Loki."
+  correct_option: b
+  explanation: "Correct. The setting is stored in `jsonData`, and the `PUT` body is the full object."

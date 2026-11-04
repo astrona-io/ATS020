@@ -1,0 +1,54 @@
+# Trimmed kube-prometheus-stack 92.3.0: only Grafana 13.2.3 and its sidecars.
+# Prometheus, the Operator, Alertmanager and the exporters are off to save
+# memory. Grafana's default dashboards and default data source are off too.
+fullnameOverride: kps
+defaultRules:
+  create: false
+alertmanager:
+  enabled: false
+prometheus:
+  enabled: false
+prometheusOperator:
+  enabled: false
+grafana:
+  enabled: true
+  defaultDashboardsEnabled: false
+  adminUser: admin
+  adminPassword: starfleet
+  serviceMonitor:
+    enabled: false
+  resources:
+    requests: {cpu: 50m, memory: 192Mi}
+    limits: {memory: 512Mi}
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: false
+      alertmanager:
+        enabled: false
+      label: grafana_datasource
+      labelValue: "1"
+      searchNamespace: ALL
+kubeStateMetrics:
+  enabled: false
+nodeExporter:
+  enabled: false
+kubeApiServer:
+  enabled: false
+kubelet:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false

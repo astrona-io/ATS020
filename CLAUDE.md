@@ -266,6 +266,7 @@ section is only true for this one.
   | Argo CD (section 040 only) | 3.5.4 |
   | Flux (section 040 only) | 2.9.6 |
   | Gitea (section 040 only, plumbing) | 28.1.0 |
+  | Loki (section 020 module 03 only) | 3.7.9 |
   | Helm | 4.3.0 |
   | Python metric fixture (section 010 module 01 lab 02 image) | 3.13.18-alpine3.24 |
 
@@ -301,6 +302,8 @@ language on first use in a file, for example:
 | Grafana dashboard | A set of panels, each running a query against a data source and drawing the result |
 | Data source | A connection Grafana uses to read data, for example Prometheus or Jaeger |
 | Log record | One log line as the OpenTelemetry Collector holds it, with its body, timestamp, severity and attributes such as `k8s.namespace.name` |
+| Loki | A log store that indexes only the labels of log lines; lines with the same set of labels form a stream |
+| LogQL | Loki's query language: a stream selector, line filters and metric queries over a time window |
 | Connector | A Collector part that is the exporter of one pipeline and the receiver of another, for example the count connector that turns log records into a metric |
 | OpenTelemetry (OTel) | A vendor-neutral standard and set of tools for metrics, logs and traces |
 | OTLP | OpenTelemetry Protocol, the wire format for sending telemetry, on port `4317` (gRPC) and `4318` (HTTP) |
@@ -512,7 +515,7 @@ this order:
   `alertmanager-route`, `silence`
 - Dashboards and logs: `grafana`, `grafana-dashboard`, `data-source`,
   `otel-collector`, `filelog-receiver`, `k8sattributes`, `count-connector`,
-  `kubectl-logs`
+  `kubectl-logs`, `loki`, `logql`
 - Tracing: `opentelemetry`, `otlp`, `collector-pipeline`,
   `instrumentation`, `auto-instrumentation`, `jaeger`, `context-propagation`
 - Delivery and efficiency: `dora-metrics`, `deployment-frequency`,

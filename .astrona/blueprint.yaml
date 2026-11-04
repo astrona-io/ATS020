@@ -173,7 +173,8 @@ sections:
       Makes the reader able to show metrics on a Grafana dashboard that is
       stored as code, and to collect pod logs with the OpenTelemetry
       Collector, enrich and filter them, and turn error lines into a
-      Prometheus metric that a dashboard can draw. It follows metrics because
+      Prometheus metric that a dashboard can draw. It also stores logs in Loki,
+      queries them with LogQL and acts on the result. It follows metrics because
       dashboards draw PromQL queries, and logs are the next signal an
       operator reads.
     modules:
@@ -223,9 +224,34 @@ sections:
           both 200 and 500 responses. No log storage backend: logs are read
           with the debug exporter and counted into a Prometheus metric.
         notes: >
-          Official CNPE tool list only: no Loki, no LogQL. Verify the filelog
+          This module uses the official CNPE tool list only and has no Loki or LogQL. Verify the filelog
           receiver's container parser, the k8sattributes RBAC the operator
           needs, and the count connector on Collector contrib 0.162.0.
+      - id: module-03
+        title: Query Logs With Loki And LogQL
+        objectives:
+          - Add and inspect a Loki data source in Grafana and change `jsonData.maxLines` in the web interface and through the API
+          - Write LogQL stream selectors, line filters and metric queries such as `count(rate({namespace="outpost"} |= "ERROR" [5m]))`
+          - Edit and save a dashboard panel's query and explain how that differs from a dashboard kept as code
+          - Use a query result to find the Pods that write errors and scale their controllers to 0
+        outline:
+          - Connect Grafana to Loki — labels and streams, add a data source by API and web interface, Maximum lines
+          - Query logs with LogQL — selectors, line filters, metric queries
+          - Edit a panel and act on the result — save, loss with the database, owners, scale to 0
+        diagrams:
+          - type: flowchart
+            shows: Pods, Collector and Loki, with Grafana querying Loki through a data source
+        playground_env: >
+          kind cluster with a trimmed kube-prometheus-stack 92.3.0 (Grafana
+          only), Loki 3.7.9 in single-binary mode and a Collector contrib
+          0.162.0 DaemonSet as plumbing. `probe`, `beacon` and `scout`
+          Deployments and a `depot` StatefulSet in `outpost`, `relay` and
+          `shuttle` in `starfleet`. A saved dashboard `Outpost Logs`, no data
+          source yet.
+        notes: >
+          The one exception to the official tool list (user decision,
+          2026-11-04), because the CNPE simulator tests Loki. Compact format.
+          The Collector is plumbing and not taught.
     capstone:
       title: Dashboards And Logs Capstone
       objective: >
@@ -236,6 +262,17 @@ sections:
         panel and an error-log-lines panel from that metric. The grader checks
         the dashboard via the Grafana API, its panel queries, and that the
         log-derived metric rises when `probe` returns errors.
+    additional_capstones:
+      - id: lab-02
+        title: Trace One Incident Through Grafana, Prometheus And Loki
+        path: sections/section-020/capstone/labs/lab-02
+        estimated_duration: 35m
+        objective: >
+          One service in `outpost` fails because of a wrong environment value.
+          The reader adds a Loki data source, corrects a dashboard with a
+          Prometheus panel and a Loki panel, saves the failing Deployment and
+          the bad path, and fixes the Deployment. The grader compares the files
+          with both backends and proves recovery.
 
   # ---------------------------------------------------------------------------
   - id: section-030

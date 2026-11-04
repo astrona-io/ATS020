@@ -25,7 +25,7 @@ Everything targets **kind v0.33.0**, **kubernetes 1.35**, **kind_node_image kind
 | Section | Title | Modules | Curriculum item |
 | --- | --- | --- | --- |
 | [010](sections/section-010) | Metrics And Alerting With Prometheus | 3 | Implementing Monitoring, Alerting, Logging, and Tracing Solutions |
-| [020](sections/section-020) | Dashboards And Logs | 2 | Implementing Monitoring, Alerting, Logging, and Tracing Solutions |
+| [020](sections/section-020) | Dashboards And Logs | 3 | Implementing Monitoring, Alerting, Logging, and Tracing Solutions |
 | [030](sections/section-030) | Distributed Tracing With OpenTelemetry And Jaeger | 2 | Implementing Monitoring, Alerting, Logging, and Tracing Solutions |
 | [040](sections/section-040) | Measuring Platform Efficiency | 2 | Measuring and Improving Platform Efficiency Using Deployment Metrics and Performance Indicators |
 | [050](sections/section-050) | Diagnosing And Remediating Incidents | 2 | Diagnosing and Remediating Platform Issue and Incident Scenarios |
