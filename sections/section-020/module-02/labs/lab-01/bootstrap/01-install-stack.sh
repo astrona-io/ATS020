@@ -42,6 +42,27 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
 done
 kubectl -n opentelemetry-operator-system rollout status deployment/opentelemetry-operator-controller-manager --timeout=300s
 
+# The Operator's webhook must answer before a Collector can be created.
+for attempt in $(seq 1 30); do
+  if kubectl apply --dry-run=server -f - >/dev/null 2>&1 <<'YAML'
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: webhook-probe
+  namespace: default
+spec:
+  config:
+    receivers: {otlp: {protocols: {grpc: {}}}}
+    exporters: {debug: {}}
+    service: {pipelines: {traces: {receivers: [otlp], exporters: [debug]}}}
+YAML
+  then
+    break
+  fi
+  [ "$attempt" -eq 30 ] && { echo "[lab] ERROR: operator webhook not ready" >&2; exit 1; }
+  sleep 5
+done
+
 if ! command -v helm >/dev/null 2>&1 || ! helm version --short | grep -q "^v4.3.0"; then
   WORK="$(mktemp -d)"
   trap 'python3 -c "import shutil,sys; shutil.rmtree(sys.argv[1])" "$WORK"' EXIT
