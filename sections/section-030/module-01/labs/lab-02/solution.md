@@ -38,6 +38,8 @@ choose **All Services**. Type `incident.code=retry-storm` in the field that
 Jaeger 2.22.0 labels **Attributes**, then select **Find Traces**. Each row names
 the service of a trace. Repeat with `incident.code=queue-pressure`.
 
+For an older exam server, the reading section **Search through the older Jaeger API** explains the legacy routes and the command that detects the available API.
+
 To use the API, define this helper in your first terminal. The time range is
 required, so it uses a wide one. `query.attributes` is a JSON (JavaScript Object
 Notation) object, and `--data-urlencode` makes it safe to put in a URL:

@@ -54,6 +54,41 @@ find_services_by_tag incident.code queue-full
 
 Look for `scout` from the first call and `shuttle` from the second. The service name is not on the span. It is on the **resource**, which describes what produced the spans, so the filter reads `resource.attributes`. Jaeger can search without a service name here because its in-memory storage allows it. A storage backend that does not allow it answers that it requires a service name.
 
+## Search through the older Jaeger API
+
+An exam server may run Jaeger 1.x or Jaeger 2.0 through 2.20. These versions
+serve the older `/api/services` and `/api/traces` search routes. Jaeger 2.21.0
+removed both routes, so the pinned 2.22.0 playground uses `/api/v3`.
+Before choosing a search command, probe both service routes with one command:
+
+```sh
+curl -sS -w '\n%{url_effective}: HTTP %{http_code}\n' \
+  http://127.0.0.1:16686/api/services \
+  http://127.0.0.1:16686/api/v3/services
+```
+
+A `200` with a JSON `data` array on the first route proves that the older API
+is available. A `404` there and a `200` on the second route identifies a server
+where you should use `/api/v3`. Older servers can serve both APIs. Connection
+or authentication failures do not identify an API version; resolve them first.
+
+On an older server, list services, then search `scout` for the span tag:
+
+```sh
+curl -fsS http://127.0.0.1:16686/api/services | jq '.data'
+curl -fsSG http://127.0.0.1:16686/api/traces \
+  --data-urlencode 'service=scout' \
+  --data-urlencode 'tags={"incident.code":"slow-scan"}' \
+  --data-urlencode 'limit=3' | jq '.data'
+```
+
+`service` is required for this older search. If only a tag is known, list
+services first and search each candidate. `tags` is a JSON object, and `limit`
+caps the number of returned traces. Without explicit times, this search uses
+a two-day lookback. Its response holds traces in `data`, with `traceID`,
+`spans` and `processes`; it does not have the version 3 `result.resourceSpans`
+shape. Continue using `/api/v3` for the playground and its lab.
+
 ## Act on the result
 
 Now you know where to work. Suppose that `slow-scan` calls for a setting change on `scout`. Each service here has a Deployment with the same name. Change an environment variable on the Deployment and wait for the rollout. A change to the pod template makes Kubernetes replace the pod, so the new value is proved only when the new pod answers. The last command asks `scout` from the `shuttle` pod and prints the color that `podinfo` reports, which should be the new value:

@@ -13,7 +13,7 @@ Makes the reader able to run an OpenTelemetry Collector with the OpenTelemetry O
 - Choose the Collector mode (deployment, daemonset, sidecar) for a given need
 - Send a test trace over OTLP and find it in the Jaeger UI and API
 - Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)
-- Find a service by a span tag in the Jaeger UI and the `/api/v3` query API, and act on the result by changing an environment variable and scaling a Deployment
+- Find a service by a span tag in the Jaeger UI and the `/api/v3` query API, recognise the legacy search routes on older servers, and act on the result by changing an environment variable and scaling a Deployment
 - Export an exact number of traces for a service as JSON to a named file, and count them by distinct trace ID
 - Write an Instrumentation resource with the exporter endpoint, propagators and sampler
 - Annotate a Deployment so the operator injects the language agent, and restart it so the change takes effect

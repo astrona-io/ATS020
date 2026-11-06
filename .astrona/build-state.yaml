@@ -32,7 +32,7 @@ items:
   kind: lab
   what: module lab 02 for section-010 module 02
   status: done
-  note: written; validate-only; not run. Manifest entry moved after module-03 part 1 (recording rules), which teaches the rules it tests; lab path unchanged
+  note: "untested: built without booting 2026-11-06; replaced placeholder solution with walkthrough covering all three existing validators and the reference expressions; task, validators and apply.sh agree and remain unchanged. Walkthrough YAML equals reference; shell syntax and YAML checks pass; astrona validate blocked by sandbox denial opening .maintenance.lock. Manifest entry remains after module-03 part 1 (recording rules)"
 - key: section-010/module-03/playground
   kind: playground
   what: 'playground for module 3: Alert With PrometheusRule And Alertmanager'
@@ -129,7 +129,7 @@ items:
   kind: course
   what: 'chapter for module 1: Run An OpenTelemetry Collector With The Operator'
   status: done
-  note: 'written: landing + 5 parts + summary; untested: built without booting 2026-11-04, part 06 tag search added from Jaeger 2.22.0 sources'
+  note: 'untested: built without booting 2026-11-06; six parts and summary; added legacy Jaeger search subsection to part 06, checked routes and parameters against 2.20.0 source and removal boundary against 2.21.0 release notes; updated landing and summary'
 - key: section-030/module-01/lab-01
   kind: lab
   what: module lab 01 for section-030 module 01
@@ -260,7 +260,7 @@ items:
   kind: lab
   what: Find services by span tag in Jaeger, change two Deployments and export five traces
   status: done
-  note: "untested: built without booting 2026-11-04; Jaeger 2.22.0 serves /api/v3 only for search, so validators count distinct traceId values in the response and compare each trace with the live API; validator logic tested with a stub kubectl and fixtures; astrona validate passes"
+  note: "untested: built without booting 2026-11-06; added one solution sentence pointing to the legacy API reading section; task and validators unchanged; current astrona validate blocked by sandbox denial opening .maintenance.lock. Prior build: Jaeger 2.22.0 uses /api/v3 for search; validators count distinct traceId values and compare each trace with the live API; validator logic checked with stub kubectl and fixtures; astrona validate passed"
 - key: section-010/module-03/lab-01
   kind: lab
   what: Route a team alert and silence maintenance

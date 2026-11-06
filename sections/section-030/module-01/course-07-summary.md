@@ -16,6 +16,11 @@ A Collector in `Running` can still be broken. Read the Service ports, the startu
 
 A span can also carry tags, which OpenTelemetry calls attributes, and a tag can lead you to a service you could not name. The web interface of Jaeger 2.22 takes tags in its Attributes field. Its version 3 API takes them as a JSON object in `query.attributes`, together with a required time range, and older guides show a legacy search form that this release no longer serves. The service name is on the resource and not on the span. To save an exact number of traces, limit the search with `query.searchDepth` and write the response to a file. One trace can fill more than one `resourceSpans` entry, so count distinct trace IDs.
 
+Jaeger 1.x and 2.0 through 2.20 also serve the older `/api/services` and
+`/api/traces` search routes. Jaeger 2.21.0 removed them. Probe the service
+routes before choosing the search form: the older search uses `service`,
+JSON `tags` and `limit`, and returns traces in `data`.
+
 The key facts to remember are these:
 
 - The Operator needs cert-manager first, and its webhook must answer before you create a Collector.

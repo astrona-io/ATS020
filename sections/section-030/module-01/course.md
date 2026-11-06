@@ -15,7 +15,7 @@ After this module you can:
 - Choose the Collector mode (deployment, daemonset or sidecar) for a given need.
 - Send a test trace over OTLP and find it in the Jaeger API and web interface.
 - Diagnose a broken pipeline from the Service ports, the Collector log and the Collector counters.
-- Find a service by a span tag in the Jaeger web interface and API, and change the Deployment behind it.
+- Find a service by a span tag in the Jaeger web interface and API, detect whether an older server serves the legacy search routes, and change the Deployment behind it.
 - Save an exact number of traces for a service as JSON, and count them by trace ID.
 
 ## Before you start
