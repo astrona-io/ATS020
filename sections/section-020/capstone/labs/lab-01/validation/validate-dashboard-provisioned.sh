@@ -16,7 +16,7 @@ for _ in $(seq 1 30); do
   curl -fsS "$GRAFANA/api/health" >/dev/null 2>&1 && break
   sleep 2
 done
-grafana_get() { curl -fsS -u admin:outpost "$GRAFANA$1" 2>/dev/null; }
+grafana_get() { curl -fsS -u admin:starfleet "$GRAFANA$1" 2>/dev/null; }
 
 holder=$(kubectl get configmap -A -l grafana_dashboard=1 -o json |
   jq -r '[.items[] | select([.data[]? | try (fromjson | .uid) catch empty] | index("outpost-overview")) | .metadata.name] | join(",")')

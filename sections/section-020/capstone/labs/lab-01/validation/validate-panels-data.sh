@@ -16,7 +16,7 @@ for _ in $(seq 1 30); do
   curl -fsS "$GRAFANA/api/health" >/dev/null 2>&1 && break
   sleep 2
 done
-grafana_get() { curl -fsS -u admin:outpost "$GRAFANA$1" 2>/dev/null; }
+grafana_get() { curl -fsS -u admin:starfleet "$GRAFANA$1" 2>/dev/null; }
 
 dashboard=""
 for _ in $(seq 1 36); do
@@ -40,7 +40,7 @@ while IFS=$'\t' read -r title uid expr; do
   for _ in $(seq 1 24); do
     body=$(jq -n --arg uid "$uid" --arg expr "$expr" \
       '{from: "now-5m", to: "now", queries: [{refId: "A", datasource: {uid: $uid}, expr: $expr, instant: true}]}')
-    values=$(curl -s -u admin:outpost -H 'Content-Type: application/json' "$GRAFANA/api/ds/query" -d "$body" |
+    values=$(curl -s -u admin:starfleet -H 'Content-Type: application/json' "$GRAFANA/api/ds/query" -d "$body" |
       jq -r '[.results.A.frames[]?.data.values[1][0]? | select(. != null)] | length')
     [[ "${values:-0}" -ge 1 ]] && { ok=yes; break; }
     sleep 5

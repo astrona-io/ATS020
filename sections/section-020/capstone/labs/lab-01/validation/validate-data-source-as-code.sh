@@ -16,7 +16,7 @@ for _ in $(seq 1 30); do
   curl -fsS "$GRAFANA/api/health" >/dev/null 2>&1 && break
   sleep 2
 done
-grafana_get() { curl -fsS -u admin:outpost "$GRAFANA$1" 2>/dev/null; }
+grafana_get() { curl -fsS -u admin:starfleet "$GRAFANA$1" 2>/dev/null; }
 
 dashboard=$(grafana_get /api/dashboards/uid/outpost-overview) || fail "Grafana has no dashboard with the UID outpost-overview"
 uids=$(echo "$dashboard" | jq -r '[.dashboard.panels[] | (.datasource.uid // empty), (.targets[]? | .datasource.uid // empty)] | unique | .[]')
