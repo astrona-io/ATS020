@@ -26,8 +26,8 @@ for line in sys.stdin.read().splitlines():
     except ValueError:
         continue
     for rs in doc.get("result", {}).get("resourceSpans", []):
-        names = [a["value"].get("stringValue") for a in rs.get("resource", {}).get("attributes", []) if a.get("key") == "service.name"]
-        svc = names[0] if names else ""
+        service_names = [a["value"].get("stringValue") for a in rs.get("resource", {}).get("attributes", []) if a.get("key") == "service.name"]
+        svc = service_names[0] if service_names else ""
         for ss in rs.get("scopeSpans", []):
             for s in ss.get("spans", []):
                 if s["name"] == "GET /readyz":
