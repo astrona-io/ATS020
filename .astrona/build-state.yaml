@@ -42,7 +42,7 @@ items:
   kind: course
   what: 'chapter for module 3: Alert With PrometheusRule And Alertmanager'
   status: done
-  note: "untested: built without booting 2026-11-06; added four diagnostic parts, moved summary to 09, updated landing and summary; existing parts retain prior runtime evidence"
+  note: "untested: deep-dive review 2026-11-06 without booting; reordered into seven parts (rules, selecting and loading, lifecycle, routing, silences, inhibition, precedence and grouping) plus summary at 08; merged the diagnostic parts into the topics they repeated, fixed the rule ConfigMap label selector (prometheus-name=) and the resend-delay claim, added Mermaid diagrams and API checkpoints; manifest, README and quiz repointed; parts 01, 03 (lifecycle readings), 04 and 05 keep prior runtime evidence, new commands in 02, 03, 06 and 07 are unverified"
 - key: section-010/quiz
   kind: quiz
   what: 'knowledge check for section-010: Metrics And Alerting With Prometheus'

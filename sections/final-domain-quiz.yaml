@@ -148,7 +148,7 @@ questions:
   difficulty: advanced
   learning_objective: Route alerts by label to a receiver with an AlertmanagerConfig or the Alertmanager configuration
   source_readings:
-  - sections/section-010/module-03/course-03-routing-alerts-with-alertmanager.md
+  - sections/section-010/module-03/course-04-routing-alerts-with-alertmanager.md
   prompt: 'An AlertmanagerConfig in `monitoring` routes `team: frontier` to a webhook. An alert for `team: frontier` fires from a rule in `starfleet`, and the webhook receives nothing. Which cause fits?'
   options:
   - id: a
@@ -170,7 +170,7 @@ questions:
   difficulty: advanced
   learning_objective: Silence an alert for a time window and prove it stops notifying
   source_readings:
-  - sections/section-010/module-03/course-04-silences-and-inhibition.md
+  - sections/section-010/module-03/course-05-silences.md
   prompt: Which silence is safest for muting `ScoutHighErrorRatio` for the `starfleet` team only?
   options:
   - id: a

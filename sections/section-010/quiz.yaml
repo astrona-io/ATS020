@@ -280,7 +280,7 @@ questions:
   difficulty: beginner
   learning_objective: Read an alert's state (inactive, pending, firing) in Prometheus and in Alertmanager
   source_readings:
-  - sections/section-010/module-03/course-02-the-alert-lifecycle.md
+  - sections/section-010/module-03/course-03-the-alert-lifecycle.md
   prompt: 'An alert has `for: 1m`. The expression has returned a result for 20 seconds. In which state is the alert in Prometheus, and does Alertmanager receive it yet?'
   options:
   - id: a
@@ -302,7 +302,7 @@ questions:
   difficulty: intermediate
   learning_objective: Read an alert's state (inactive, pending, firing) in Prometheus and in Alertmanager
   source_readings:
-  - sections/section-010/module-03/course-02-the-alert-lifecycle.md
+  - sections/section-010/module-03/course-03-the-alert-lifecycle.md
   prompt: "`ScoutHighErrorRatio` shows `firing` in Prometheus, but nobody got a message. What is the best next step?"
   options:
   - id: a
@@ -324,7 +324,7 @@ questions:
   difficulty: advanced
   learning_objective: Route alerts by label to a receiver with an AlertmanagerConfig or the Alertmanager configuration
   source_readings:
-  - sections/section-010/module-03/course-03-routing-alerts-with-alertmanager.md
+  - sections/section-010/module-03/course-04-routing-alerts-with-alertmanager.md
   prompt: 'An AlertmanagerConfig in `monitoring` routes `team: frontier` to a webhook. An alert for `team: frontier` fires from a rule in `starfleet`, and the webhook receives nothing. Which cause fits?'
   options:
   - id: a
@@ -346,7 +346,7 @@ questions:
   difficulty: intermediate
   learning_objective: Silence an alert for a time window and prove it stops notifying
   source_readings:
-  - sections/section-010/module-03/course-04-silences-and-inhibition.md
+  - sections/section-010/module-03/course-05-silences.md
   prompt: During maintenance you silence `ScoutHighErrorRatio` for 30 minutes. What do you see?
   options:
   - id: a
@@ -368,7 +368,7 @@ questions:
   difficulty: advanced
   learning_objective: Silence an alert for a time window and prove it stops notifying
   source_readings:
-  - sections/section-010/module-03/course-04-silences-and-inhibition.md
+  - sections/section-010/module-03/course-05-silences.md
   prompt: Which silence is safest for muting `ScoutHighErrorRatio` for the `starfleet` team only?
   options:
   - id: a
@@ -435,7 +435,7 @@ questions:
   difficulty: intermediate
   learning_objective: Distinguish rule loading from inactive alert state
   source_readings:
-  - sections/section-010/module-03/course-06-select-and-prove-loaded-rules.md
+  - sections/section-010/module-03/course-02-selecting-and-loading-prometheusrules.md
   prompt: A PrometheusRule exists in starfleet with release=outpost. Prometheus selects
     all namespaces and release=kps. Its alert is absent from the alerts API. What
     should you do first?
@@ -463,7 +463,7 @@ questions:
   difficulty: intermediate
   learning_objective: Predict nested route matching and continuation
   source_readings:
-  - sections/section-010/module-03/course-07-route-precedence-and-merging.md
+  - sections/section-010/module-03/course-07-route-precedence-and-grouping.md
   prompt: A matching team route has a parent receiver and two children. The first
     matches severity=warning and has continue=true. The second matches alertname=~"Scout.*".
     A warning ScoutErrorRate alert matches both. Which receivers handle it?
@@ -490,7 +490,7 @@ questions:
   difficulty: intermediate
   learning_objective: Diagnose suppression after a silence expires
   source_readings:
-  - sections/section-010/module-03/course-08-prove-silencing-and-inhibition.md
+  - sections/section-010/module-03/course-06-inhibition.md
   prompt: A scoped silence has expired. A warning alert is still firing in Prometheus
     and suppressed in Alertmanager. Its silencedBy list is empty and inhibitedBy is
     not empty. What explains this?

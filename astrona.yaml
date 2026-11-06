@@ -164,26 +164,23 @@ modules:
         topic: metrics-and-alerting
         task_kind: troubleshooting
       - type: reading
+        title: "Selecting And Loading PrometheusRules"
+        path: sections/section-010/module-03/course-02-selecting-and-loading-prometheusrules.md
+      - type: reading
         title: "The Alert Lifecycle"
-        path: sections/section-010/module-03/course-02-the-alert-lifecycle.md
+        path: sections/section-010/module-03/course-03-the-alert-lifecycle.md
       - type: reading
         title: "Routing Alerts With Alertmanager"
-        path: sections/section-010/module-03/course-03-routing-alerts-with-alertmanager.md
+        path: sections/section-010/module-03/course-04-routing-alerts-with-alertmanager.md
       - type: reading
-        title: "Silences And Inhibition"
-        path: sections/section-010/module-03/course-04-silences-and-inhibition.md
+        title: "Silences"
+        path: sections/section-010/module-03/course-05-silences.md
       - type: reading
-        title: "Diagnose Alert Evaluation And Delivery"
-        path: sections/section-010/module-03/course-05-diagnose-alert-evaluation.md
+        title: "Inhibition"
+        path: sections/section-010/module-03/course-06-inhibition.md
       - type: reading
-        title: "Select And Prove Loaded Rules"
-        path: sections/section-010/module-03/course-06-select-and-prove-loaded-rules.md
-      - type: reading
-        title: "Route Precedence And Configuration Merging"
-        path: sections/section-010/module-03/course-07-route-precedence-and-merging.md
-      - type: reading
-        title: "Prove Silencing And Inhibition"
-        path: sections/section-010/module-03/course-08-prove-silencing-and-inhibition.md
+        title: "Route Precedence And Grouping"
+        path: sections/section-010/module-03/course-07-route-precedence-and-grouping.md
       - type: reading
         title: Question
         path: sections/section-010/module-03/labs/lab-01/question.md
@@ -208,7 +205,7 @@ modules:
             url: https://prometheus-operator.dev/docs/api-reference/api/
       - type: reading
         title: Summary
-        path: sections/section-010/module-03/course-09-summary.md
+        path: sections/section-010/module-03/course-08-summary.md
 
       - type: reading
         title: Question

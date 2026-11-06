@@ -9,7 +9,18 @@ A **rule** is a PromQL expression that Prometheus evaluates on a fixed interval,
 - A **recording rule** stores the result of its expression as a new time series under the name in `record`. Dashboards and alerts then read that cheap, precomputed series instead of running the full query again.
 - An **alerting rule** raises an alert named in `alert` for every series its expression returns. The expression is usually a comparison, such as "error ratio greater than 5%", so it returns series only while the condition is true.
 
-Rules live in **groups**. All rules in a group are evaluated in order, on the group's `interval`, so a recording rule can feed an alerting rule placed after it in the same group.
+Rules live in **groups**. All rules in a group are evaluated in order, on the group's `interval`, so a recording rule can feed an alerting rule placed after it in the same group. Groups are independent of each other: Prometheus spreads their start times over the interval, and one group never waits for another.
+
+```mermaid
+flowchart TB
+    T["group interval tick"] --> R["recording rule"]
+    R -->|"writes series"| S["namespace:http_requests_error_ratio:rate1m"]
+    S -->|"read by"| A["alerting rule"]
+    A -->|"series returned"| F["alert instance"]
+    A -->|"no series"| I["inactive"]
+```
+
+The diagram shows one evaluation of the group written below: the recording rule runs first and stores its series, and the alerting rule after it reads that series in the same tick.
 
 ## Which rules Prometheus reads
 
@@ -116,7 +127,7 @@ promql 'namespace:http_requests_error_ratio:rate1m'
 
 It prints nothing, and that is correct. `scout` has never answered with a `5xx`, so the selector `status=~"5.."` finds no series, the top half of the division is empty, and an empty side makes the whole result empty. The ratio is not `0`; it does not exist. That is also why the alert is `inactive`: its expression returns nothing, which counts as "condition false".
 
-You can now write recording and alerting rules in a PrometheusRule, get them picked up by the right label, and check that Prometheus loaded them. The alert has never fired, though. The open question is what happens between "the condition is true" and "someone is told".
+You can now write recording and alerting rules in a PrometheusRule, get them picked up by the right label, and check that Prometheus loaded them. The list above proves the end of the path, not the path itself. The open question is what happened between `kubectl apply` and that list, and where a rule can get lost on the way.
 
 ## Common pitfalls
 
