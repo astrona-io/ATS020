@@ -52,6 +52,9 @@ Makes the reader able to get any workload's metrics into Prometheus through the 
     astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-03/playground
     ```
 
+*   **Further reading:** Diagnose evaluation and delivery, select and prove loaded rules, follow route precedence and configuration merging, and prove silencing and inhibition from API status.
+*   **Module lab:** [Route A Team Alert And Silence Maintenance](./module-03/labs/lab-01/README.md) — 25 minutes. Write a selected PrometheusRule, repair a team route to the webhook receiver and create an active 30-minute silence for a separate firing alert.
+
 ### Section Capstone Challenge
 *   **Comprehensive Challenge:** Metrics And Alerting Capstone — `sections/section-010/capstone/labs/lab-01`
     ```bash

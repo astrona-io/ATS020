@@ -4,7 +4,7 @@ kind: question_bank
 id: ats020-010
 course_id: ATS020
 exam_code: CNPE
-status: alpha
+status: draft
 provenance: Original practice material written for this course; not official exam questions.
 scope:
   type: section
@@ -430,3 +430,84 @@ questions:
     explanation: A fixed value does not read the real series.
   correct_option: b
   explanation: A recording rule stores its result as a normal series under the name in `record`. The alert compares that series with the threshold. `rate()` is for counters, and a fixed value never reflects the real ratio.
+- id: ats020-010-q20
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish rule loading from inactive alert state
+  source_readings:
+  - sections/section-010/module-03/course-06-select-and-prove-loaded-rules.md
+  prompt: A PrometheusRule exists in starfleet with release=outpost. Prometheus selects
+    all namespaces and release=kps. Its alert is absent from the alerts API. What
+    should you do first?
+  options:
+  - id: a
+    text: Wait for the for duration; existence proves the rule is loaded.
+    explanation: An object can exist without matching the operator selector.
+  - id: b
+    text: Check the rules API and correct the object label to release=kps.
+    explanation: The operator selects metadata.labels on rule objects. The rules API
+      proves loading; the alerts API alone cannot distinguish ignored rules from inactive
+      rules.
+  - id: c
+    text: Add release=kps only to the alert labels.
+    explanation: Alert labels do not decide object selection.
+  - id: d
+    text: Create a silence for the missing alert.
+    explanation: Silences only suppress received alerts.
+  correct_option: b
+  explanation: The operator selects metadata.labels on rule objects. The rules API
+    proves loading; the alerts API alone cannot distinguish ignored rules from inactive
+    rules.
+- id: ats020-010-q21
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Predict nested route matching and continuation
+  source_readings:
+  - sections/section-010/module-03/course-07-route-precedence-and-merging.md
+  prompt: A matching team route has a parent receiver and two children. The first
+    matches severity=warning and has continue=true. The second matches alertname=~"Scout.*".
+    A warning ScoutErrorRate alert matches both. Which receivers handle it?
+  options:
+  - id: a
+    text: Only the parent receiver.
+    explanation: A parent receiver is a fallback when no child handles the alert.
+  - id: b
+    text: Only the first child receiver.
+    explanation: Continuation permits a later matching sibling.
+  - id: c
+    text: Only the second child receiver.
+    explanation: The first child already matched and also handles the alert.
+  - id: d
+    text: Both child receivers; the parent fallback is unused.
+    explanation: A matching child handles the alert instead of the parent fallback.
+      continue=true on the first matching child allows the later sibling to match
+      too.
+  correct_option: d
+  explanation: A matching child handles the alert instead of the parent fallback.
+    continue=true on the first matching child allows the later sibling to match too.
+- id: ats020-010-q22
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Diagnose suppression after a silence expires
+  source_readings:
+  - sections/section-010/module-03/course-08-prove-silencing-and-inhibition.md
+  prompt: A scoped silence has expired. A warning alert is still firing in Prometheus
+    and suppressed in Alertmanager. Its silencedBy list is empty and inhibitedBy is
+    not empty. What explains this?
+  options:
+  - id: a
+    text: A matching source alert still inhibits the warning alert.
+    explanation: inhibitedBy identifies suppression by inhibition. Expiring a silence
+      removes that silence, but it does not disable a separate inhibition rule.
+  - id: b
+    text: The expired silence still suppresses the warning alert.
+    explanation: The silence is expired and silencedBy is empty.
+  - id: c
+    text: Prometheus stopped evaluating the alerting rule.
+    explanation: The firing state proves evaluation continues.
+  - id: d
+    text: The receiver has already acknowledged the warning alert.
+    explanation: Receiver acknowledgement does not create inhibitedBy.
+  correct_option: a
+  explanation: inhibitedBy identifies suppression by inhibition. Expiring a silence
+    removes that silence, but it does not disable a separate inhibition rule.

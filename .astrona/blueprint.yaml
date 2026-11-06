@@ -142,6 +142,11 @@ sections:
           - The alert lifecycle — inactive, pending for `for:`, firing, resolved
           - Alertmanager routing tree, grouping and receivers
           - Silences and inhibition
+          - Diagnose evaluation, pending timers and delivery through component APIs
+          - Select rule namespaces and rule objects and prove loading
+          - Route precedence, inherited timing and generated namespace scope
+          - Prove suppression with silencedBy and inhibitedBy
+          - Lab — load ScoutErrorRate, repair its team route and silence ProbeMaintenance
         diagrams:
           - type: state
             shows: Alert lifecycle from inactive to pending to firing to resolved

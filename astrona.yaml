@@ -173,8 +173,42 @@ modules:
         title: "Silences And Inhibition"
         path: sections/section-010/module-03/course-04-silences-and-inhibition.md
       - type: reading
+        title: "Diagnose Alert Evaluation And Delivery"
+        path: sections/section-010/module-03/course-05-diagnose-alert-evaluation.md
+      - type: reading
+        title: "Select And Prove Loaded Rules"
+        path: sections/section-010/module-03/course-06-select-and-prove-loaded-rules.md
+      - type: reading
+        title: "Route Precedence And Configuration Merging"
+        path: sections/section-010/module-03/course-07-route-precedence-and-merging.md
+      - type: reading
+        title: "Prove Silencing And Inhibition"
+        path: sections/section-010/module-03/course-08-prove-silencing-and-inhibition.md
+      - type: reading
+        title: Question
+        path: sections/section-010/module-03/labs/lab-01/question.md
+      - type: lab
+        title: "Route A Team Alert And Silence Maintenance Lab"
+        path: sections/section-010/module-03/labs/lab-01
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: alerting
+        task_kind: troubleshooting
+        tags: [prometheusrule, alerting-rule, alertmanager, alertmanager-route, silence]
+        learning_goals:
+          - Load a team alerting rule and prove it fires on live request metrics
+          - Route the firing alert to the named webhook receiver and prove delivery
+          - Suppress a separate firing alert with a scoped maintenance silence
+        resources:
+          - name: "Prometheus: Alerting rules"
+            url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+          - name: "Alertmanager: Configuration"
+            url: https://prometheus.io/docs/alerting/latest/configuration/
+          - name: "Prometheus Operator: API reference"
+            url: https://prometheus-operator.dev/docs/api-reference/api/
+      - type: reading
         title: Summary
-        path: sections/section-010/module-03/course-05-summary.md
+        path: sections/section-010/module-03/course-09-summary.md
 
       - type: reading
         title: Question
@@ -189,6 +223,7 @@ modules:
       - type: quiz
         title: "Knowledge Check: Metrics And Alerting With Prometheus"
         path: sections/section-010/quiz.yaml
+        question_count: 22
         pass_score: 70
 
   - id: module-020

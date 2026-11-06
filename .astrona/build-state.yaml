@@ -42,12 +42,12 @@ items:
   kind: course
   what: 'chapter for module 3: Alert With PrometheusRule And Alertmanager'
   status: done
-  note: landing + 4 parts + summary; lifecycle, routing, silence captured live
+  note: "untested: built without booting 2026-11-06; added four diagnostic parts, moved summary to 09, updated landing and summary; existing parts retain prior runtime evidence"
 - key: section-010/quiz
   kind: quiz
   what: 'knowledge check for section-010: Metrics And Alerting With Prometheus'
   status: done
-  note: 'written: quiz.yaml, 19 questions'
+  note: "untested: built without booting 2026-11-06; section quiz has 22 questions, including three on alerting diagnostics"
 - key: section-010/capstone
   kind: capstone
   what: 'capstone lab: Metrics And Alerting Capstone'
@@ -261,3 +261,8 @@ items:
   what: Find services by span tag in Jaeger, change two Deployments and export five traces
   status: done
   note: "untested: built without booting 2026-11-04; Jaeger 2.22.0 serves /api/v3 only for search, so validators count distinct traceId values in the response and compare each trace with the live API; validator logic tested with a stub kubectl and fixtures; astrona validate passes"
+- key: section-010/module-03/lab-01
+  kind: lab
+  what: Route a team alert and silence maintenance
+  status: done
+  note: "untested: built without booting 2026-11-06; reuses section stack; four live-state graders and reference solution; skill structure, CLI JSON schema, pinned CRD schema, Helm render, shell and offline jq checks passed; astrona validate blocked by sandbox denial writing ~/.astrona/.maintenance.lock; runtime success not claimed"

@@ -6,7 +6,9 @@ On a cluster run by the Prometheus Operator, both halves are custom resources. A
 
 Keep one sentence in mind for this module: **Prometheus fires alerts, Alertmanager routes, groups and silences them.** When an alert does not arrive, first find out which of the two dropped it.
 
-The module has four parts. **Recording And Alerting Rules** writes a PrometheusRule with a recording rule for the `scout` error ratio and an alert on top of it. **The Alert Lifecycle** causes errors and follows the alert from `inactive` through `pending` to `firing` and back. **Routing Alerts With Alertmanager** sends the alert to a webhook receiver with an AlertmanagerConfig, and shows what the operator adds to every such route. **Silences And Inhibition** mutes the alert for a planned window and proves that no notification goes out.
+The module starts with four parts. **Recording And Alerting Rules** writes a PrometheusRule with a recording rule for the `scout` error ratio and an alert on top of it. **The Alert Lifecycle** causes errors and follows the alert from `inactive` through `pending` to `firing` and back. **Routing Alerts With Alertmanager** sends the alert to a webhook receiver with an AlertmanagerConfig, and shows what the operator adds to every such route. **Silences And Inhibition** mutes the alert for a planned window and proves that no notification goes out.
+
+Four further parts explain how to diagnose the path. **Diagnose Alert Evaluation And Delivery** separates loading, evaluation and sending. **Select And Prove Loaded Rules** tests namespace and object selectors. **Route Precedence And Configuration Merging** follows nested routes and timing in the generated configuration. **Prove Silencing And Inhibition** creates a scoped silence and checks the source of suppression. The graded lab asks you to load a team alert, route it to a webhook and silence a separate maintenance alert.
 
 ## Learning objectives
 
@@ -17,6 +19,8 @@ After this module you can:
 - Read an alert's state (`inactive`, `pending`, `firing`) in Prometheus and in Alertmanager.
 - Route alerts by label to a receiver with an AlertmanagerConfig.
 - Silence an alert for a time window and prove it stops notifying.
+- Distinguish namespace selection, object selection and evaluation failures.
+- Predict route precedence and identify silencing and inhibition from API status.
 
 ## Before you start
 
