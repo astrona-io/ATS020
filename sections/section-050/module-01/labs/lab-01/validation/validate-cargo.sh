@@ -38,7 +38,14 @@ done
 REASON="$(kubectl -n starfleet get pods -l app=cargo --field-selector status.phase=Running -o jsonpath='{.items[0].status.containerStatuses[0].lastState.terminated.reason}' 2>/dev/null)"
 [ "$REASON" != "OOMKilled" ] || fail "the running cargo pod was OOMKilled before; the limit is still too low"
 
-CODE="$(kubectl -n starfleet exec deploy/shuttle -- curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://cargo:8080/ 2>/dev/null)"
+# cargo has no readiness probe, so the pod is Ready before the Node.js process
+# listens; give the process and the Service endpoint a minute to settle.
+CODE=""
+for attempt in $(seq 1 12); do
+  CODE="$(kubectl -n starfleet exec deploy/shuttle -- curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://cargo:8080/ 2>/dev/null)"
+  [ "$CODE" = "200" ] && break
+  sleep 5
+done
 [ "$CODE" = "200" ] || fail "shuttle got '$CODE' from http://cargo:8080/, expected 200"
 
 echo "PASS: cargo has a memory limit of $LIMIT, is Ready and answers 200"

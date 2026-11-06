@@ -27,7 +27,13 @@ sleep 25
 AFTER="$(kubectl -n starfleet get pod "$POD" -o jsonpath='{.status.containerStatuses[0].restartCount}' 2>/dev/null)"
 [ -n "$AFTER" ] && [ "$BEFORE" = "$AFTER" ] || fail "the probe pod is still restarting (restart count $BEFORE then ${AFTER:-unknown}). Read the Unhealthy events of the pod"
 
-CODE="$(kubectl -n starfleet exec deploy/shuttle -- curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://probe:8080/ 2>/dev/null)"
+# Give the new probe pod and the Service endpoint a minute to settle.
+CODE=""
+for attempt in $(seq 1 12); do
+  CODE="$(kubectl -n starfleet exec deploy/shuttle -- curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://probe:8080/ 2>/dev/null)"
+  [ "$CODE" = "200" ] && break
+  sleep 5
+done
 [ "$CODE" = "200" ] || fail "shuttle got '$CODE' from http://probe:8080/, expected 200"
 
 echo "PASS: probe keeps its liveness probe, is Ready, does not restart and answers 200"
