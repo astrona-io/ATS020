@@ -265,6 +265,29 @@ modules:
         topic: dashboards-and-logs
         task_kind: troubleshooting
       - type: reading
+        title: Question
+        path: sections/section-020/module-01/labs/lab-02/question.md
+      - type: lab
+        title: "Bring Grafana Back After A Namespace Move Lab"
+        path: sections/section-020/module-01/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 25m
+        topic: grafana
+        task_kind: troubleshooting
+        tags: [grafana, troubleshooting, secrets, volumes, resource-limits, oomkilled]
+        learning_goals:
+          - Read a Pod's status and events to find why a container does not start, one fault at a time
+          - Replace a read-only ConfigMap volume behind a data directory with a writable volume
+          - Add the Secret key a container reads instead of renaming the environment variable
+          - Raise a memory limit that kills a container on start and confirm the rollout and the login
+        resources:
+          - name: "Grafana: Configure Grafana"
+            url: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
+          - name: "Kubernetes: Secrets"
+            url: https://kubernetes.io/docs/concepts/configuration/secret/
+          - name: "Kubernetes: Debug Pods"
+            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+      - type: reading
         title: Summary
         path: sections/section-020/module-01/course-05-summary.md
 
@@ -447,6 +470,28 @@ modules:
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
           - name: "Kubernetes: kubectl scale"
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
+      - type: reading
+        title: Question
+        path: sections/section-030/module-01/labs/lab-03/question.md
+      - type: lab
+        title: "Export The Exceptions Of A Failed Trace Lab"
+        path: sections/section-030/module-01/labs/lab-03
+        difficulty: intermediate
+        estimated_duration: 20m
+        topic: tracing
+        task_kind: troubleshooting
+        tags: [jaeger, opentelemetry, otlp, span-status, exception-event]
+        learning_goals:
+          - Find the service whose spans carry the status ERROR in the Jaeger web interface and through the /api/v3 query API
+          - Export the exception span events of a failed trace as a JSON array with jq
+          - Read the exception message to find the cause and repair the Deployment environment variable behind it
+        resources:
+          - name: "Jaeger 2.22 documentation"
+            url: https://www.jaegertracing.io/docs/2.22/
+          - name: "OpenTelemetry semantic conventions: exceptions on spans"
+            url: https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/
+          - name: "Kubernetes: kubectl set env"
+            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
       - type: reading
         title: Summary
         path: sections/section-030/module-01/course-07-summary.md

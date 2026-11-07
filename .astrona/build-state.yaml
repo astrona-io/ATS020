@@ -266,3 +266,13 @@ items:
   what: Route a team alert and silence maintenance
   status: done
   note: "untested: built without booting 2026-11-06; reuses section stack; four live-state graders and reference solution; skill structure, CLI JSON schema, pinned CRD schema, Helm render, shell and offline jq checks passed; astrona validate blocked by sandbox denial writing ~/.astrona/.maintenance.lock; runtime success not claimed"
+- key: section-020/module-01/labs/lab-02
+  kind: lab
+  what: Bring Grafana Back After A Namespace Move (25m)
+  status: done
+  note: "untested: built without booting 2026-11-07; plain manifests, no Helm; three layered faults (missing ConfigMap volume, missing Secret key, 32Mi memory limit) fixable only through limits, Secrets and volumes; three graders (rollout plus /api/health, basic-auth login through port-forward, allowed-changes diff); grader jq logic checked offline against the manifest; live startup and grading untested"
+- key: section-030/module-01/lab-03
+  kind: lab
+  what: Find the service with error spans in Jaeger, export its exception span events as JSON and repair the target address
+  status: done
+  note: "untested: built without booting 2026-11-07; CNPE exam-scenario gap (error trace with exception events to a file); same Jaeger 2.22.0 in-memory fixture as lab-02, probe calls a Service that does not exist and records status code 2 plus an exception span event; graders accept status.code 2 or STATUS_CODE_ERROR, compare exported (type, message) pairs with the live API and require an error-free trace from the new pod; jq filters checked with fixtures and a stub kubectl; bash -n passed; astrona validate, live startup and grading untested"

@@ -4,7 +4,7 @@ Metrics tell you that something is slow. They do not tell you which step of a re
 
 The three components are an instrumented application, an OpenTelemetry Collector and a trace backend. The application creates spans, the Collector receives, batches and forwards them, and Jaeger stores and shows them. On Kubernetes, the OpenTelemetry Operator runs the Collector for you from one custom resource, the OpenTelemetryCollector. When no trace arrives, the first question is which of the three stopped it.
 
-The module has six parts. **The Operator And Its Webhook** installs the Operator after cert-manager and proves that its webhook answers. **A Collector With An OTLP Receiver And A Jaeger Exporter** writes the OpenTelemetryCollector for `scout` and shows what the Operator builds. **Reading A Trace In Jaeger** defines traces and spans and finds them with the API. **Choosing A Collector Mode** creates a gateway, an agent and a sidecar. **Diagnosing A Broken Collector Pipeline** fixes two faults and ends with a graded lab. **Finding A Service By Tag And Acting On It** searches Jaeger by a span tag, changes the Deployments that the search points to, saves traces to a file and ends with a second graded lab.
+The module has six parts. **The Operator And Its Webhook** installs the Operator after cert-manager and proves that its webhook answers. **A Collector With An OTLP Receiver And A Jaeger Exporter** writes the OpenTelemetryCollector for `scout` and shows what the Operator builds. **Reading A Trace In Jaeger** defines traces and spans and finds them with the API. **Choosing A Collector Mode** creates a gateway, an agent and a sidecar. **Diagnosing A Broken Collector Pipeline** fixes two faults and ends with a graded lab. **Finding A Service By Tag And Acting On It** searches Jaeger by a span tag, changes the Deployments that the search points to, saves traces to a file, finds the spans that ended with an error and their exception events, and ends with two graded labs.
 
 ## Learning objectives
 
@@ -17,6 +17,7 @@ After this module you can:
 - Diagnose a broken pipeline from the Service ports, the Collector log and the Collector counters.
 - Find a service by a span tag in the Jaeger web interface and API, detect whether an older server serves the legacy search routes, and change the Deployment behind it.
 - Save an exact number of traces for a service as JSON, and count them by trace ID.
+- Find the service whose spans carry the status `ERROR`, export their `exception` span events as JSON, and fix the cause the exception message names.
 
 ## Before you start
 

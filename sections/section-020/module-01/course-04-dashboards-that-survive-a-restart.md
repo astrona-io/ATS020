@@ -184,3 +184,15 @@ You can now export a dashboard model, store it in a labelled ConfigMap, and prov
 > - **Testing only a container restart.** An `emptyDir` survives that restart. Replace the pod to test recovery from lost temporary storage.
 > - **Keeping the old port-forward.** It points at the deleted pod. Start it again before checking the new instance.
 > - **Editing only Grafana's database.** Provisioning loads the file again; put lasting changes in the ConfigMap.
+
+## Your mission: Bring Grafana Back After A Namespace Move Lab
+
+You can now say what a Grafana pod needs to start: a writable data directory, the Secret its environment variables read, and enough memory. The lab gives you a Grafana Deployment that was moved to a new namespace and no longer starts. You read the Pod's status, events and logs, and fix every fault by changing only resource limits, Secrets and volumes.
+
+```sh
+astrona stop ats-020-playground-020-01
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-01/labs/lab-02
+astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-01/labs/lab-02
+astrona destroy ats-020-lab-020-01-02
+astrona start ats-020-playground-020-01
+```

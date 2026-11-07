@@ -32,6 +32,7 @@ Makes the reader able to run an OpenTelemetry Collector with the OpenTelemetry O
     astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-01/playground
     ```
 *   **Tag search reading and lab:** Find services by a span tag, change one Deployment's environment variable, scale another and export five traces: `sections/section-030/module-01/labs/lab-02` (20 minutes).
+*   **Error trace lab:** Find the service whose spans end with the status `ERROR`, export the `exception` span events of a trace as JSON and repair the address the Deployment calls: `sections/section-030/module-01/labs/lab-03` (20 minutes).
 
 ### 2. Add Tracing Without Code Changes Using Auto-Instrumentation
 *   **Module Reader:** **[Module 2: Add Tracing Without Code Changes Using Auto-Instrumentation](./module-02/course.md)**

@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-030-01-03
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+    # Compatibility aliases for the skill's structural checker.
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - jaegertracing/jaeger:2.22.0
+      - python:3.13.18-alpine3.24
+bootstrap:
+  init:
+    - name: prepare
+      description: Check that the terminal has kubectl, curl and jq, and remove the two answer files left by an earlier attempt
+      type: file
+      source: bootstrap/01-prepare.sh
+  manifests:
+    - name: lab-start
+      description: Jaeger 2.22.0 with in-memory storage, two healthy workloads and one workload whose spans end in an error with an exception event
+      type: file
+      source: manifests/lab-start.yaml
+  waitFor:
+    - resource: deploy/jaeger
+      namespace: observability
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/probe
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+testing:
+  init:
+    - name: wait-for-traces
+      description: Wait until Jaeger holds a probe trace with an exception event
+      type: file
+      source: testing/wait-for-traces.sh
+    - name: solution
+      description: Name the failing service, export its exception events and repair the target address
+      type: file
+      source: solution/apply.sh
+validation:
+  scripts:
+    - name: service-named
+      description: The answer file names the one service whose spans carry an error status
+      type: file
+      source: validation/validate-service-named.sh
+    - name: exceptions-exported
+      description: The export file is a JSON array of exception events that exist in the running Jaeger for that service
+      type: file
+      source: validation/validate-exceptions-exported.sh
+    - name: cause-fixed
+      description: The Deployment probe calls http://shuttle.starfleet:8080, finished its rollout, and its new traces have no error
+      type: file
+      source: validation/validate-cause-fixed.sh
+teardown:
+  keepCluster: false
