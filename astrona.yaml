@@ -49,16 +49,16 @@ modules:
     content:
       - type: reading
         title: Introduction
-        path: sections/intro/README.md
+        path: sections/intro/00-introduction.md
       - type: reading
         title: "Welcome To The Course"
-        path: sections/intro/course-01-welcome.md
+        path: sections/intro/10-welcome.md
       - type: reading
         title: "Get Your Machine Ready"
-        path: sections/intro/course-02-get-your-machine-ready.md
+        path: sections/intro/20-get-your-machine-ready.md
       - type: reading
         title: "How This Course Is Made"
-        path: sections/intro/course-03-how-this-course-is-made.md
+        path: sections/intro/30-how-this-course-is-made.md
 
   - id: module-010
     title: "Metrics And Alerting With Prometheus"
