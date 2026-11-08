@@ -1,12 +1,12 @@
 ---
-title: "Welcome To The Course"
+title: "Get Your Machine Ready"
 maturity: published
 reviewed: "2026-11-08"
 ---
 
 # Get Your Machine Ready
 
-Every playground and lab in this course runs locally on your machine in a small Kubernetes cluster in `kind` or in a `vm` . The `astrona` CLI creates and configures the environment, grades your lab work, and removes the environment when you are finished.
+Every playground and lab in this course runs locally on your machine in a small Kubernetes cluster in `kind` or in a `vm`. The `astrona` CLI creates and configures the environment, grades your lab work, and removes the environment when you are finished.
 
 This page walks you through the required tools, introduces the `astrona` commands you will use throughout the course, and explains how to troubleshoot problems when an environment fails to start.
 
