@@ -1,95 +1,50 @@
+---
+title: "Welcome To The Course"
+maturity: published
+reviewed: "2026-11-08"
+---
+
 # Get Your Machine Ready
 
-Every playground and lab in this course runs on your own machine, in a small Kubernetes cluster. A tool called `astrona` builds it for you, sets it up, grades your work and removes it again. This page gets your machine ready: first the tools you need, then the handful of `astrona` commands you will use every day, and last what to do when a start goes wrong.
+Every playground and lab in this course runs locally on your machine in a small Kubernetes cluster in `kind` or in a `vm` . The `astrona` CLI creates and configures the environment, grades your lab work, and removes the environment when you are finished.
+
+This page walks you through the required tools, introduces the `astrona` commands you will use throughout the course, and explains how to troubleshoot problems when an environment fails to start.
 
 ## What you need
 
-Every section needs the same set of tools. Install these before you start:
+All playgrounds and labs use the same tools. Have the following installed before you begin:
 
-- **A container engine:** Docker or Podman. The cluster runs inside it.
-- **`kind`:** runs Kubernetes inside the container engine.
-- **`kubectl`:** talks to the cluster.
-- **The astrona command-line tool.**
-- **`jq`:** reads the JSON that `kubectl` and the Prometheus API print, so you can pick out one field.
-- **A web browser:** you open Prometheus, Grafana and Jaeger through `kubectl port-forward`.
+| Tool | What you use it for |
+| --- | --- |
+| **Docker or Podman** | Runs the containers that make up your local Kubernetes cluster. |
+| **`kind`** | Creates a Kubernetes cluster inside Docker or Podman. |
+| **`kubectl`** | Interacts with the cluster to manage resources and inspect workloads. |
+| **`astrona` CLI** | Creates and manages playgrounds and labs, and submits your work for grading. |
+| **`jq`** | Extracts specific fields from JSON returned by `kubectl` and the Prometheus API. |
+| **Web browser** | Opens Prometheus, Grafana, and Jaeger through connections created with `kubectl port-forward`. |
 
-The playgrounds and labs also need **outbound internet** while they start. They download Helm charts and container images for Prometheus, Grafana, the OpenTelemetry Operator and Jaeger, and install Helm for themselves if your machine does not have it. Without outbound internet, those starts fail with network errors that have nothing to do with the module. These tools also need memory: give your container engine at least 8 GiB, and expect the modules with a GitOps controller to be the slowest to start.
+### Memory and internet access
 
-You do not have to check all of this by hand. Let `astrona` look at your machine for you:
+Allocate **at least 8 GiB of memory** to your container engine.
+
+You also need **outbound internet access during startup**. The environments download Helm charts and container images for Prometheus, Grafana, the OpenTelemetry Operator, and Jaeger. They also install Helm automatically if it is missing.
+
+Without internet access, startup will fail with network errors. Modules that include a GitOps controller may take longer to start.
+
+### Set up your machine
+
+Run the following command to check for missing prerequisites and get help installing them:
 
 ```sh
 astrona setup
 ```
 
-`astrona setup` looks at what is missing, shows you each step it would take, and asks before it does anything. On macOS it can install `kind`, `kubectl` and Podman. Install `jq` yourself.
+`astrona setup` identifies what is missing, explains the proposed steps, and asks for confirmation before making changes. On macOS, it can install `kind`, `kubectl`, and Podman. You must install `jq` separately.
 
-Later, you can check your machine at any time:
+### Check your machine
+
+You can check whether your machine meets the requirements at any time:
 
 ```sh
 astrona check
 ```
-
-## The commands you use every day
-
-Once your machine is ready, you need only a handful of `astrona` commands. Each module page and lab page shows the exact command to copy, so you do not need to remember paths. This section walks through them in the order you meet them: sign in, start, pause, submit and clean up.
-
-Labs from the course catalog are tied to your Astrona account, so you sign in first:
-
-```sh
-astrona login
-```
-
-Next you start a playground or a lab. Each module page and lab page shows the exact `astrona run` command for it. It looks like this:
-
-```sh
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-01/playground
-```
-
-When the cluster is ready, `kubectl` already points at it.
-
-A chapter that sends you to a lab asks you to pause the playground first. Pausing frees your machine's memory but keeps everything you built:
-
-```sh
-astrona stop <name>
-```
-
-When the lab is done, start the playground again and carry on where you left off:
-
-```sh
-astrona start <name>
-```
-
-Inside a lab, you send your work for grading with `astrona submit`. The grader checks the live cluster. It queries Prometheus, reads traces from Jaeger and sends real requests from the `shuttle` pod, so your work has to actually work, not only make an error message go away. Each lab page shows the exact command:
-
-```sh
-astrona submit -c sections/section-010/module-01/labs/lab-01
-```
-
-A submit is final. A pass or a fail finishes the attempt and deletes the lab, so submit once, when you are done. To see your checks change while you work, run `astrona submit --watch` with the same arguments in a second terminal. It grades every few seconds, records nothing and stops with Ctrl-C.
-
-When you are done with a playground or a lab, remove it:
-
-```sh
-astrona destroy <name>
-```
-
-The name is the environment's name, printed by `astrona run` and shown on each page (for example `ats-020-playground-010-01`). It is not the folder path. To see what is on your machine, list it:
-
-```sh
-astrona list
-```
-
-> [!WARNING]
-> **Run one environment at a time.** Each playground and lab is a whole cluster, and the monitoring tools in this course use a lot of memory. Two running at once slow your machine down, and it is easy to send a command to the wrong one. Pause or destroy the playground before you start the lab.
-
-## When a start goes wrong
-
-Sometimes a playground or lab does not start cleanly. Ask `astrona` what is wrong before you try anything else:
-
-```sh
-astrona doctor
-```
-
-It checks your machine, the lab's configuration and the running lab, and tells you how to fix what it finds.
-
-If a start fails while it downloads something, check your network first. If it fails while it waits for pods, check that your container engine has enough memory. Remember also that a playground that starts with a failing pod is often broken on purpose: the module's landing page tells you when that is the case. With your machine ready and these commands at hand, you can start the first module.
