@@ -1,4 +1,4 @@
-# Section 030: Distributed Tracing With OpenTelemetry And Jaeger
+# Distributed Tracing With OpenTelemetry And Jaeger
 
 Makes the reader able to run an OpenTelemetry Collector with the OpenTelemetry Operator, send traces to Jaeger, and add tracing to an application without changing its code. It comes after metrics and logs because tracing reuses the Collector pipeline idea and answers the question metrics cannot — where in a chain of services the time went.
 

@@ -1,4 +1,4 @@
-# Section 010: Metrics And Alerting With Prometheus
+# Metrics And Alerting With Prometheus
 
 Makes the reader able to get any workload's metrics into Prometheus through the Prometheus Operator or raw scrape configuration, query them with PromQL, and turn a query into an alert that reaches a receiver. It comes first because every later section (dashboards, SLOs, DORA metrics, incident triage) reads these metrics.
 

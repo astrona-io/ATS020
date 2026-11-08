@@ -1,4 +1,4 @@
-# Section 040: Measuring Platform Efficiency
+# Measuring Platform Efficiency
 
 Makes the reader able to measure how well the platform delivers and how well it uses resources: the four DORA metrics from GitOps history, service level objectives with error budgets, and the gap between requested and used CPU and memory. It comes after the collection sections because every number here is a Prometheus query on data those sections taught to collect.
 

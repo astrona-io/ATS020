@@ -1,4 +1,4 @@
-# Section 050: Diagnosing And Remediating Incidents
+# Diagnosing And Remediating Incidents
 
 Makes the reader able to find and fix the cause of a broken workload or a broken platform component, using events, logs, status conditions and metrics, and to prove the fix. It comes last because it uses every tool the earlier sections taught, under the time pressure of an incident.
 

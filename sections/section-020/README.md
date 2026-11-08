@@ -1,4 +1,4 @@
-# Section 020: Dashboards And Logs
+# Dashboards And Logs
 
 Makes the reader able to show metrics on a Grafana dashboard that is stored as code, and to collect pod logs with the OpenTelemetry Collector, enrich and filter them, and turn error lines into a Prometheus metric that a dashboard can draw. It also stores logs in Loki, queries them with LogQL and acts on the result. It follows metrics because dashboards draw PromQL queries, and logs are the next signal an operator reads.
 
