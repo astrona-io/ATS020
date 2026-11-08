@@ -1,38 +1,55 @@
+---
+title: "How This Course Is Made"
+maturity: published
+reviewed: "2026-11-08"
+---
+
 # How This Course Is Made
 
-You will trust a course more when you know how it is built. This page tells you how the content is written and checked, who is behind it, and how you can help make it better.
+This page explains how the course content is written and reviewed, introduces the people behind it, and shows how you can contribute improvements.
 
 ## How the content is written
 
-The course targets one version of each tool. Everything is built and checked on **Kubernetes 1.35**, the version the exam uses, with fixed versions of Prometheus, Grafana, the OpenTelemetry Collector and Jaeger. When a page says how a tool behaves, it means that version.
+The course uses fixed versions of Kubernetes, Prometheus, Grafana, the OpenTelemetry Collector, and Jaeger. All environments and examples are built and checked against those versions. Descriptions of a tool’s behaviour refer to the version used in the course.
 
-Facts come from real sources. They are checked against the official documentation of each tool: the Prometheus and Prometheus Operator documentation, the OpenTelemetry Collector and Operator documentation, the Jaeger and Grafana documentation, and the Kubernetes debugging pages. Each page then explains everything you need on the page itself, so you never have to leave the course to look something up.
+Technical explanations are checked against official documentation, including the Prometheus and Prometheus Operator documentation, the OpenTelemetry Collector and Operator documentation, the Jaeger and Grafana documentation, and the Kubernetes debugging guides. Each page provides the explanations you need to follow along without having to consult external resources.
 
-Command output is real, too. When a page shows output, it comes from a real run. If the output is shortened, the page says so. If there was no real run to copy from, the page describes the result in words instead of making up output.
+Command output comes from actual runs. When output is shortened, it is clearly marked. If verified output is unavailable, the page describes the expected result in words.
 
-The same care goes into the graded labs, because their graders check behaviour. A grader queries Prometheus, reads traces from Jaeger or sends real requests, and checks that the result is what the task asked for. Many graders also reject the fix that only hides the problem, such as deleting the alert that fires or removing a memory limit instead of sizing it. Each lab also has a reference solution that is run against its own grader, so the grader is known to accept a correct answer.
+Graded labs follow the same approach. Their graders check behaviour by querying Prometheus, reading traces from Jaeger, or sending real requests and inspecting the responses. Many graders also check for changes that hide a problem without resolving it, such as deleting a firing alert or removing a memory limit instead of adjusting it appropriately. Each lab includes a reference solution that is tested against its grader to verify that a correct solution passes.
 
-The pages are written in plain English, for people who are not native English speakers and have no university degree. Words are written out in full, and each technical term gets a short, plain definition the first time it appears. The pages use the real technical terms, not metaphors, because those are the words you meet in the product, the logs and the exam.
-
-Finally, large parts of this course are drafted and edited with the help of AI tools. A maintainer reviews every change before it is published, and the technical checks above apply to all content, however it was written.
+AI tools help create substantial parts of the course. A maintainer reviews every change before publication, and the same technical checks apply to all content, regardless of how it was written.
 
 ## Maintainers
 
-A small group of people builds and looks after the course. The core maintainer is **Paris Nakita Kejser** ([@parisnakitakejser](https://github.com/parisnakitakejser)).
+The core maintainers develop the course, review contributions, and keep the content accurate and up to date.
 
-Many others have helped along the way. Every person who has changed the course is listed on the GitHub contributors page:
-[github.com/astrona-io/ATS020/graphs/contributors](https://github.com/astrona-io/ATS020/graphs/contributors)
+| Maintainer | GitHub |
+| --- | --- |
+| Paris Nakita Kejser | [@parisnakitakejser](https://github.com/parisnakitakejser) |
+
+### Contributors
+
+Thank you to everyone who has helped improve the course. See the full list on the [GitHub contributors page](https://github.com/astrona-io/ATS020/graphs/contributors).
+
+### Become a maintainer
+
+Interested in becoming a core maintainer? Get in touch—we welcome people who want to help shape and maintain the course.
 
 ## Found a mistake? Report it
 
-Even with these checks, mistakes slip through. If a command fails, a page says something wrong, or a lab grades a correct answer as wrong, please tell us. Every report makes the course better for the next learner. A good report takes four steps:
+Mistakes can slip through despite our checks. If a command fails, an explanation is inaccurate, or a lab rejects a correct solution, please report it. Your feedback helps improve the course for everyone.
 
-1. Open a new issue on GitHub: [github.com/astrona-io/ATS020/issues](https://github.com/astrona-io/ATS020/issues).
-2. Say which page or lab it is (the file path is the easiest, for example `sections/section-010/module-01/labs/lab-01`).
-3. Paste the command you ran and what you saw. Leave out passwords, tokens, private keys or anything else private. Logs and Grafana or Alertmanager configuration can hold secrets, so check them before you paste.
-4. Say what you expected to happen instead.
+To report a problem:
 
-Want to fix it yourself? Pull requests are welcome on the same repository.
+1. [Open a GitHub issue](https://github.com/astrona-io/ATS020/issues/new).
+2. Identify the affected page or lab. Include its file path if possible, such as `sections/section-010/module-01/labs/lab-01`.
+3. Include the command you ran and the output or error you received.
+4. Explain what you expected to happen.
+
+Before sharing output, logs, screenshots, or configuration, remove passwords, tokens, private keys, and other sensitive information. Check Grafana and Alertmanager configuration carefully, as these files may contain credentials.
+
+Want to contribute a fix? Pull requests are welcome in the [course repository](https://github.com/astrona-io/ATS020).
 
 ## License
 
