@@ -16,7 +16,7 @@ questions:
   difficulty: beginner
   learning_objective: Define deployment frequency, lead time for changes, change failure rate and time to restore service
   source_readings:
-  - sections/section-040/module-01/course-01-the-four-dora-metrics-and-where-the-data-lives.md
+  - sections/section-040/module-10/course-010-the-four-dora-metrics-and-where-the-data-lives.md
   prompt: A platform team reports these results for last month. Changes reach production in about 20 minutes after the commit. The team deploys 40 times a week. About one deployment in three needs a rollback, and each rollback takes half a day to finish. Which statement describes the result correctly?
   options:
   - id: a
@@ -38,7 +38,7 @@ questions:
   difficulty: beginner
   learning_objective: Count deployments over a time window from the GitOps controller's sync metrics in Prometheus
   source_readings:
-  - sections/section-040/module-01/course-02-deployment-frequency-from-the-sync-counter.md
+  - sections/section-040/module-10/course-020-deployment-frequency-from-the-sync-counter.md
   prompt: Argo CD exposes the counter `argocd_app_sync_total` with the labels `name` and `phase`. A team wants the number of deployments of the Application `scout` in the last 7 days, as a whole number. The Prometheus server holds more than 7 days of data. Which query does this?
   options:
   - id: a
@@ -60,7 +60,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate change failure rate and time to restore from failed and recovered deployments
   source_readings:
-  - sections/section-040/module-01/course-03-change-failure-rate-from-application-health.md
+  - sections/section-040/module-10/course-030-change-failure-rate-from-application-health.md
   prompt: The Application `scout` was deployed ten times. In two of those deployments the image tag did not exist, and the new pods stayed in `ImagePullBackOff`. A recording rule counts `argocd_app_sync_total{name="scout",phase=~"Failed|Error"}` as the failed deployments, and the change failure rate it returns is `0`. What is the cause, and what is the fix?
   options:
   - id: a
@@ -82,7 +82,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate change failure rate and time to restore from failed and recovered deployments
   source_readings:
-  - sections/section-040/module-01/course-03-change-failure-rate-from-application-health.md
+  - sections/section-040/module-10/course-030-change-failure-rate-from-application-health.md
   prompt: The flag `max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0` is `1` while the Application is `Degraded` and `0` otherwise. The Application was `Degraded` twice in the last 6 hours, and it is healthy now. A rule applies `changes()` to the flag over a 6 hour subquery. Which value does `changes()` return, and what must the rule do to get the failed deployments?
   options:
   - id: a
@@ -104,7 +104,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate lead time from a commit time in Git and the sync time recorded by the controller
   source_readings:
-  - sections/section-040/module-01/course-04-lead-time-and-time-to-restore-from-timestamps.md
+  - sections/section-040/module-10/course-040-lead-time-and-time-to-restore-from-timestamps.md
   prompt: The Application history of `scout` has an entry with `revision` `736f9f2...` and `deployedAt` `2026-11-02T19:53:26Z`. The Git commit with the same hash has the committer date `2026-11-02T19:47:24Z`. The team squashes pull requests when it merges, and `736f9f2...` is the merge commit. What is the lead time for changes of this deployment, and why does the join work?
   options:
   - id: a
@@ -126,7 +126,7 @@ questions:
   difficulty: intermediate
   learning_objective: Name one change to the delivery process that improves each metric
   source_readings:
-  - sections/section-040/module-01/course-04-lead-time-and-time-to-restore-from-timestamps.md
+  - sections/section-040/module-10/course-040-lead-time-and-time-to-restore-from-timestamps.md
   prompt: A team has a change failure rate of 30 percent. Most failures are image tags that do not exist, and every one is found only after the deployment. Which change to the delivery process lowers the change failure rate the most?
   options:
   - id: a
@@ -148,7 +148,7 @@ questions:
   difficulty: beginner
   learning_objective: Calculate the remaining error budget for a 99% SLO over a window
   source_readings:
-  - sections/section-040/module-02/course-01-sli-slo-and-error-budget-from-request-counters.md
+  - sections/section-040/module-20/course-010-sli-slo-and-error-budget-from-request-counters.md
   prompt: A service has an SLO of 99 percent of successful requests over 30 days. In the last 30 days it served 2,000,000 requests. So far 12,000 of them failed. How much of the error budget is left?
   options:
   - id: a
@@ -170,7 +170,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write an SLI as a PromQL ratio of good requests to all requests
   source_readings:
-  - sections/section-040/module-02/course-01-sli-slo-and-error-budget-from-request-counters.md
+  - sections/section-040/module-20/course-010-sli-slo-and-error-budget-from-request-counters.md
   prompt: The counter `http_requests_total` has a `status` label with the values `200`, `404` and `500`. The SLI of `scout` is the share of requests that did not end with a `5xx` status. Which query returns the SLI of the whole service, over the last 5 minutes?
   options:
   - id: a
@@ -192,7 +192,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write a burn-rate alert that fires when the budget would run out early
   source_readings:
-  - sections/section-040/module-02/course-02-burn-rate-alerts-with-two-windows.md
+  - sections/section-040/module-20/course-020-burn-rate-alerts-with-two-windows.md
   prompt: The SLO is 99 percent over 30 days. For the last hour, 6 percent of the requests to `scout` failed, and the rate does not change. What is the burn rate, and when is the 30-day error budget used up if nothing changes?
   options:
   - id: a
@@ -214,7 +214,7 @@ questions:
   difficulty: advanced
   learning_objective: Write a burn-rate alert that fires when the budget would run out early
   source_readings:
-  - sections/section-040/module-02/course-02-burn-rate-alerts-with-two-windows.md
+  - sections/section-040/module-20/course-020-burn-rate-alerts-with-two-windows.md
   prompt: A team has a burn-rate alert with the expression `scout:burn_rate:rate5m > 2`. It sends a notification at every short spike of errors, and the team starts to ignore it. A second alert with only a 1 hour window keeps firing for almost an hour after an incident ends. Which design fixes both problems?
   options:
   - id: a
@@ -236,7 +236,7 @@ questions:
   difficulty: intermediate
   learning_objective: Compare container CPU and memory requests with real usage from metrics-server and Prometheus
   source_readings:
-  - sections/section-040/module-02/course-03-requests-versus-usage-with-kubectl-top-and-prometheus.md
+  - sections/section-040/module-20/course-030-requests-versus-usage-with-kubectl-top-and-prometheus.md
   prompt: A team wants the peak memory use of every container in `starfleet` over the last day, next to the memory each container requested. `kubectl top pods --containers` shows only the latest value. Which combination answers the question?
   options:
   - id: a
@@ -258,7 +258,7 @@ questions:
   difficulty: advanced
   learning_objective: Name the workload with the biggest gap and change its requests to match usage
   source_readings:
-  - sections/section-040/module-02/course-04-find-and-fix-over-and-under-provisioned-workloads.md
+  - sections/section-040/module-20/course-040-find-and-fix-over-and-under-provisioned-workloads.md
   prompt: The ratio of the memory request to the peak memory usage over 30 minutes is `7.6` for the container `scout`, `0.45` for `probe` and `1.8` for `shuttle`. The peak of `scout` is about `34Mi` and the peak of `probe` is about `9Mi`. Which statement and action are correct?
   options:
   - id: a

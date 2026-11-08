@@ -16,7 +16,7 @@ questions:
     difficulty: beginner
     learning_objective: "Follow a fixed triage order — status, events, describe, logs, previous logs — to find a pod's failure cause"
     source_readings:
-      - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+      - sections/section-050/module-10/course-010-a-triage-order-and-pending-pods.md
     prompt: |-
       A pod in `starfleet` shows `Pending`. Which command gives the cause fastest?
     options:
@@ -40,7 +40,7 @@ questions:
     difficulty: beginner
     learning_objective: "Fix a Pending pod caused by too-large requests, a missing PersistentVolumeClaim or an unmatched node selector"
     source_readings:
-      - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+      - sections/section-050/module-10/course-010-a-triage-order-and-pending-pods.md
     prompt: |-
       The event of a pending pod reads `0/1 nodes are available: 1 Insufficient cpu`. The node is almost idle in `kubectl top node`. What is the cause?
     options:
@@ -64,7 +64,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix a Pending pod caused by too-large requests, a missing PersistentVolumeClaim or an unmatched node selector"
     source_readings:
-      - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+      - sections/section-050/module-10/course-010-a-triage-order-and-pending-pods.md
     prompt: |-
       The event of a pending pod reads `persistentvolumeclaim "bridge-data" not found`. What fixes it without changing the Deployment?
     options:
@@ -88,7 +88,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe"
     source_readings:
-      - sections/section-050/module-01/course-02-crashloopbackoff-and-failing-probes.md
+      - sections/section-050/module-10/course-020-crashloopbackoff-and-failing-probes.md
     prompt: |-
       A container shows `CrashLoopBackOff`. The describe output shows `Last State: Terminated`, `Reason: Completed`, `Exit Code: 0`, and the events show `Liveness probe failed: HTTP probe failed with statuscode: 404` and `Killing`. What is the cause?
     options:
@@ -112,7 +112,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe"
     source_readings:
-      - sections/section-050/module-01/course-02-crashloopbackoff-and-failing-probes.md
+      - sections/section-050/module-10/course-020-crashloopbackoff-and-failing-probes.md
     prompt: |-
       A pod went from `Error` to `CrashLoopBackOff`. You want the log of the run that crashed, and the current container has just started again. Which command do you run?
     options:
@@ -136,7 +136,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix an OOMKilled container by reading its usage and setting a fitting memory limit"
     source_readings:
-      - sections/section-050/module-01/course-03-oomkilled-and-memory-limits.md
+      - sections/section-050/module-10/course-030-oomkilled-and-memory-limits.md
     prompt: |-
       A container restarts and `kubectl logs --previous` prints nothing. `kubectl describe pod` shows `Last State: Terminated`, `Reason: OOMKilled`, `Exit Code: 137`. Which fix is correct?
     options:
@@ -160,7 +160,7 @@ questions:
     difficulty: advanced
     learning_objective: "Fix an OOMKilled container by reading its usage and setting a fitting memory limit"
     source_readings:
-      - sections/section-050/module-01/course-03-oomkilled-and-memory-limits.md
+      - sections/section-050/module-10/course-030-oomkilled-and-memory-limits.md
     prompt: |-
       Why does the cause of an `OOMKilled` container not appear in the events of the pod?
     options:
@@ -184,7 +184,7 @@ questions:
     difficulty: beginner
     learning_objective: "Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret"
     source_readings:
-      - sections/section-050/module-01/course-04-imagepullbackoff-and-image-references.md
+      - sections/section-050/module-10/course-040-imagepullbackoff-and-image-references.md
     prompt: |-
       The event of a pod reads `Failed to pull image "ghcr.io/stefanprodan/podinfo:6.15.99": ... not found`. What do you change?
     options:
@@ -208,7 +208,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret"
     source_readings:
-      - sections/section-050/module-01/course-04-imagepullbackoff-and-image-references.md
+      - sections/section-050/module-10/course-040-imagepullbackoff-and-image-references.md
     prompt: |-
       A pull event reads `failed to authorize: ... 403 Forbidden`. Which statement is correct?
     options:
@@ -232,7 +232,7 @@ questions:
     difficulty: beginner
     learning_objective: "Find a failing admission webhook from the API server error message and fix its Service without deleting it"
     source_readings:
-      - sections/section-050/module-02/course-01-a-webhook-service-without-endpoints.md
+      - sections/section-050/module-20/course-010-a-webhook-service-without-endpoints.md
     prompt: |-
       `kubectl create` fails with `failed calling webhook "starfleet-policy.astrona.io": ... dial tcp 10.96.155.36:443: connect: connection refused`. The webhook pod is `Running` and `Ready`. What do you check first?
     options:
@@ -256,7 +256,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Prove each fix by the platform behaviour it restores (create succeeds, resource reconciles, sync is Healthy)"
     source_readings:
-      - sections/section-050/module-02/course-01-a-webhook-service-without-endpoints.md
+      - sections/section-050/module-20/course-010-a-webhook-service-without-endpoints.md
     prompt: |-
       A webhook Service has no endpoints. A colleague proposes to set `failurePolicy: Ignore` so creates work again. What happens, and how do you prove a real fix?
     options:
@@ -280,7 +280,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Find an expired webhook serving certificate from the `x509` error text and `openssl`, and replace it"
     source_readings:
-      - sections/section-050/module-02/course-02-an-expired-webhook-certificate.md
+      - sections/section-050/module-20/course-020-an-expired-webhook-certificate.md
     prompt: |-
       A create fails with `tls: failed to verify certificate: x509: certificate has expired or is not yet valid: current time ... is after 2025-01-08T00:00:00Z`. Which step is correct?
     options:
@@ -304,7 +304,7 @@ questions:
     difficulty: advanced
     learning_objective: "Find an expired webhook serving certificate from the `x509` error text and `openssl`, and replace it"
     source_readings:
-      - sections/section-050/module-02/course-02-an-expired-webhook-certificate.md
+      - sections/section-050/module-20/course-020-an-expired-webhook-certificate.md
     prompt: |-
       You signed a new serving certificate with the platform CA and updated the Secret. Creates still fail with the old `x509` expiry error. What is the most likely cause?
     options:
@@ -328,7 +328,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Find a stopped or crashing controller from its Deployment, logs and the resources that stop reconciling"
     source_readings:
-      - sections/section-050/module-02/course-03-a-controller-scaled-to-zero.md
+      - sections/section-050/module-20/course-030-a-controller-scaled-to-zero.md
     prompt: |-
       You create a ServiceMonitor, the API server accepts it, and Prometheus never shows the target. `kubectl get prometheus` shows `RECONCILED True`. What do you check?
     options:
@@ -352,7 +352,7 @@ questions:
     difficulty: advanced
     learning_objective: "Prove each fix by the platform behaviour it restores (create succeeds, resource reconciles, sync is Healthy)"
     source_readings:
-      - sections/section-050/module-02/course-03-a-controller-scaled-to-zero.md
+      - sections/section-050/module-20/course-030-a-controller-scaled-to-zero.md
     prompt: |-
       The Prometheus Operator Deployment was scaled to zero and you scale it to one. Which result proves the fix?
     options:
@@ -377,7 +377,7 @@ questions:
     difficulty: beginner
     learning_objective: "Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git"
     source_readings:
-      - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+      - sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
     prompt: |-
       An Argo CD Application shows sync status `Unknown` and a `ComparisonError` condition that says the app path does not exist. What is the most likely cause?
     options:
@@ -401,7 +401,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git"
     source_readings:
-      - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+      - sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
     prompt: |-
       An Application is `Synced` and `Degraded`. Which step finds the cause?
     options:
@@ -425,7 +425,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git"
     source_readings:
-      - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+      - sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
     prompt: |-
       A `PreSync` hook Job fails. What happens to the sync, and where is the reason?
     options:
@@ -449,7 +449,7 @@ questions:
     difficulty: advanced
     learning_objective: "Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git"
     source_readings:
-      - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+      - sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
     prompt: |-
       A Deployment of a GitOps Application has a bad image tag. You fix it with `kubectl set image`, and a minute later the pods fail again. What is the correct fix?
     options:

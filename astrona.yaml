@@ -1,8 +1,8 @@
 # Course manifest for ATS020 - Observability and Operations (Certified Cloud Native Platform Engineer).
 #
 # One entry per section under `modules:`. Each section lists, in order: its
-# README, then for each module the landing page (course.md), its parts
-# (course-0N-*.md), and right after the part a lab tests, the lab's
+# README, then for each module the landing page (course-000.md), its parts
+# (course-0N0-*.md), and right after the part a lab tests, the lab's
 # question.md reading and the `type: lab` entry. The module's wrap-up page
 # comes last. The section capstone closes the section. Playgrounds are not
 # listed: the landing page's playground marker shows them. solution.md is
@@ -76,38 +76,38 @@ modules:
 
       - type: reading
         title: "Scrape Workloads With ServiceMonitor And PodMonitor"
-        path: sections/section-010/module-01/course.md
+        path: sections/section-010/module-10/course-000.md
       - type: reading
         title: "Targets And The up Metric"
-        path: sections/section-010/module-01/course-01-targets-and-the-up-metric.md
+        path: sections/section-010/module-10/course-010-targets-and-the-up-metric.md
       - type: reading
         title: "Select A Service With A ServiceMonitor"
-        path: sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+        path: sections/section-010/module-10/course-020-select-a-service-with-a-servicemonitor.md
       - type: reading
         title: "Scrape Pods Without A Service With A PodMonitor"
-        path: sections/section-010/module-01/course-03-scrape-pods-with-a-podmonitor.md
+        path: sections/section-010/module-10/course-030-scrape-pods-with-a-podmonitor.md
       - type: reading
         title: "Finding A Missing Target"
-        path: sections/section-010/module-01/course-04-finding-a-missing-target.md
+        path: sections/section-010/module-10/course-040-finding-a-missing-target.md
       - type: reading
         title: Question
-        path: sections/section-010/module-01/labs/lab-01/question.md
+        path: sections/section-010/module-10/labs/lab-01/question.md
       - type: lab
         title: "Get A Workload Scraped With A ServiceMonitor Lab"
-        path: sections/section-010/module-01/labs/lab-01
+        path: sections/section-010/module-10/labs/lab-01
         difficulty: intermediate
         estimated_duration: 20m
         topic: metrics-and-alerting
         task_kind: troubleshooting
       - type: reading
         title: "Scrape Pods With Raw Prometheus Configuration"
-        path: sections/section-010/module-01/course-05-raw-prometheus-configuration.md
+        path: sections/section-010/module-10/course-050-raw-prometheus-configuration.md
       - type: reading
         title: Question
-        path: sections/section-010/module-01/labs/lab-02/question.md
+        path: sections/section-010/module-10/labs/lab-02/question.md
       - type: lab
         title: "Extend Raw Prometheus Discovery And Scale A Workload Lab"
-        path: sections/section-010/module-01/labs/lab-02
+        path: sections/section-010/module-10/labs/lab-02
         difficulty: intermediate
         estimated_duration: 20m
         topic: metrics
@@ -126,67 +126,67 @@ modules:
             url: https://github.com/prometheus/prometheus/blob/v3.15.0/docs/querying/operators.md
       - type: reading
         title: Summary
-        path: sections/section-010/module-01/course-06-summary.md
+        path: sections/section-010/module-10/course-100-summary.md
 
       - type: reading
         title: "Query Metrics With PromQL"
-        path: sections/section-010/module-02/course.md
+        path: sections/section-010/module-20/course-000.md
       - type: reading
         title: "Selecting Time Series"
-        path: sections/section-010/module-02/course-01-selecting-time-series.md
+        path: sections/section-010/module-20/course-010-selecting-time-series.md
       - type: reading
         title: "Counters, Gauges And rate()"
-        path: sections/section-010/module-02/course-02-counters-gauges-and-rate.md
+        path: sections/section-010/module-20/course-020-counters-gauges-and-rate.md
       - type: reading
         title: "Aggregation, Error Ratio And Latency"
-        path: sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+        path: sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
       - type: reading
         title: "Running Queries From The Command Line"
-        path: sections/section-010/module-02/course-04-running-queries-from-the-command-line.md
+        path: sections/section-010/module-20/course-040-running-queries-from-the-command-line.md
       - type: reading
         title: Summary
-        path: sections/section-010/module-02/course-05-summary.md
+        path: sections/section-010/module-20/course-100-summary.md
 
       - type: reading
         title: "Alert With PrometheusRule And Alertmanager"
-        path: sections/section-010/module-03/course.md
+        path: sections/section-010/module-30/course-000.md
       - type: reading
         title: "Recording And Alerting Rules"
-        path: sections/section-010/module-03/course-01-recording-and-alerting-rules.md
+        path: sections/section-010/module-30/course-010-recording-and-alerting-rules.md
       - type: reading
         title: Question
-        path: sections/section-010/module-02/labs/lab-02/question.md
+        path: sections/section-010/module-20/labs/lab-02/question.md
       - type: lab
         title: "Record The Error Ratio And p95 Latency Lab"
-        path: sections/section-010/module-02/labs/lab-02
+        path: sections/section-010/module-20/labs/lab-02
         difficulty: intermediate
         estimated_duration: 25m
         topic: metrics-and-alerting
         task_kind: troubleshooting
       - type: reading
         title: "Selecting And Loading PrometheusRules"
-        path: sections/section-010/module-03/course-02-selecting-and-loading-prometheusrules.md
+        path: sections/section-010/module-30/course-020-selecting-and-loading-prometheusrules.md
       - type: reading
         title: "The Alert Lifecycle"
-        path: sections/section-010/module-03/course-03-the-alert-lifecycle.md
+        path: sections/section-010/module-30/course-030-the-alert-lifecycle.md
       - type: reading
         title: "Routing Alerts With Alertmanager"
-        path: sections/section-010/module-03/course-04-routing-alerts-with-alertmanager.md
+        path: sections/section-010/module-30/course-040-routing-alerts-with-alertmanager.md
       - type: reading
         title: "Silences"
-        path: sections/section-010/module-03/course-05-silences.md
+        path: sections/section-010/module-30/course-050-silences.md
       - type: reading
         title: "Inhibition"
-        path: sections/section-010/module-03/course-06-inhibition.md
+        path: sections/section-010/module-30/course-060-inhibition.md
       - type: reading
         title: "Route Precedence And Grouping"
-        path: sections/section-010/module-03/course-07-route-precedence-and-grouping.md
+        path: sections/section-010/module-30/course-070-route-precedence-and-grouping.md
       - type: reading
         title: Question
-        path: sections/section-010/module-03/labs/lab-01/question.md
+        path: sections/section-010/module-30/labs/lab-01/question.md
       - type: lab
         title: "Route A Team Alert And Silence Maintenance Lab"
-        path: sections/section-010/module-03/labs/lab-01
+        path: sections/section-010/module-30/labs/lab-01
         difficulty: intermediate
         estimated_duration: 25m
         topic: alerting
@@ -205,7 +205,7 @@ modules:
             url: https://prometheus-operator.dev/docs/api-reference/api/
       - type: reading
         title: Summary
-        path: sections/section-010/module-03/course-08-summary.md
+        path: sections/section-010/module-30/course-100-summary.md
 
       - type: reading
         title: Question
@@ -241,35 +241,35 @@ modules:
 
       - type: reading
         title: "Build Grafana Dashboards As Code"
-        path: sections/section-020/module-01/course.md
+        path: sections/section-020/module-10/course-000.md
       - type: reading
         title: "Grafana's Parts And A Provisioned Data Source"
-        path: sections/section-020/module-01/course-01-grafana-parts-and-a-provisioned-data-source.md
+        path: sections/section-020/module-10/course-010-grafana-parts-and-a-provisioned-data-source.md
       - type: reading
         title: "Panels For Rate, Error Ratio And Latency"
-        path: sections/section-020/module-01/course-02-panels-for-rate-error-ratio-and-latency.md
+        path: sections/section-020/module-10/course-020-panels-for-rate-error-ratio-and-latency.md
       - type: reading
         title: "A Namespace Variable For Every Panel"
-        path: sections/section-020/module-01/course-03-a-namespace-variable-for-every-panel.md
+        path: sections/section-020/module-10/course-030-a-namespace-variable-for-every-panel.md
       - type: reading
         title: "Dashboards That Survive A Restart"
-        path: sections/section-020/module-01/course-04-dashboards-that-survive-a-restart.md
+        path: sections/section-020/module-10/course-040-dashboards-that-survive-a-restart.md
       - type: reading
         title: Question
-        path: sections/section-020/module-01/labs/lab-01/question.md
+        path: sections/section-020/module-10/labs/lab-01/question.md
       - type: lab
         title: "Fix A Grafana Dashboard That Is Provisioned From A ConfigMap"
-        path: sections/section-020/module-01/labs/lab-01
+        path: sections/section-020/module-10/labs/lab-01
         difficulty: intermediate
         estimated_duration: 25m
         topic: dashboards-and-logs
         task_kind: troubleshooting
       - type: reading
         title: Question
-        path: sections/section-020/module-01/labs/lab-02/question.md
+        path: sections/section-020/module-10/labs/lab-02/question.md
       - type: lab
         title: "Bring Grafana Back After A Namespace Move Lab"
-        path: sections/section-020/module-01/labs/lab-02
+        path: sections/section-020/module-10/labs/lab-02
         difficulty: intermediate
         estimated_duration: 25m
         topic: grafana
@@ -289,55 +289,55 @@ modules:
             url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
       - type: reading
         title: Summary
-        path: sections/section-020/module-01/course-05-summary.md
+        path: sections/section-020/module-10/course-100-summary.md
 
       - type: reading
         title: "Collect Pod Logs With The OpenTelemetry Collector"
-        path: sections/section-020/module-02/course.md
+        path: sections/section-020/module-20/course-000.md
       - type: reading
         title: "What Kubernetes Keeps About Logs"
-        path: sections/section-020/module-02/course-01-what-kubernetes-keeps-about-logs.md
+        path: sections/section-020/module-20/course-010-what-kubernetes-keeps-about-logs.md
       - type: reading
         title: "A DaemonSet Collector Reads The Log Files"
-        path: sections/section-020/module-02/course-02-a-daemonset-collector-reads-the-log-files.md
+        path: sections/section-020/module-20/course-020-a-daemonset-collector-reads-the-log-files.md
       - type: reading
         title: "Add Kubernetes Metadata And Drop Records"
-        path: sections/section-020/module-02/course-03-add-kubernetes-metadata-and-drop-records.md
+        path: sections/section-020/module-20/course-030-add-kubernetes-metadata-and-drop-records.md
       - type: reading
         title: "Count Error Lines Into A Prometheus Metric"
-        path: sections/section-020/module-02/course-04-count-error-lines-into-a-prometheus-metric.md
+        path: sections/section-020/module-20/course-040-count-error-lines-into-a-prometheus-metric.md
       - type: reading
         title: Question
-        path: sections/section-020/module-02/labs/lab-01/question.md
+        path: sections/section-020/module-20/labs/lab-01/question.md
       - type: lab
         title: "Count Error Log Lines With The OpenTelemetry Collector"
-        path: sections/section-020/module-02/labs/lab-01
+        path: sections/section-020/module-20/labs/lab-01
         difficulty: intermediate
         estimated_duration: 20m
         topic: dashboards-and-logs
         task_kind: build
       - type: reading
         title: Summary
-        path: sections/section-020/module-02/course-05-summary.md
+        path: sections/section-020/module-20/course-100-summary.md
 
       - type: reading
         title: "Query Logs With Loki And LogQL"
-        path: sections/section-020/module-03/course.md
+        path: sections/section-020/module-30/course-000.md
       - type: reading
         title: "Connect Grafana To Loki"
-        path: sections/section-020/module-03/course-01-connect-grafana-to-loki.md
+        path: sections/section-020/module-30/course-010-connect-grafana-to-loki.md
       - type: reading
         title: "Query Logs With LogQL"
-        path: sections/section-020/module-03/course-02-query-logs-with-logql.md
+        path: sections/section-020/module-30/course-020-query-logs-with-logql.md
       - type: reading
         title: "Edit A Panel And Act On The Result"
-        path: sections/section-020/module-03/course-03-edit-a-panel-and-act-on-the-result.md
+        path: sections/section-020/module-30/course-030-edit-a-panel-and-act-on-the-result.md
       - type: reading
         title: Question
-        path: sections/section-020/module-03/labs/lab-01/question.md
+        path: sections/section-020/module-30/labs/lab-01/question.md
       - type: lab
         title: "Query Loki And Stop The Failing Workloads Lab"
-        path: sections/section-020/module-03/labs/lab-01
+        path: sections/section-020/module-30/labs/lab-01
         difficulty: intermediate
         estimated_duration: 25m
         topic: logging
@@ -356,10 +356,10 @@ modules:
             url: https://grafana.com/docs/loki/latest/query/metric_queries/
       - type: reading
         title: Summary
-        path: sections/section-020/module-03/course-04-summary.md
+        path: sections/section-020/module-30/course-100-summary.md
       - type: quiz
         title: "Knowledge Check: Query Logs With Loki And LogQL"
-        path: sections/section-020/module-03/quiz.yaml
+        path: sections/section-020/module-30/quiz.yaml
         question_count: 10
         pass_score: 70
 
@@ -417,41 +417,41 @@ modules:
 
       - type: reading
         title: "Run An OpenTelemetry Collector With The Operator"
-        path: sections/section-030/module-01/course.md
+        path: sections/section-030/module-10/course-000.md
       - type: reading
         title: "The Operator And Its Webhook"
-        path: sections/section-030/module-01/course-01-the-operator-and-its-webhook.md
+        path: sections/section-030/module-10/course-010-the-operator-and-its-webhook.md
       - type: reading
         title: "A Collector With An OTLP Receiver And A Jaeger Exporter"
-        path: sections/section-030/module-01/course-02-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
+        path: sections/section-030/module-10/course-020-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
       - type: reading
         title: "Reading A Trace In Jaeger"
-        path: sections/section-030/module-01/course-03-reading-a-trace-in-jaeger.md
+        path: sections/section-030/module-10/course-030-reading-a-trace-in-jaeger.md
       - type: reading
         title: "Choosing A Collector Mode"
-        path: sections/section-030/module-01/course-04-choosing-a-collector-mode.md
+        path: sections/section-030/module-10/course-040-choosing-a-collector-mode.md
       - type: reading
         title: "Diagnosing A Broken Collector Pipeline"
-        path: sections/section-030/module-01/course-05-diagnosing-a-broken-collector-pipeline.md
+        path: sections/section-030/module-10/course-050-diagnosing-a-broken-collector-pipeline.md
       - type: reading
         title: Question
-        path: sections/section-030/module-01/labs/lab-01/question.md
+        path: sections/section-030/module-10/labs/lab-01/question.md
       - type: lab
         title: "Fix A Broken Collector Pipeline Lab"
-        path: sections/section-030/module-01/labs/lab-01
+        path: sections/section-030/module-10/labs/lab-01
         difficulty: intermediate
         estimated_duration: 20m
         topic: distributed-tracing
         task_kind: troubleshooting
       - type: reading
         title: "Finding A Service By Tag And Acting On It"
-        path: sections/section-030/module-01/course-06-finding-a-service-by-tag-and-acting-on-it.md
+        path: sections/section-030/module-10/course-060-finding-a-service-by-tag-and-acting-on-it.md
       - type: reading
         title: Question
-        path: sections/section-030/module-01/labs/lab-02/question.md
+        path: sections/section-030/module-10/labs/lab-02/question.md
       - type: lab
         title: "Find Tagged Traces And Remediate Deployments Lab"
-        path: sections/section-030/module-01/labs/lab-02
+        path: sections/section-030/module-10/labs/lab-02
         difficulty: intermediate
         estimated_duration: 20m
         topic: tracing
@@ -472,10 +472,10 @@ modules:
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
       - type: reading
         title: Question
-        path: sections/section-030/module-01/labs/lab-03/question.md
+        path: sections/section-030/module-10/labs/lab-03/question.md
       - type: lab
         title: "Export The Exceptions Of A Failed Trace Lab"
-        path: sections/section-030/module-01/labs/lab-03
+        path: sections/section-030/module-10/labs/lab-03
         difficulty: intermediate
         estimated_duration: 20m
         topic: tracing
@@ -494,33 +494,33 @@ modules:
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
       - type: reading
         title: Summary
-        path: sections/section-030/module-01/course-07-summary.md
+        path: sections/section-030/module-10/course-100-summary.md
 
       - type: reading
         title: "Add Tracing Without Code Changes Using Auto-Instrumentation"
-        path: sections/section-030/module-02/course.md
+        path: sections/section-030/module-20/course-000.md
       - type: reading
         title: "What The Operator Injects Into A Pod"
-        path: sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+        path: sections/section-030/module-20/course-010-what-the-operator-injects-into-a-pod.md
       - type: reading
         title: "Reading One Trace Across Two Services"
-        path: sections/section-030/module-02/course-02-reading-one-trace-across-two-services.md
+        path: sections/section-030/module-20/course-020-reading-one-trace-across-two-services.md
       - type: reading
         title: "Finding Why A Pod Is Not Instrumented"
-        path: sections/section-030/module-02/course-03-finding-why-a-pod-is-not-instrumented.md
+        path: sections/section-030/module-20/course-030-finding-why-a-pod-is-not-instrumented.md
       - type: reading
         title: Question
-        path: sections/section-030/module-02/labs/lab-01/question.md
+        path: sections/section-030/module-20/labs/lab-01/question.md
       - type: lab
         title: "Get Two Services Into One Trace Lab"
-        path: sections/section-030/module-02/labs/lab-01
+        path: sections/section-030/module-20/labs/lab-01
         difficulty: intermediate
         estimated_duration: 30m
         topic: distributed-tracing
         task_kind: troubleshooting
       - type: reading
         title: Summary
-        path: sections/section-030/module-02/course-04-summary.md
+        path: sections/section-030/module-20/course-100-summary.md
 
       - type: reading
         title: Question
@@ -554,71 +554,71 @@ modules:
 
       - type: reading
         title: "Measure Delivery With DORA Metrics"
-        path: sections/section-040/module-01/course.md
+        path: sections/section-040/module-10/course-000.md
       - type: reading
         title: "The Four DORA Metrics And Where The Data Lives"
-        path: sections/section-040/module-01/course-01-the-four-dora-metrics-and-where-the-data-lives.md
+        path: sections/section-040/module-10/course-010-the-four-dora-metrics-and-where-the-data-lives.md
       - type: reading
         title: "Deployment Frequency From The Sync Counter"
-        path: sections/section-040/module-01/course-02-deployment-frequency-from-the-sync-counter.md
+        path: sections/section-040/module-10/course-020-deployment-frequency-from-the-sync-counter.md
       - type: reading
         title: "Change Failure Rate From Application Health"
-        path: sections/section-040/module-01/course-03-change-failure-rate-from-application-health.md
+        path: sections/section-040/module-10/course-030-change-failure-rate-from-application-health.md
       - type: reading
         title: Question
-        path: sections/section-040/module-01/labs/lab-01/question.md
+        path: sections/section-040/module-10/labs/lab-01/question.md
       - type: lab
         title: "Fix The Change Failure Rate Rule Lab"
-        path: sections/section-040/module-01/labs/lab-01
+        path: sections/section-040/module-10/labs/lab-01
         difficulty: intermediate
         estimated_duration: 25m
         topic: platform-efficiency
         task_kind: troubleshooting
       - type: reading
         title: "Lead Time And Time To Restore From Timestamps"
-        path: sections/section-040/module-01/course-04-lead-time-and-time-to-restore-from-timestamps.md
+        path: sections/section-040/module-10/course-040-lead-time-and-time-to-restore-from-timestamps.md
       - type: reading
         title: Summary
-        path: sections/section-040/module-01/course-05-summary.md
+        path: sections/section-040/module-10/course-100-summary.md
 
       - type: reading
         title: "Measure Service Levels And Resource Efficiency"
-        path: sections/section-040/module-02/course.md
+        path: sections/section-040/module-20/course-000.md
       - type: reading
         title: "SLI, SLO And Error Budget From Request Counters"
-        path: sections/section-040/module-02/course-01-sli-slo-and-error-budget-from-request-counters.md
+        path: sections/section-040/module-20/course-010-sli-slo-and-error-budget-from-request-counters.md
       - type: reading
         title: "Burn-Rate Alerts With Two Windows"
-        path: sections/section-040/module-02/course-02-burn-rate-alerts-with-two-windows.md
+        path: sections/section-040/module-20/course-020-burn-rate-alerts-with-two-windows.md
       - type: reading
         title: Question
-        path: sections/section-040/module-02/labs/lab-01/question.md
+        path: sections/section-040/module-20/labs/lab-01/question.md
       - type: lab
         title: "Fix The Burn-Rate Alert Lab"
-        path: sections/section-040/module-02/labs/lab-01
+        path: sections/section-040/module-20/labs/lab-01
         difficulty: intermediate
         estimated_duration: 20m
         topic: platform-efficiency
         task_kind: troubleshooting
       - type: reading
         title: "Requests Versus Usage With kubectl top And Prometheus"
-        path: sections/section-040/module-02/course-03-requests-versus-usage-with-kubectl-top-and-prometheus.md
+        path: sections/section-040/module-20/course-030-requests-versus-usage-with-kubectl-top-and-prometheus.md
       - type: reading
         title: "Find And Fix Over- And Under-Provisioned Workloads"
-        path: sections/section-040/module-02/course-04-find-and-fix-over-and-under-provisioned-workloads.md
+        path: sections/section-040/module-20/course-040-find-and-fix-over-and-under-provisioned-workloads.md
       - type: reading
         title: Question
-        path: sections/section-040/module-02/labs/lab-02/question.md
+        path: sections/section-040/module-20/labs/lab-02/question.md
       - type: lab
         title: "Right-Size Two Deployments Lab"
-        path: sections/section-040/module-02/labs/lab-02
+        path: sections/section-040/module-20/labs/lab-02
         difficulty: intermediate
         estimated_duration: 20m
         topic: platform-efficiency
         task_kind: troubleshooting
       - type: reading
         title: Summary
-        path: sections/section-040/module-02/course-05-summary.md
+        path: sections/section-040/module-20/course-100-summary.md
 
       - type: reading
         title: Question
@@ -651,61 +651,61 @@ modules:
 
       - type: reading
         title: "Triage And Fix Failing Workloads"
-        path: sections/section-050/module-01/course.md
+        path: sections/section-050/module-10/course-000.md
       - type: reading
         title: "A Triage Order And Pending Pods"
-        path: sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+        path: sections/section-050/module-10/course-010-a-triage-order-and-pending-pods.md
       - type: reading
         title: "CrashLoopBackOff And Failing Probes"
-        path: sections/section-050/module-01/course-02-crashloopbackoff-and-failing-probes.md
+        path: sections/section-050/module-10/course-020-crashloopbackoff-and-failing-probes.md
       - type: reading
         title: "OOMKilled And Memory Limits"
-        path: sections/section-050/module-01/course-03-oomkilled-and-memory-limits.md
+        path: sections/section-050/module-10/course-030-oomkilled-and-memory-limits.md
       - type: reading
         title: "ImagePullBackOff And Image References"
-        path: sections/section-050/module-01/course-04-imagepullbackoff-and-image-references.md
+        path: sections/section-050/module-10/course-040-imagepullbackoff-and-image-references.md
       - type: reading
         title: Question
-        path: sections/section-050/module-01/labs/lab-01/question.md
+        path: sections/section-050/module-10/labs/lab-01/question.md
       - type: lab
         title: "Fix Four Failing Workloads Lab"
-        path: sections/section-050/module-01/labs/lab-01
+        path: sections/section-050/module-10/labs/lab-01
         difficulty: intermediate
         estimated_duration: 40m
         topic: incident-response
         task_kind: troubleshooting
       - type: reading
         title: Summary
-        path: sections/section-050/module-01/course-05-summary.md
+        path: sections/section-050/module-10/course-100-summary.md
 
       - type: reading
         title: "Diagnose And Fix Broken Platform Components"
-        path: sections/section-050/module-02/course.md
+        path: sections/section-050/module-20/course-000.md
       - type: reading
         title: "A Webhook Service Without Endpoints"
-        path: sections/section-050/module-02/course-01-a-webhook-service-without-endpoints.md
+        path: sections/section-050/module-20/course-010-a-webhook-service-without-endpoints.md
       - type: reading
         title: "An Expired Webhook Certificate"
-        path: sections/section-050/module-02/course-02-an-expired-webhook-certificate.md
+        path: sections/section-050/module-20/course-020-an-expired-webhook-certificate.md
       - type: reading
         title: "A Controller Scaled To Zero"
-        path: sections/section-050/module-02/course-03-a-controller-scaled-to-zero.md
+        path: sections/section-050/module-20/course-030-a-controller-scaled-to-zero.md
       - type: reading
         title: Question
-        path: sections/section-050/module-02/labs/lab-01/question.md
+        path: sections/section-050/module-20/labs/lab-01/question.md
       - type: lab
         title: "Restore A Platform After Three Failures Lab"
-        path: sections/section-050/module-02/labs/lab-01
+        path: sections/section-050/module-20/labs/lab-01
         difficulty: intermediate
         estimated_duration: 40m
         topic: incident-response
         task_kind: troubleshooting
       - type: reading
         title: "A GitOps Application Out Of Sync Or Degraded"
-        path: sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+        path: sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
       - type: reading
         title: Summary
-        path: sections/section-050/module-02/course-05-summary.md
+        path: sections/section-050/module-20/course-100-summary.md
 
       - type: reading
         title: Question

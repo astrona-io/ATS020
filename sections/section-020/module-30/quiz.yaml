@@ -1,0 +1,232 @@
+schema_version: 1
+kind: question_bank
+id: ats020-020-03
+course_id: ATS020
+exam_code: CNPE
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-020/module-30
+  title: Query Logs With Loki And LogQL
+questions:
+  - id: ats020-020-03-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: Explain what Loki indexes and what a stream is.
+    source_readings:
+      - sections/section-020/module-30/course-010-connect-grafana-to-loki.md
+    prompt: "In Loki, what makes a set of log lines one stream?"
+    options:
+      - id: a
+        text: "They were written during the same minute."
+        explanation: "Time does not define a stream."
+      - id: b
+        text: "They were read by the same Collector Pod."
+        explanation: "The sender does not define a stream."
+      - id: c
+        text: "They contain the same text."
+        explanation: "Loki indexes labels, not line text."
+      - id: d
+        text: "They have exactly the same set of labels."
+        explanation: "Correct. Loki groups lines into streams by their labels."
+    correct_option: d
+    explanation: "Lines with exactly the same set of labels form one stream."
+  - id: ats020-020-03-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Set the address of a Loki data source from Grafana's point of view.
+    source_readings:
+      - sections/section-020/module-30/course-010-connect-grafana-to-loki.md
+    prompt: "`curl http://127.0.0.1:3100/loki/api/v1/labels` works through your port-forward, but a Grafana data source with the address `http://localhost:3100` fails its health check. Why?"
+    options:
+      - id: a
+        text: "Loki refuses requests from Grafana unless they have a password."
+        explanation: "This environment's Loki has no such check, and it would not explain the address."
+      - id: b
+        text: "The Loki plugin only works over HTTPS."
+        explanation: "The working address `http://loki.logging:3100` uses HTTP."
+      - id: c
+        text: "The address is used from inside the Grafana Pod, where `localhost` is that Pod."
+        explanation: "Correct. Use the Service name, `http://loki.logging:3100`."
+      - id: d
+        text: "The port-forward must run inside the Grafana Pod."
+        explanation: "A port-forward serves your terminal, and Grafana does not need one."
+    correct_option: c
+    explanation: "The health check runs in Grafana, so the address must work from inside its Pod."
+  - id: ats020-020-03-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Change jsonData.maxLines through the Grafana data source API.
+    source_readings:
+      - sections/section-020/module-30/course-010-connect-grafana-to-loki.md
+    prompt: "You want to change Maximum lines through the API without losing the rest of the data source. Which approach is correct?"
+    options:
+      - id: a
+        text: "Send `PUT /api/datasources/uid/loki` with only `{\"jsonData\":{\"maxLines\":250}}`."
+        explanation: "A `PUT` replaces the data source, so the other fields are lost or refused."
+      - id: b
+        text: "Read the data source with `GET`, change `jsonData.maxLines`, and send the whole object back with `PUT`."
+        explanation: "Correct. The `PUT` body must be the full object."
+      - id: c
+        text: "Send `POST /api/datasources/` with the same UID and the new value."
+        explanation: "`POST` creates a data source, and the UID already exists."
+      - id: d
+        text: "Change the setting in Loki's configuration file."
+        explanation: "Maximum lines is a Grafana data source setting."
+    correct_option: b
+    explanation: "Read the whole object, change one field, and send it back with `PUT`."
+  - id: ats020-020-03-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Read jsonData.maxLines correctly after a save in the web interface.
+    source_readings:
+      - sections/section-020/module-30/course-010-connect-grafana-to-loki.md
+    prompt: "After you save Maximum lines as `500` in the web interface, a script reads `jsonData.maxLines` and compares it to the number `500`. The comparison fails. What is the most likely reason?"
+    options:
+      - id: a
+        text: "The web interface stores the value as the string `\"500\"`."
+        explanation: "Correct. A script should accept both a string and a number."
+      - id: b
+        text: "The save in the web interface did not reach the database."
+        explanation: "The value is there, in another JSON type."
+      - id: c
+        text: "Grafana rounds the value to the nearest thousand."
+        explanation: "Grafana does not round this setting."
+      - id: d
+        text: "The field is only readable by a provisioned data source."
+        explanation: "The API returns it for any data source."
+    correct_option: a
+    explanation: "The web interface stores a string, while an API client can send a number."
+  - id: ats020-020-03-q05
+    type: single_choice
+    difficulty: beginner
+    learning_objective: Write a stream selector and a line filter.
+    source_readings:
+      - sections/section-020/module-30/course-020-query-logs-with-logql.md
+    prompt: "Which query returns only lines that contain `ERROR` from the namespace `outpost`?"
+    options:
+      - id: a
+        text: "`{namespace=\"outpost\", text=\"ERROR\"}`"
+        explanation: "`text` is not a label, and the line text is not selected in the braces."
+      - id: b
+        text: "`|= \"ERROR\" {namespace=\"outpost\"}`"
+        explanation: "A query starts with the stream selector."
+      - id: c
+        text: "`{namespace=\"outpost\"} != \"ERROR\"`"
+        explanation: "`!=` drops the lines that contain the text."
+      - id: d
+        text: "`{namespace=\"outpost\"} |= \"ERROR\"`"
+        explanation: "Correct. The selector picks the streams and the filter keeps the matching lines."
+    correct_option: d
+    explanation: "A stream selector comes first and a line filter follows it."
+  - id: ats020-020-03-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Predict the effect of a case-sensitive line filter.
+    source_readings:
+      - sections/section-020/module-30/course-020-query-logs-with-logql.md
+    prompt: "A healthy Pod writes `level=INFO msg=\"retrying after error\"`. Which query matches that line?"
+    options:
+      - id: a
+        text: "`{namespace=\"outpost\"} |~ \"(?i)error\"`"
+        explanation: "Correct. The `(?i)` flag ignores letter case, so a healthy Pod also matches."
+      - id: b
+        text: "`{namespace=\"outpost\"} |= \"ERROR\"`"
+        explanation: "The filter is case-sensitive, and the line has lower-case `error`."
+      - id: c
+        text: "`{namespace=\"outpost\"} != \"error\"`"
+        explanation: "`!=` drops lines that contain `error`."
+      - id: d
+        text: "`{namespace=\"outpost\"} !~ \"retrying\"`"
+        explanation: "`!~` drops lines that match the pattern."
+    correct_option: a
+    explanation: "A case-insensitive filter also finds lines that only mention the word."
+  - id: ats020-020-03-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Say what a LogQL metric query counts.
+    source_readings:
+      - sections/section-020/module-30/course-020-query-logs-with-logql.md
+    prompt: "What does `count(rate({namespace=\"outpost\"} |= \"ERROR\" [5m]))` return?"
+    options:
+      - id: a
+        text: "The number of error lines in the last five minutes."
+        explanation: "That is `sum(count_over_time(...))`."
+      - id: b
+        text: "The number of error lines per second."
+        explanation: "That is the `rate` part without `count`, per stream."
+      - id: c
+        text: "The number of streams that wrote an error line in the last five minutes."
+        explanation: "Correct. `count` counts the series that `rate` returns, one per stream."
+      - id: d
+        text: "The number of Pods in `outpost`."
+        explanation: "Only streams with a matching line in the window appear."
+    correct_option: c
+    explanation: "`rate` returns one series per matching stream, and `count` counts those series."
+  - id: ats020-020-03-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Choose the right Loki query route.
+    source_readings:
+      - sections/section-020/module-30/course-020-query-logs-with-logql.md
+    prompt: "A call to `/loki/api/v1/query` with `{namespace=\"outpost\"} |= \"ERROR\"` returns HTTP status 400. What should you change?"
+    options:
+      - id: a
+        text: "Use `/loki/api/v1/query_range` for a log query."
+        explanation: "Correct. The `query` route answers metric queries, and log queries use `query_range`."
+      - id: b
+        text: "Remove the line filter, because the route does not accept one."
+        explanation: "A selector alone is still a log query."
+      - id: c
+        text: "Add Grafana's user and password to the call."
+        explanation: "The request goes to Loki, and the status does not come from authentication."
+      - id: d
+        text: "Change `ERROR` to lower case."
+        explanation: "The text of the filter does not cause this response."
+    correct_option: a
+    explanation: "Loki refuses log queries on the `query` route."
+  - id: ats020-020-03-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: Explain how a saved panel edit differs from a dashboard kept as code.
+    source_readings:
+      - sections/section-020/module-30/course-030-edit-a-panel-and-act-on-the-result.md
+    prompt: "You edit a panel in the web interface and save it. Grafana's database is on an `emptyDir` volume. What happens when the Grafana Pod is replaced, if the dashboard is not provisioned?"
+    options:
+      - id: a
+        text: "The edit stays, because a saved dashboard is stored in the Kubernetes API."
+        explanation: "It is stored in Grafana's database."
+      - id: b
+        text: "The edit stays, because Grafana writes it to version control."
+        explanation: "A save does not touch your repository."
+      - id: c
+        text: "The dashboard and the edit are lost with the database."
+        explanation: "Correct. Only a provisioned file brings a dashboard back at start."
+      - id: d
+        text: "Grafana restores the previous version of the dashboard."
+        explanation: "The database with its versions is gone too."
+    correct_option: c
+    explanation: "A saved edit lives only in the database, and dashboards as code restore a dashboard from a file."
+  - id: ats020-020-03-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: Act on a query result by scaling the controller that owns the Pods.
+    source_readings:
+      - sections/section-020/module-30/course-030-edit-a-panel-and-act-on-the-result.md
+    prompt: "A query shows that `depot-0` and `probe-7c9f6-abcde` write error lines. Which action stops them?"
+    options:
+      - id: a
+        text: "Delete both Pods with `kubectl delete pod`."
+        explanation: "Their controllers replace them at once."
+      - id: b
+        text: "Scale the StatefulSet `depot` and the Deployment `probe` to `0`."
+        explanation: "Correct. Each Pod's owner chain leads to the controller to scale."
+      - id: c
+        text: "Scale the ReplicaSet of `probe` and the Pod `depot-0` to `0`."
+        explanation: "The Deployment restores its ReplicaSet's count, and a Pod does not scale."
+      - id: d
+        text: "Add `!= \"ERROR\"` to the panel query."
+        explanation: "That hides the lines without stopping the Pods."
+    correct_option: b
+    explanation: "Follow `ownerReferences` to the controller, then scale that controller."

@@ -43,7 +43,7 @@ Mistakes can slip through despite our checks. If a command fails, an explanation
 To report a problem:
 
 1. [Open a GitHub issue](https://github.com/astrona-io/ATS020/issues/new).
-2. Identify the affected page or lab. Include its file path if possible, such as `sections/section-010/module-01/labs/lab-01`.
+2. Identify the affected page or lab. Include its file path if possible, such as `sections/section-010/module-10/labs/lab-01`.
 3. Include the command you ran and the output or error you received.
 4. Explain what you expected to happen.
 

@@ -16,7 +16,7 @@ questions:
     difficulty: beginner
     learning_objective: "Install the OpenTelemetry Operator after cert-manager and confirm its webhook is ready"
     source_readings:
-      - sections/section-030/module-01/course-01-the-operator-and-its-webhook.md
+      - sections/section-030/module-10/course-010-the-operator-and-its-webhook.md
     prompt: "You installed the OpenTelemetry Operator, and applying an OpenTelemetryCollector fails with a webhook error. Which cause is the most likely?"
     options:
       - id: a
@@ -39,7 +39,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Write an OpenTelemetryCollector resource with an OTLP receiver, a batch processor and an exporter to Jaeger"
     source_readings:
-      - sections/section-030/module-01/course-02-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
+      - sections/section-030/module-10/course-020-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
     prompt: "A Collector defines the receivers `otlp/grpc` and `otlp/http`, but its `traces` pipeline lists only `otlp/http`. An application sends spans to port `4317`. What happens?"
     options:
       - id: a
@@ -62,7 +62,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Choose the Collector mode (deployment, daemonset, sidecar) for a given need"
     source_readings:
-      - sections/section-030/module-01/course-04-choosing-a-collector-mode.md
+      - sections/section-030/module-10/course-040-choosing-a-collector-mode.md
     prompt: "Many applications in several namespaces send OTLP spans to one shared address, and the platform team wants one place to batch and export them. Which Collector mode fits?"
     options:
       - id: a
@@ -85,7 +85,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Send a test trace over OTLP and find it in the Jaeger UI and API"
     source_readings:
-      - sections/section-030/module-01/course-03-reading-a-trace-in-jaeger.md
+      - sections/section-030/module-10/course-030-reading-a-trace-in-jaeger.md
     prompt: "A test trace was sent to the Collector, and Jaeger shows no service for it a few seconds later. What is the best next step?"
     options:
       - id: a
@@ -108,7 +108,7 @@ questions:
     difficulty: advanced
     learning_objective: "Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)"
     source_readings:
-      - sections/section-030/module-01/course-05-diagnosing-a-broken-collector-pipeline.md
+      - sections/section-030/module-10/course-050-diagnosing-a-broken-collector-pipeline.md
     prompt: "The Collector is `Running` and `scout` can connect, but the log of the Collector shows `dial tcp ...:4316: i/o timeout` for the exporter to Jaeger, which listens on `4317`. What is the fault?"
     options:
       - id: a
@@ -131,7 +131,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Write an Instrumentation resource with the exporter endpoint, propagators and sampler"
     source_readings:
-      - sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+      - sections/section-030/module-20/course-010-what-the-operator-injects-into-a-pod.md
     prompt: "Spans of `relay` and `scout` appear in Jaeger as two separate traces. Both services are traced. Which setting in the Instrumentation makes one request one trace?"
     options:
       - id: a
@@ -154,7 +154,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Annotate a Deployment so the Operator injects the language agent, and read the injected init container and environment variables to prove it"
     source_readings:
-      - sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+      - sections/section-030/module-20/course-010-what-the-operator-injects-into-a-pod.md
     prompt: "You added `instrumentation.opentelemetry.io/inject-nodejs: \"true\"` to the pod template of a Deployment, and the pods already running do not change. How do you prove injection happened for new pods?"
     options:
       - id: a
@@ -177,7 +177,7 @@ questions:
     difficulty: advanced
     learning_objective: "Find why a pod was not instrumented (annotation on the wrong object, Instrumentation in another namespace, pod not restarted)"
     source_readings:
-      - sections/section-030/module-02/course-03-finding-why-a-pod-is-not-instrumented.md
+      - sections/section-030/module-20/course-030-finding-why-a-pod-is-not-instrumented.md
     prompt: "The annotation is on the pod template, the pod was recreated, and the pod still has no init container. The Instrumentation `nodejs` exists in the namespace `observability`, and the pod runs in `starfleet`. What is wrong?"
     options:
       - id: a

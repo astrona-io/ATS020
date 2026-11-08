@@ -16,7 +16,7 @@ questions:
   difficulty: beginner
   learning_objective: Read the Prometheus targets page and the `up` metric to say which targets are scraped and which fail
   source_readings:
-  - sections/section-010/module-01/course-01-targets-and-the-up-metric.md
+  - sections/section-010/module-10/course-010-targets-and-the-up-metric.md
   prompt: A team deployed a new service and asks why `up{namespace="billing"}` returns nothing at all. Which statement is correct?
   options:
   - id: a
@@ -38,7 +38,7 @@ questions:
   difficulty: intermediate
   learning_objective: Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
   source_readings:
-  - sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+  - sections/section-010/module-10/course-020-select-a-service-with-a-servicemonitor.md
   prompt: 'You apply a correct ServiceMonitor in `starfleet`. `kubectl apply` prints `created`, but no job for it appears in Prometheus after five minutes. The Prometheus resource has `serviceMonitorNamespaceSelector: {}` and `serviceMonitorSelector.matchLabels: {release: kps}`. What is the most likely cause?'
   options:
   - id: a
@@ -60,7 +60,7 @@ questions:
   difficulty: advanced
   learning_objective: Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
   source_readings:
-  - sections/section-010/module-01/course-04-finding-a-missing-target.md
+  - sections/section-010/module-10/course-040-finding-a-missing-target.md
   prompt: After a change to a ServiceMonitor, `show_targets` lists no `scout` targets and `up` has no series for `starfleet`. The job `serviceMonitor/starfleet/scout/0` exists in the Prometheus configuration. Which check finds the cause fastest?
   options:
   - id: a
@@ -82,7 +82,7 @@ questions:
   difficulty: intermediate
   learning_objective: Aggregate series with `sum by` and `without` to get one value per namespace or per status code
   source_readings:
-  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
   prompt: You need the request rate of `scout` for each HTTP status code across all pods. Which query is correct?
   options:
   - id: a
@@ -104,7 +104,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
   source_readings:
-  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
   prompt: A teammate writes `sum by (namespace) (rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))` and gets an empty result. Why?
   options:
   - id: a
@@ -126,7 +126,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write an alerting rule in a PrometheusRule with `expr`, `for`, labels and annotations
   source_readings:
-  - sections/section-010/module-03/course-01-recording-and-alerting-rules.md
+  - sections/section-010/module-30/course-010-recording-and-alerting-rules.md
   prompt: 'A PrometheusRule is created in `starfleet`, but Prometheus does not list its rules, and no error appears. The `ruleSelector` of the Prometheus resource matches `release: kps`. What is the first thing to check?'
   options:
   - id: a
@@ -148,7 +148,7 @@ questions:
   difficulty: advanced
   learning_objective: Route alerts by label to a receiver with an AlertmanagerConfig or the Alertmanager configuration
   source_readings:
-  - sections/section-010/module-03/course-04-routing-alerts-with-alertmanager.md
+  - sections/section-010/module-30/course-040-routing-alerts-with-alertmanager.md
   prompt: 'An AlertmanagerConfig in `monitoring` routes `team: frontier` to a webhook. An alert for `team: frontier` fires from a rule in `starfleet`, and the webhook receives nothing. Which cause fits?'
   options:
   - id: a
@@ -170,7 +170,7 @@ questions:
   difficulty: advanced
   learning_objective: Silence an alert for a time window and prove it stops notifying
   source_readings:
-  - sections/section-010/module-03/course-05-silences.md
+  - sections/section-010/module-30/course-050-silences.md
   prompt: Which silence is safest for muting `ScoutHighErrorRatio` for the `starfleet` team only?
   options:
   - id: a
@@ -192,7 +192,7 @@ questions:
   difficulty: beginner
   learning_objective: Add a Prometheus data source to Grafana with a provisioning file or a labelled ConfigMap
   source_readings:
-  - sections/section-020/module-01/course-01-grafana-parts-and-a-provisioned-data-source.md
+  - sections/section-020/module-10/course-010-grafana-parts-and-a-provisioned-data-source.md
   prompt: The platform team wants the Prometheus data source in Grafana to exist after every pod restart, and nobody should be able to change it in the web interface. Which approach meets this?
   options:
   - id: a
@@ -214,7 +214,7 @@ questions:
   difficulty: intermediate
   learning_objective: Build a panel from a PromQL query and choose the right visualisation for a rate, a ratio and a latency
   source_readings:
-  - sections/section-020/module-01/course-02-panels-for-rate-error-ratio-and-latency.md
+  - sections/section-020/module-10/course-020-panels-for-rate-error-ratio-and-latency.md
   prompt: A panel must show the share of requests that failed over the last five minutes, as one number between 0 and 1 per service. The counter `http_requests_total` has a `status` label. Which query fits?
   options:
   - id: a
@@ -236,7 +236,7 @@ questions:
   difficulty: intermediate
   learning_objective: Use a dashboard variable to switch the namespace shown on every panel
   source_readings:
-  - sections/section-020/module-01/course-03-a-namespace-variable-for-every-panel.md
+  - sections/section-020/module-10/course-030-a-namespace-variable-for-every-panel.md
   prompt: A dashboard has a variable `namespace`, but the panels do not change when the viewer selects another namespace. What is the most likely cause?
   options:
   - id: a
@@ -258,7 +258,7 @@ questions:
   difficulty: intermediate
   learning_objective: Export a dashboard as JSON and load it through the Grafana sidecar ConfigMap so it survives a pod restart
   source_readings:
-  - sections/section-020/module-01/course-04-dashboards-that-survive-a-restart.md
+  - sections/section-020/module-10/course-040-dashboards-that-survive-a-restart.md
   prompt: A teammate built a dashboard by hand in the Grafana web interface. After the Grafana pod was replaced, the dashboard was gone. Which change keeps the dashboard after every restart?
   options:
   - id: a
@@ -280,7 +280,7 @@ questions:
   difficulty: beginner
   learning_objective: Read a pod's logs, its previous container's logs and its events with `kubectl logs` and `kubectl events`
   source_readings:
-  - sections/section-020/module-02/course-01-what-kubernetes-keeps-about-logs.md
+  - sections/section-020/module-20/course-010-what-kubernetes-keeps-about-logs.md
   prompt: The container in the pod `probe` crashed and restarted. You need the output of the container that crashed, not the new one. Which command do you run?
   options:
   - id: a
@@ -302,7 +302,7 @@ questions:
   difficulty: intermediate
   learning_objective: Deploy an OpenTelemetry Collector as a DaemonSet whose file_log receiver reads the container log files on each node
   source_readings:
-  - sections/section-020/module-02/course-02-a-daemonset-collector-reads-the-log-files.md
+  - sections/section-020/module-20/course-020-a-daemonset-collector-reads-the-log-files.md
   prompt: A Collector must read the log files of every pod on every node. Which setup does that?
   options:
   - id: a
@@ -324,7 +324,7 @@ questions:
   difficulty: advanced
   learning_objective: Add Kubernetes metadata to each log record with the k8s_attributes processor and drop unwanted records with the filter processor
   source_readings:
-  - sections/section-020/module-02/course-03-add-kubernetes-metadata-and-drop-records.md
+  - sections/section-020/module-20/course-030-add-kubernetes-metadata-and-drop-records.md
   prompt: The Collector log records show no `k8s.deployment.name`, and the log of the Collector contains a `forbidden` error for pods. What is missing?
   options:
   - id: a
@@ -346,7 +346,7 @@ questions:
   difficulty: beginner
   learning_objective: Install the OpenTelemetry Operator after cert-manager and confirm its webhook is ready
   source_readings:
-  - sections/section-030/module-01/course-01-the-operator-and-its-webhook.md
+  - sections/section-030/module-10/course-010-the-operator-and-its-webhook.md
   prompt: You installed the OpenTelemetry Operator, and applying an OpenTelemetryCollector fails with a webhook error. Which cause is the most likely?
   options:
   - id: a
@@ -368,7 +368,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write an OpenTelemetryCollector resource with an OTLP receiver, a batch processor and an exporter to Jaeger
   source_readings:
-  - sections/section-030/module-01/course-02-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
+  - sections/section-030/module-10/course-020-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
   prompt: A Collector defines the receivers `otlp/grpc` and `otlp/http`, but its `traces` pipeline lists only `otlp/http`. An application sends spans to port `4317`. What happens?
   options:
   - id: a
@@ -390,7 +390,7 @@ questions:
   difficulty: intermediate
   learning_objective: Choose the Collector mode (deployment, daemonset, sidecar) for a given need
   source_readings:
-  - sections/section-030/module-01/course-04-choosing-a-collector-mode.md
+  - sections/section-030/module-10/course-040-choosing-a-collector-mode.md
   prompt: Many applications in several namespaces send OTLP spans to one shared address, and the platform team wants one place to batch and export them. Which Collector mode fits?
   options:
   - id: a
@@ -412,7 +412,7 @@ questions:
   difficulty: intermediate
   learning_objective: Send a test trace over OTLP and find it in the Jaeger UI and API
   source_readings:
-  - sections/section-030/module-01/course-03-reading-a-trace-in-jaeger.md
+  - sections/section-030/module-10/course-030-reading-a-trace-in-jaeger.md
   prompt: A test trace was sent to the Collector, and Jaeger shows no service for it a few seconds later. What is the best next step?
   options:
   - id: a
@@ -434,7 +434,7 @@ questions:
   difficulty: advanced
   learning_objective: Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)
   source_readings:
-  - sections/section-030/module-01/course-05-diagnosing-a-broken-collector-pipeline.md
+  - sections/section-030/module-10/course-050-diagnosing-a-broken-collector-pipeline.md
   prompt: 'The Collector is `Running` and `scout` can connect, but the log of the Collector shows `dial tcp ...:4316: i/o timeout` for the exporter to Jaeger, which listens on `4317`. What is the fault?'
   options:
   - id: a
@@ -456,7 +456,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write an Instrumentation resource with the exporter endpoint, propagators and sampler
   source_readings:
-  - sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+  - sections/section-030/module-20/course-010-what-the-operator-injects-into-a-pod.md
   prompt: Spans of `relay` and `scout` appear in Jaeger as two separate traces. Both services are traced. Which setting in the Instrumentation makes one request one trace?
   options:
   - id: a
@@ -478,7 +478,7 @@ questions:
   difficulty: intermediate
   learning_objective: Annotate a Deployment so the Operator injects the language agent, and read the injected init container and environment variables to prove it
   source_readings:
-  - sections/section-030/module-02/course-01-what-the-operator-injects-into-a-pod.md
+  - sections/section-030/module-20/course-010-what-the-operator-injects-into-a-pod.md
   prompt: 'You added `instrumentation.opentelemetry.io/inject-nodejs: "true"` to the pod template of a Deployment, and the pods already running do not change. How do you prove injection happened for new pods?'
   options:
   - id: a
@@ -500,7 +500,7 @@ questions:
   difficulty: beginner
   learning_objective: Define deployment frequency, lead time for changes, change failure rate and time to restore service
   source_readings:
-  - sections/section-040/module-01/course-01-the-four-dora-metrics-and-where-the-data-lives.md
+  - sections/section-040/module-10/course-010-the-four-dora-metrics-and-where-the-data-lives.md
   prompt: A platform team reports these results for last month. Changes reach production in about 20 minutes after the commit. The team deploys 40 times a week. About one deployment in three needs a rollback, and each rollback takes half a day to finish. Which statement describes the result correctly?
   options:
   - id: a
@@ -522,7 +522,7 @@ questions:
   difficulty: beginner
   learning_objective: Count deployments over a time window from the GitOps controller's sync metrics in Prometheus
   source_readings:
-  - sections/section-040/module-01/course-02-deployment-frequency-from-the-sync-counter.md
+  - sections/section-040/module-10/course-020-deployment-frequency-from-the-sync-counter.md
   prompt: Argo CD exposes the counter `argocd_app_sync_total` with the labels `name` and `phase`. A team wants the number of deployments of the Application `scout` in the last 7 days, as a whole number. The Prometheus server holds more than 7 days of data. Which query does this?
   options:
   - id: a
@@ -544,7 +544,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate change failure rate and time to restore from failed and recovered deployments
   source_readings:
-  - sections/section-040/module-01/course-03-change-failure-rate-from-application-health.md
+  - sections/section-040/module-10/course-030-change-failure-rate-from-application-health.md
   prompt: The flag `max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0` is `1` while the Application is `Degraded` and `0` otherwise. The Application was `Degraded` twice in the last 6 hours, and it is healthy now. A rule applies `changes()` to the flag over a 6 hour subquery. Which value does `changes()` return, and what must the rule do to get the failed deployments?
   options:
   - id: a
@@ -566,7 +566,7 @@ questions:
   difficulty: intermediate
   learning_objective: Name one change to the delivery process that improves each metric
   source_readings:
-  - sections/section-040/module-01/course-04-lead-time-and-time-to-restore-from-timestamps.md
+  - sections/section-040/module-10/course-040-lead-time-and-time-to-restore-from-timestamps.md
   prompt: A team has a change failure rate of 30 percent. Most failures are image tags that do not exist, and every one is found only after the deployment. Which change to the delivery process lowers the change failure rate the most?
   options:
   - id: a
@@ -588,7 +588,7 @@ questions:
   difficulty: beginner
   learning_objective: Calculate the remaining error budget for a 99% SLO over a window
   source_readings:
-  - sections/section-040/module-02/course-01-sli-slo-and-error-budget-from-request-counters.md
+  - sections/section-040/module-20/course-010-sli-slo-and-error-budget-from-request-counters.md
   prompt: A service has an SLO of 99 percent of successful requests over 30 days. In the last 30 days it served 2,000,000 requests. So far 12,000 of them failed. How much of the error budget is left?
   options:
   - id: a
@@ -610,7 +610,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write a burn-rate alert that fires when the budget would run out early
   source_readings:
-  - sections/section-040/module-02/course-02-burn-rate-alerts-with-two-windows.md
+  - sections/section-040/module-20/course-020-burn-rate-alerts-with-two-windows.md
   prompt: The SLO is 99 percent over 30 days. For the last hour, 6 percent of the requests to `scout` failed, and the rate does not change. What is the burn rate, and when is the 30-day error budget used up if nothing changes?
   options:
   - id: a
@@ -632,7 +632,7 @@ questions:
   difficulty: intermediate
   learning_objective: Compare container CPU and memory requests with real usage from metrics-server and Prometheus
   source_readings:
-  - sections/section-040/module-02/course-03-requests-versus-usage-with-kubectl-top-and-prometheus.md
+  - sections/section-040/module-20/course-030-requests-versus-usage-with-kubectl-top-and-prometheus.md
   prompt: A team wants the peak memory use of every container in `starfleet` over the last day, next to the memory each container requested. `kubectl top pods --containers` shows only the latest value. Which combination answers the question?
   options:
   - id: a
@@ -654,7 +654,7 @@ questions:
   difficulty: beginner
   learning_objective: Follow a fixed triage order — status, events, describe, logs, previous logs — to find a pod's failure cause
   source_readings:
-  - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+  - sections/section-050/module-10/course-010-a-triage-order-and-pending-pods.md
   prompt: A pod in `starfleet` shows `Pending`. Which command gives the cause fastest?
   options:
   - id: a
@@ -676,7 +676,7 @@ questions:
   difficulty: intermediate
   learning_objective: Fix a Pending pod caused by too-large requests, a missing PersistentVolumeClaim or an unmatched node selector
   source_readings:
-  - sections/section-050/module-01/course-01-a-triage-order-and-pending-pods.md
+  - sections/section-050/module-10/course-010-a-triage-order-and-pending-pods.md
   prompt: The event of a pending pod reads `persistentvolumeclaim "bridge-data" not found`. What fixes it without changing the Deployment?
   options:
   - id: a
@@ -698,7 +698,7 @@ questions:
   difficulty: intermediate
   learning_objective: Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe
   source_readings:
-  - sections/section-050/module-01/course-02-crashloopbackoff-and-failing-probes.md
+  - sections/section-050/module-10/course-020-crashloopbackoff-and-failing-probes.md
   prompt: A pod went from `Error` to `CrashLoopBackOff`. You want the log of the run that crashed, and the current container has just started again. Which command do you run?
   options:
   - id: a
@@ -720,7 +720,7 @@ questions:
   difficulty: advanced
   learning_objective: Fix an OOMKilled container by reading its usage and setting a fitting memory limit
   source_readings:
-  - sections/section-050/module-01/course-03-oomkilled-and-memory-limits.md
+  - sections/section-050/module-10/course-030-oomkilled-and-memory-limits.md
   prompt: Why does the cause of an `OOMKilled` container not appear in the events of the pod?
   options:
   - id: a
@@ -742,7 +742,7 @@ questions:
   difficulty: intermediate
   learning_objective: Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret
   source_readings:
-  - sections/section-050/module-01/course-04-imagepullbackoff-and-image-references.md
+  - sections/section-050/module-10/course-040-imagepullbackoff-and-image-references.md
   prompt: 'A pull event reads `failed to authorize: ... 403 Forbidden`. Which statement is correct?'
   options:
   - id: a
@@ -764,7 +764,7 @@ questions:
   difficulty: intermediate
   learning_objective: Prove each fix by the platform behaviour it restores (create succeeds, resource reconciles, sync is Healthy)
   source_readings:
-  - sections/section-050/module-02/course-01-a-webhook-service-without-endpoints.md
+  - sections/section-050/module-20/course-010-a-webhook-service-without-endpoints.md
   prompt: 'A webhook Service has no endpoints. A colleague proposes to set `failurePolicy: Ignore` so creates work again. What happens, and how do you prove a real fix?'
   options:
   - id: a
@@ -786,7 +786,7 @@ questions:
   difficulty: advanced
   learning_objective: Find an expired webhook serving certificate from the `x509` error text and `openssl`, and replace it
   source_readings:
-  - sections/section-050/module-02/course-02-an-expired-webhook-certificate.md
+  - sections/section-050/module-20/course-020-an-expired-webhook-certificate.md
   prompt: You signed a new serving certificate with the platform CA and updated the Secret. Creates still fail with the old `x509` expiry error. What is the most likely cause?
   options:
   - id: a
@@ -808,7 +808,7 @@ questions:
   difficulty: intermediate
   learning_objective: Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git
   source_readings:
-  - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+  - sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
   prompt: "An Application is `Synced` and `Degraded`. Which step finds the cause?"
   options:
   - id: a
@@ -830,7 +830,7 @@ questions:
   difficulty: advanced
   learning_objective: Find why a GitOps Application is stuck OutOfSync or Degraded from its status conditions and fix the cause in Git
   source_readings:
-  - sections/section-050/module-02/course-04-a-gitops-application-out-of-sync-or-degraded.md
+  - sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
   prompt: "A Deployment of a GitOps Application has a bad image tag. You fix it with `kubectl set image`, and a minute later the pods fail again. What is the correct fix?"
   options:
   - id: a
@@ -852,7 +852,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write LogQL stream selectors, line filters and metric queries
   source_readings:
-  - sections/section-020/module-03/course-02-query-logs-with-logql.md
+  - sections/section-020/module-30/course-020-query-logs-with-logql.md
   prompt: "Which LogQL query counts how many streams in `outpost` wrote a line containing `ERROR` in the last five minutes?"
   options:
   - id: a
@@ -874,7 +874,7 @@ questions:
   difficulty: intermediate
   learning_objective: Change jsonData.maxLines through the Grafana data source API
   source_readings:
-  - sections/section-020/module-03/course-01-connect-grafana-to-loki.md
+  - sections/section-020/module-30/course-010-connect-grafana-to-loki.md
   prompt: "How do you change Maximum lines on an editable Loki data source through the Grafana API?"
   options:
   - id: a

@@ -54,7 +54,7 @@ Strict guidelines:
   one or two sentences on what to run and why, the command, the real output,
   then a sentence or two on what it shows.
 - **The module ends with a summary.** The last page of every module is
-  `course-0N-summary.md` with the title `# Summary`: a few short prose
+  `course-100-summary.md` with the title `# Summary`: a few short prose
   paragraphs on what the reader learned, organised by idea, optionally with
   one short list of key facts. It names no parts, modules, sections or
   chapters, and has no links, lab table, quiz or commands. Its last line is
@@ -142,6 +142,12 @@ Strict guidelines:
     and short message text.
   - Anything longer (cluster names, full hostnames) goes in the sentence under
     the diagram.
+- **Module directories and pages are numbered in steps of ten.** A section's
+  modules are `module-10`, `module-20`, `module-30`; inside a module the
+  landing page is `course-000.md`, the parts are `course-010-<slug>.md`,
+  `course-020-<slug>.md` and so on, and the summary is always
+  `course-100-summary.md`. Three digits keep file lists in reading order and
+  leave room to insert a part without renumbering.
 - **Every course starts with an Introduction.** It lives in `sections/intro/`
   and is the first entry in `astrona.yaml` (`id: module-intro`, title
   "Introduction"). Its pages are numbered `NN-<slug>.md` in steps of ten (`00-` is the overview) so a page can be inserted without renumbering. It has exactly these four pages, in this order:
@@ -433,7 +439,7 @@ apps to a page until a playground actually runs them.
 | Overview, sections and modules tables, how to run things | `README.md` |
 | Introduction (see "Every course starts with an Introduction") | `sections/intro/` |
 | Section overview and its modules | `sections/section-0N0/README.md` |
-| Module reading: landing page, deep-dive parts, closing page | `sections/section-0N0/module-0M/course.md`, `course-0N-*.md` |
+| Module reading: landing page, deep-dive parts, closing page | `sections/section-0N0/module-M0/course-000.md`, `course-0N0-*.md`, `course-100-summary.md` |
 | Graded lab: task, walkthrough, setup, grader | `.../labs/lab-01/` (`question.md`, `solution.md`, `prerequisites.md`, `bootstrap/`, `manifests/`, `solution/`, `testing/`, `validation/`) |
 | Ungraded sandbox for a module | `.../playground/` (`config.yaml`, `bootstrap/prepare.sh`, `manifests/`, `docs/overview.md`, which is the only learner page) |
 | One graded integration lab per section | `sections/section-0N0/capstone/labs/lab-01/` |
@@ -471,10 +477,10 @@ this order:
 ```yaml
       - type: reading
         title: Question
-        path: sections/section-010/module-01/labs/lab-01/question.md
+        path: sections/section-010/module-10/labs/lab-01/question.md
       - type: lab
         title: "Get A Workload Scraped With A ServiceMonitor Lab"
-        path: sections/section-010/module-01/labs/lab-01
+        path: sections/section-010/module-10/labs/lab-01
         difficulty: beginner
         estimated_duration: 15m
         topic: metrics
@@ -529,17 +535,17 @@ this order:
 
 ```bash
 # Playground (ungraded)
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-01/playground
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-10/playground
 astrona destroy ats-020-playground-010-01   # takes metadata.name from config.yaml, not the path
 
 # Lab or capstone (graded against the live cluster)
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-01/labs/lab-01
-astrona submit -c sections/section-010/module-01/labs/lab-01
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-10/labs/lab-01
+astrona submit -c sections/section-010/module-10/labs/lab-01
 astrona destroy ats-020-lab-010-01
 
 # Authors: run a local, uncommitted copy, and prove a lab passes with its reference solution
-astrona run -c sections/section-010/module-01/playground
-astrona test -c sections/section-010/module-01/labs/lab-01
+astrona run -c sections/section-010/module-10/playground
+astrona test -c sections/section-010/module-10/labs/lab-01
 ```
 
 Names: a playground is `ats-020-playground-<section>-<module>`, a module lab

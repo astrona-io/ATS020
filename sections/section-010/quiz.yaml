@@ -16,7 +16,7 @@ questions:
   difficulty: beginner
   learning_objective: Read the Prometheus targets page and the `up` metric to say which targets are scraped and which fail
   source_readings:
-  - sections/section-010/module-01/course-01-targets-and-the-up-metric.md
+  - sections/section-010/module-10/course-010-targets-and-the-up-metric.md
   prompt: A team deployed a new service and asks why `up{namespace="billing"}` returns nothing at all. Which statement is correct?
   options:
   - id: a
@@ -38,7 +38,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write a ServiceMonitor that selects a Service by label and scrapes a named port and path
   source_readings:
-  - sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+  - sections/section-010/module-10/course-020-select-a-service-with-a-servicemonitor.md
   prompt: 'A Service `scout` has the label `app: scout` and the port `name: http` (`9898`). Which `endpoints` entry in a ServiceMonitor scrapes it on `/metrics`?'
   options:
   - id: a
@@ -60,7 +60,7 @@ questions:
   difficulty: intermediate
   learning_objective: Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
   source_readings:
-  - sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
+  - sections/section-010/module-10/course-020-select-a-service-with-a-servicemonitor.md
   prompt: 'You apply a correct ServiceMonitor in `starfleet`. `kubectl apply` prints `created`, but no job for it appears in Prometheus after five minutes. The Prometheus resource has `serviceMonitorNamespaceSelector: {}` and `serviceMonitorSelector.matchLabels: {release: kps}`. What is the most likely cause?'
   options:
   - id: a
@@ -82,7 +82,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write a PodMonitor for pods that have no Service
   source_readings:
-  - sections/section-010/module-01/course-03-scrape-pods-with-a-podmonitor.md
+  - sections/section-010/module-10/course-030-scrape-pods-with-a-podmonitor.md
   prompt: 'The pods `app: scout` in `outpost` have no Service. Their container port is named `http`. Which resource scrapes them?'
   options:
   - id: a
@@ -104,7 +104,7 @@ questions:
   difficulty: advanced
   learning_objective: Find why a new monitor produces no target (Prometheus selector label, namespace selector, port name, path)
   source_readings:
-  - sections/section-010/module-01/course-04-finding-a-missing-target.md
+  - sections/section-010/module-10/course-040-finding-a-missing-target.md
   prompt: After a change to a ServiceMonitor, `show_targets` lists no `scout` targets and `up` has no series for `starfleet`. The job `serviceMonitor/starfleet/scout/0` exists in the Prometheus configuration. Which check finds the cause fastest?
   options:
   - id: a
@@ -126,7 +126,7 @@ questions:
   difficulty: beginner
   learning_objective: Select time series by metric name and label matchers, including regex matchers
   source_readings:
-  - sections/section-010/module-02/course-01-selecting-time-series.md
+  - sections/section-010/module-20/course-010-selecting-time-series.md
   prompt: Which query selects the series of `http_requests_total` for every `5xx` status code in `starfleet`?
   options:
   - id: a
@@ -148,7 +148,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate a per-second request rate from a counter with `rate()` and explain why `rate` is not used on a gauge
   source_readings:
-  - sections/section-010/module-02/course-02-counters-gauges-and-rate.md
+  - sections/section-010/module-20/course-020-counters-gauges-and-rate.md
   prompt: A teammate runs `rate(go_goroutines[5m])`. `go_goroutines` is a gauge. What happens?
   options:
   - id: a
@@ -170,7 +170,7 @@ questions:
   difficulty: intermediate
   learning_objective: Aggregate series with `sum by` and `without` to get one value per namespace or per status code
   source_readings:
-  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
   prompt: You need the request rate of `scout` for each HTTP status code across all pods. Which query is correct?
   options:
   - id: a
@@ -192,7 +192,7 @@ questions:
   difficulty: advanced
   learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
   source_readings:
-  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
   prompt: Which query returns the 95th-percentile request duration of `scout` in `starfleet` from the histogram `http_request_duration_seconds`?
   options:
   - id: a
@@ -214,7 +214,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
   source_readings:
-  - sections/section-010/module-02/course-03-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
   prompt: A teammate writes `sum by (namespace) (rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))` and gets an empty result. Why?
   options:
   - id: a
@@ -236,7 +236,7 @@ questions:
   difficulty: intermediate
   learning_objective: Run a query from the command line against the Prometheus HTTP API and read the result with jq
   source_readings:
-  - sections/section-010/module-02/course-04-running-queries-from-the-command-line.md
+  - sections/section-010/module-20/course-040-running-queries-from-the-command-line.md
   prompt: You script a check with `curl -s http://127.0.0.1:9090/api/v1/query --data-urlencode 'query=...' | jq '.data.result[0].value[1]'` and want to test that the value is above 0.05. What must the script do?
   options:
   - id: a
@@ -258,7 +258,7 @@ questions:
   difficulty: intermediate
   learning_objective: Write an alerting rule in a PrometheusRule with `expr`, `for`, labels and annotations
   source_readings:
-  - sections/section-010/module-03/course-01-recording-and-alerting-rules.md
+  - sections/section-010/module-30/course-010-recording-and-alerting-rules.md
   prompt: 'A PrometheusRule is created in `starfleet`, but Prometheus does not list its rules, and no error appears. The `ruleSelector` of the Prometheus resource matches `release: kps`. What is the first thing to check?'
   options:
   - id: a
@@ -280,7 +280,7 @@ questions:
   difficulty: beginner
   learning_objective: Read an alert's state (inactive, pending, firing) in Prometheus and in Alertmanager
   source_readings:
-  - sections/section-010/module-03/course-03-the-alert-lifecycle.md
+  - sections/section-010/module-30/course-030-the-alert-lifecycle.md
   prompt: 'An alert has `for: 1m`. The expression has returned a result for 20 seconds. In which state is the alert in Prometheus, and does Alertmanager receive it yet?'
   options:
   - id: a
@@ -302,7 +302,7 @@ questions:
   difficulty: intermediate
   learning_objective: Read an alert's state (inactive, pending, firing) in Prometheus and in Alertmanager
   source_readings:
-  - sections/section-010/module-03/course-03-the-alert-lifecycle.md
+  - sections/section-010/module-30/course-030-the-alert-lifecycle.md
   prompt: "`ScoutHighErrorRatio` shows `firing` in Prometheus, but nobody got a message. What is the best next step?"
   options:
   - id: a
@@ -324,7 +324,7 @@ questions:
   difficulty: advanced
   learning_objective: Route alerts by label to a receiver with an AlertmanagerConfig or the Alertmanager configuration
   source_readings:
-  - sections/section-010/module-03/course-04-routing-alerts-with-alertmanager.md
+  - sections/section-010/module-30/course-040-routing-alerts-with-alertmanager.md
   prompt: 'An AlertmanagerConfig in `monitoring` routes `team: frontier` to a webhook. An alert for `team: frontier` fires from a rule in `starfleet`, and the webhook receives nothing. Which cause fits?'
   options:
   - id: a
@@ -346,7 +346,7 @@ questions:
   difficulty: intermediate
   learning_objective: Silence an alert for a time window and prove it stops notifying
   source_readings:
-  - sections/section-010/module-03/course-05-silences.md
+  - sections/section-010/module-30/course-050-silences.md
   prompt: During maintenance you silence `ScoutHighErrorRatio` for 30 minutes. What do you see?
   options:
   - id: a
@@ -368,7 +368,7 @@ questions:
   difficulty: advanced
   learning_objective: Silence an alert for a time window and prove it stops notifying
   source_readings:
-  - sections/section-010/module-03/course-05-silences.md
+  - sections/section-010/module-30/course-050-silences.md
   prompt: Which silence is safest for muting `ScoutHighErrorRatio` for the `starfleet` team only?
   options:
   - id: a
@@ -390,8 +390,8 @@ questions:
   difficulty: advanced
   learning_objective: Prove a scrape works with `up == 1` for every endpoint of the workload
   source_readings:
-  - sections/section-010/module-01/course-02-select-a-service-with-a-servicemonitor.md
-  - sections/section-010/module-01/course-04-finding-a-missing-target.md
+  - sections/section-010/module-10/course-020-select-a-service-with-a-servicemonitor.md
+  - sections/section-010/module-10/course-040-finding-a-missing-target.md
   prompt: "`scout` runs two ready pods behind a Service. After you fix a ServiceMonitor, which result proves the scrape works for the whole workload?"
   options:
   - id: a
@@ -413,7 +413,7 @@ questions:
   difficulty: advanced
   learning_objective: Write a recording rule and query the new series it creates
   source_readings:
-  - sections/section-010/module-03/course-01-recording-and-alerting-rules.md
+  - sections/section-010/module-30/course-010-recording-and-alerting-rules.md
   prompt: A recording rule named `namespace:http_requests_error_ratio:rate1m` is loaded. An alert must use it. Which alert expression is correct?
   options:
   - id: a
@@ -435,7 +435,7 @@ questions:
   difficulty: intermediate
   learning_objective: Distinguish rule loading from inactive alert state
   source_readings:
-  - sections/section-010/module-03/course-02-selecting-and-loading-prometheusrules.md
+  - sections/section-010/module-30/course-020-selecting-and-loading-prometheusrules.md
   prompt: A PrometheusRule exists in starfleet with release=outpost. Prometheus selects
     all namespaces and release=kps. Its alert is absent from the alerts API. What
     should you do first?
@@ -463,7 +463,7 @@ questions:
   difficulty: intermediate
   learning_objective: Predict nested route matching and continuation
   source_readings:
-  - sections/section-010/module-03/course-07-route-precedence-and-grouping.md
+  - sections/section-010/module-30/course-070-route-precedence-and-grouping.md
   prompt: A matching team route has a parent receiver and two children. The first
     matches severity=warning and has continue=true. The second matches alertname=~"Scout.*".
     A warning ScoutErrorRate alert matches both. Which receivers handle it?
@@ -490,7 +490,7 @@ questions:
   difficulty: intermediate
   learning_objective: Diagnose suppression after a silence expires
   source_readings:
-  - sections/section-010/module-03/course-06-inhibition.md
+  - sections/section-010/module-30/course-060-inhibition.md
   prompt: A scoped silence has expired. A warning alert is still firing in Prometheus
     and suppressed in Alertmanager. Its silencedBy list is empty and inhibitedBy is
     not empty. What explains this?

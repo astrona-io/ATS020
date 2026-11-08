@@ -16,7 +16,7 @@ questions:
     difficulty: beginner
     learning_objective: "Add a Prometheus data source to Grafana with a provisioning file or a labelled ConfigMap"
     source_readings:
-      - sections/section-020/module-01/course-01-grafana-parts-and-a-provisioned-data-source.md
+      - sections/section-020/module-10/course-010-grafana-parts-and-a-provisioned-data-source.md
     prompt: "The platform team wants the Prometheus data source in Grafana to exist after every pod restart, and nobody should be able to change it in the web interface. Which approach meets this?"
     options:
       - id: a
@@ -39,7 +39,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Build a panel from a PromQL query and choose the right visualisation for a rate, a ratio and a latency"
     source_readings:
-      - sections/section-020/module-01/course-02-panels-for-rate-error-ratio-and-latency.md
+      - sections/section-020/module-10/course-020-panels-for-rate-error-ratio-and-latency.md
     prompt: "A panel must show the share of requests that failed over the last five minutes, as one number between 0 and 1 per service. The counter `http_requests_total` has a `status` label. Which query fits?"
     options:
       - id: a
@@ -62,7 +62,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Use a dashboard variable to switch the namespace shown on every panel"
     source_readings:
-      - sections/section-020/module-01/course-03-a-namespace-variable-for-every-panel.md
+      - sections/section-020/module-10/course-030-a-namespace-variable-for-every-panel.md
     prompt: "A dashboard has a variable `namespace`, but the panels do not change when the viewer selects another namespace. What is the most likely cause?"
     options:
       - id: a
@@ -85,7 +85,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Export a dashboard as JSON and load it through the Grafana sidecar ConfigMap so it survives a pod restart"
     source_readings:
-      - sections/section-020/module-01/course-04-dashboards-that-survive-a-restart.md
+      - sections/section-020/module-10/course-040-dashboards-that-survive-a-restart.md
     prompt: "A teammate built a dashboard by hand in the Grafana web interface. After the Grafana pod was replaced, the dashboard was gone. Which change keeps the dashboard after every restart?"
     options:
       - id: a
@@ -108,7 +108,7 @@ questions:
     difficulty: beginner
     learning_objective: "Read a pod's logs, its previous container's logs and its events with `kubectl logs` and `kubectl events`"
     source_readings:
-      - sections/section-020/module-02/course-01-what-kubernetes-keeps-about-logs.md
+      - sections/section-020/module-20/course-010-what-kubernetes-keeps-about-logs.md
     prompt: "The container in the pod `probe` crashed and restarted. You need the output of the container that crashed, not the new one. Which command do you run?"
     options:
       - id: a
@@ -131,7 +131,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Deploy an OpenTelemetry Collector as a DaemonSet whose file_log receiver reads the container log files on each node"
     source_readings:
-      - sections/section-020/module-02/course-02-a-daemonset-collector-reads-the-log-files.md
+      - sections/section-020/module-20/course-020-a-daemonset-collector-reads-the-log-files.md
     prompt: "A Collector must read the log files of every pod on every node. Which setup does that?"
     options:
       - id: a
@@ -154,7 +154,7 @@ questions:
     difficulty: advanced
     learning_objective: "Add Kubernetes metadata to each log record with the k8s_attributes processor and drop unwanted records with the filter processor"
     source_readings:
-      - sections/section-020/module-02/course-03-add-kubernetes-metadata-and-drop-records.md
+      - sections/section-020/module-20/course-030-add-kubernetes-metadata-and-drop-records.md
     prompt: "The Collector log records show no `k8s.deployment.name`, and the log of the Collector contains a `forbidden` error for pods. What is missing?"
     options:
       - id: a
@@ -177,7 +177,7 @@ questions:
     difficulty: advanced
     learning_objective: "Turn error log lines into a Prometheus metric with the count connector and query it with PromQL"
     source_readings:
-      - sections/section-020/module-02/course-04-count-error-lines-into-a-prometheus-metric.md
+      - sections/section-020/module-20/course-040-count-error-lines-into-a-prometheus-metric.md
     prompt: "The `count` connector in the Collector is configured, and the metric `log_error_lines_total` appears on port `8889` of the Collector. Prometheus has no such series. What must you check first?"
     options:
       - id: a
