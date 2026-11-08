@@ -1,38 +1,71 @@
+---
+title: "Run An OpenTelemetry Collector With The Operator"
+maturity: published
+reviewed: "2026-11-08"
+---
+
 # Run An OpenTelemetry Collector With The Operator
 
-Metrics tell you that something is slow. They do not tell you which step of a request took the time. A trace does: it records every step of one request, from the first service to the last, with a start time and a duration for each. Getting traces to a place where you can read them takes three components, and the exam expects you to build and repair that path by hand.
+Metrics can reveal that requests are slow, but they do not show which step caused the delay. A trace follows a request across services, recording the start time and duration of each instrumented operation as a **span**. The exam expects you to build and troubleshoot the path that carries these spans to a tracing backend.
 
-The three components are an instrumented application, an OpenTelemetry Collector and a trace backend. The application creates spans, the Collector receives, batches and forwards them, and Jaeger stores and shows them. On Kubernetes, the OpenTelemetry Operator runs the Collector for you from one custom resource, the OpenTelemetryCollector. When no trace arrives, the first question is which of the three stopped it.
+This path has three components:
 
-The module has six parts. **The Operator And Its Webhook** installs the Operator after cert-manager and proves that its webhook answers. **A Collector With An OTLP Receiver And A Jaeger Exporter** writes the OpenTelemetryCollector for `scout` and shows what the Operator builds. **Reading A Trace In Jaeger** defines traces and spans and finds them with the API. **Choosing A Collector Mode** creates a gateway, an agent and a sidecar. **Diagnosing A Broken Collector Pipeline** fixes two faults and ends with a graded lab. **Finding A Service By Tag And Acting On It** searches Jaeger by a span tag, changes the Deployments that the search points to, saves traces to a file, finds the spans that ended with an error and their exception events, and ends with two graded labs.
+- **Instrumented application:** Creates spans that describe the work performed during a request.
+- **OpenTelemetry Collector:** Receives, batches, and forwards spans.
+- **Tracing backend, such as Jaeger:** Stores traces and makes them available for searching and analysis.
 
-## Learning objectives
+On Kubernetes, the OpenTelemetry Operator manages the Collector through an `OpenTelemetryCollector` custom resource. When traces are missing, determine where the flow stops: span creation, collection and forwarding, or backend ingestion.
 
-After this module you can:
+## Learning Objectives
 
-- Install the OpenTelemetry Operator after cert-manager and confirm that its webhook is ready.
-- Write an OpenTelemetryCollector with an OTLP receiver, a batch processor and an exporter to Jaeger.
-- Choose the Collector mode (deployment, daemonset or sidecar) for a given need.
-- Send a test trace over OTLP and find it in the Jaeger API and web interface.
-- Diagnose a broken pipeline from the Service ports, the Collector log and the Collector counters.
-- Find a service by a span tag in the Jaeger web interface and API, detect whether an older server serves the legacy search routes, and change the Deployment behind it.
-- Save an exact number of traces for a service as JSON, and count them by trace ID.
-- Find the service whose spans carry the status `ERROR`, export their `exception` span events as JSON, and fix the cause the exception message names.
+After completing this module, you will be able to:
 
-## Before you start
+- Install the OpenTelemetry Operator after cert-manager and verify its webhook is ready.
+- Configure an `OpenTelemetryCollector` with an OTLP receiver, a batch processor, and an exporter that sends traces to Jaeger.
+- Choose between Deployment, DaemonSet, and sidecar Collector modes.
+- Send a test trace over OTLP and locate it in the Jaeger API and web interface.
+- Troubleshoot tracing pipelines using Service ports, Collector logs, and Collector counters.
+- Search spans by tag in the Jaeger web interface and API, identify legacy search routes on older servers, and update the corresponding Deployment.
+- Export an exact number of service traces as JSON and verify the count using distinct trace IDs.
+- Identify services with spans marked `ERROR`, export their `exception` span events as JSON, and resolve the cause described in the exception message.
 
-You need Kubernetes basics and `kubectl port-forward`, `kubectl logs` and `kubectl exec`, and `jq` on your machine. You need to read a Kubernetes Service and its ports.
+## Before You Start
 
-Your playground is a single-node `kind` cluster running Kubernetes 1.35. It has cert-manager 1.21.2 and Jaeger 2.22.0. The OpenTelemetry Operator (version 0.160.0) and the Collector (contrib image 0.162.0) are not installed yet: you install the Operator and create the Collector. No Prometheus stack runs, to save memory.
+### Required Knowledge and Tools
 
-| Namespace | Workload | What it is |
+You should be able to:
+
+- Read Kubernetes Services and identify their exposed ports.
+- Forward ports using `kubectl port-forward`.
+- Inspect container logs using `kubectl logs`.
+- Run commands inside containers using `kubectl exec`.
+
+You need these tools on your machine:
+
+- `kubectl`
+- `jq`
+
+### Playground Environment
+
+The playground uses a single-node `kind` cluster with:
+
+- Kubernetes **1.35**
+- cert-manager **1.21.2**
+- Jaeger **2.22.0**
+
+During this module, you will install and configure:
+
+- OpenTelemetry Operator **0.160.0**
+- OpenTelemetry Collector using the **contrib 0.162.0** image
+
+A Prometheus stack is omitted to reduce memory usage.
+
+### Preconfigured Workloads
+
+| Namespace | Workload | Configuration |
 | --- | --- | --- |
-| `observability` | `jaeger` | Jaeger 2.22.0 in one pod with in-memory storage. The Service `jaeger` has OTLP on ports `4317` and `4318` and the web interface and API on `16686` |
-| `starfleet` | `scout` | One pod of `podinfo` 6.15.0 with OpenTelemetry tracing on. It sends spans over OTLP to `otel-collector.observability:4317`, a Service that does not exist yet |
-| `starfleet` | `shuttle` | A client pod that sends a request to `scout` every 2 seconds, and a slow request (`/delay/1`) every tenth round |
-
-Every command in the parts runs against the playground cluster, and `kubectl` already points at it.
-
-Launch your playground now, and keep it running next to you while you read the parts:
+| `observability` | `jaeger` | A single Jaeger pod with in-memory storage. The `jaeger` Service exposes OTLP on ports `4317` and `4318`, and the web interface and API on port `16686`. |
+| `starfleet` | `scout` | A single `podinfo` 6.15.0 pod with tracing enabled. It sends spans over OTLP to `otel-collector.observability:4317`. You will create this Collector Service during the module. |
+| `starfleet` | `shuttle` | A client pod that requests `scout` every two seconds and sends a slow request to `/delay/1` every tenth round. |
 
 <!-- astrona:playground -->

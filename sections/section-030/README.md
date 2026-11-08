@@ -1,22 +1,29 @@
-# Distributed Tracing With OpenTelemetry And Jaeger
+---
+title: "Distributed Tracing With OpenTelemetry And Jaeger"
+maturity: published
+reviewed: "2026-11-08"
+---
 
-Makes the reader able to run an OpenTelemetry Collector with the OpenTelemetry Operator, send traces to Jaeger, and add tracing to an application without changing its code. It comes after metrics and logs because tracing reuses the Collector pipeline idea and answers the question metrics cannot — where in a chain of services the time went.
+# Distributed Tracing With OpenTelemetry and Jaeger
+
+Learn to deploy an OpenTelemetry Collector using the OpenTelemetry Operator, send traces to Jaeger, and investigate requests through the Jaeger dashboard. Add tracing to applications using automatic instrumentation without changing their source code.
+
+Building on metrics and logging, this chapter introduces Collector pipelines for receiving, processing, and exporting traces, metrics, and logs. Use distributed tracing to follow requests across services and identify where time is spent.
 
 **Curriculum item covered:** Implementing Monitoring, Alerting, Logging, and Tracing Solutions
 
----
-
 ## What You Will Master
 
-- Install the OpenTelemetry Operator after cert-manager and confirm its webhook is ready
-- Write an OpenTelemetryCollector resource with an OTLP receiver, a batch processor and an exporter to Jaeger
-- Choose the Collector mode (deployment, daemonset, sidecar) for a given need
-- Send a test trace over OTLP and find it in the Jaeger UI and API
-- Diagnose a broken pipeline from the Collector's logs (wrong endpoint, missing pipeline, unused receiver)
-- Find a service by a span tag in the Jaeger UI and the `/api/v3` query API, recognise the legacy search routes on older servers, and act on the result by changing an environment variable and scaling a Deployment
-- Export an exact number of traces for a service as JSON to a named file, and count them by distinct trace ID
-- Write an Instrumentation resource with the exporter endpoint, propagators and sampler
-- Annotate a Deployment so the operator injects the language agent, and restart it so the change takes effect
-- Read the injected init container and environment variables to prove injection happened
-- Follow one request across two services in Jaeger and name the slowest span
-- Find why a pod was not instrumented (annotation on the wrong object, Instrumentation in another namespace, pod not restarted)
+- Install the OpenTelemetry Operator after cert-manager and verify its webhook is ready
+- Configure an OpenTelemetryCollector with an OTLP receiver, batch processor, and Jaeger exporter endpoint
+- Choose between Deployment, DaemonSet, and sidecar Collector modes
+- Send test traces over OTLP and locate them in the Jaeger UI and API
+- Troubleshoot Collector pipelines using logs and configuration
+- Search spans by tag using the Jaeger UI and `/api/v3` query API, and recognise legacy search routes
+- Use trace findings to update environment variables and scale Deployments
+- Export a specified number of service traces to a JSON file and verify the count using distinct trace IDs
+- Configure an Instrumentation resource with an exporter endpoint, propagators, and sampler
+- Enable automatic instrumentation through Deployment pod-template annotations and restart the pods
+- Verify agent injection through init containers and environment variables
+- Follow a request across services and identify its slowest span
+- Troubleshoot missing instrumentation caused by incorrect annotations, namespace references, or pods that need restarting
