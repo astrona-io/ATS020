@@ -1,95 +1,86 @@
+---
+title: "Welcome To The Course"
+maturity: published
+reviewed: "2026-11-08"
+---
+
 # Welcome To The Course
 
-This course trains you for the **Observability and Operations** part of the **Certified Cloud Native Platform Engineer (CNPE)** exam. That part is 20% of the exam. This page tells you who the course is for, what you can do at the end, which words and example app it uses, and how its pages fit together.
+This course prepares you for the **Observability and Operations** domain of the Linux Foundation’s **Certified Cloud Native Platform Engineer (CNPE)** exam.
+
+This page introduces the intended audience, learning outcomes, key terminology, and example application used throughout the course. It also explains how the course is structured.
 
 ## Who this course is for
 
-You know your way around Kubernetes: namespaces, Deployments, Services, pod labels, `kubectl logs`, `kubectl describe` and `kubectl exec`. You do not need to know Prometheus, Grafana, OpenTelemetry or Jaeger yet. Each new idea is explained the first time it appears.
+This course is for learners who are familiar with Kubernetes fundamentals, including namespaces, Deployments, Services, pod labels, and commands such as `kubectl logs`, `kubectl describe`, and `kubectl exec`.
+
+You do not need prior experience with the following tools:
+
+- Prometheus
+- Grafana
+- OpenTelemetry
+- Jaeger
+
+Each new concept is explained when it is first introduced.
 
 ## What you can do at the end
 
-The exam is hands-on. You get a set of hosts, a terminal and 15 to 20 tasks in two hours, and you must make things work on a live cluster. The exam touches many tools but expects only working depth in each one. So this course does not ask you to remember words. It asks you to set something up, check that it works, and prove it with a query, a trace or a real request. The exam groups this part into three topics, and each one turns into a set of skills you will practise.
+The exam is hands-on. You work in a remote desktop environment with terminal access to a set of hosts, completing 15–20 tasks within two hours. Each task requires you to configure, troubleshoot, or verify something in a live environment.
 
-The first topic is **implementing monitoring, alerting, logging and tracing**. You will learn to:
+The exam covers a broad range of tools and expects you to use them to solve practical problems. This course therefore focuses on applying what you learn: setting up components, checking that they work, and verifying the results through queries, traces, real requests, or dashboards.
 
-- Get a workload's metrics into Prometheus with a `ServiceMonitor`, `PodMonitor` or raw scrape configuration, and find out why a target does not appear.
-- Write PromQL queries for request rate, error rate and latency.
-- Write alerting rules in a `PrometheusRule`, and route the alerts to a receiver with Alertmanager.
-- Build a Grafana dashboard, and collect pod logs with the OpenTelemetry Collector and turn error lines into a metric.
-- Send traces through an OpenTelemetry Collector to Jaeger, and add tracing to an app without changing its code.
-
-A platform also has to show whether it is getting better, so the second topic is **measuring and improving platform efficiency**. You will learn to:
-
-- Measure the four DORA delivery metrics from the history of a GitOps controller.
-- Define a service level objective and calculate how much error budget is left.
-- Compare what workloads request with what they really use, and find the waste.
-
-Things break, so the third topic is **diagnosing and remediating incidents**. You will learn to:
-
-- Find why a pod is `Pending`, in `CrashLoopBackOff`, `OOMKilled` or in `ImagePullBackOff`, and fix it.
-- Find and fix a broken platform component: a failing admission webhook, a stopped controller, a GitOps sync that is stuck, or an expired certificate.
-
-Everything is built and checked on **Kubernetes 1.35**, the version the exam uses.
+The Observability and Operations domain is divided into three topics. Each topic maps to a set of practical skills you will develop throughout the course.
 
 ## The words this course uses
 
-The pages use each tool's own terms, because those are the words you meet in the product, the logs and the exam. Each term gets a short, plain definition the first time it appears on a page. A few terms come back on almost every page, so here they are up front.
+This course uses each tool’s official terminology so you can recognise the terms in its interface, documentation, logs, and the exam. Each term is briefly explained the first time it appears on a page. The following terms are used throughout the course.
 
-A **pod** runs one copy of an application, and a **namespace** groups pods and other objects inside the cluster. A **request** is one call that a client sends to a server, and the **response** is the answer it gets back. Observability means you can tell what a system is doing from the data it sends out. That data comes in three kinds, often called signals:
+A **Pod** is the smallest deployable unit in Kubernetes and contains one or more containers that run together. A **namespace** groups and scopes resources within a cluster.
 
-| Signal | What it is | Tool in this course |
+A **request** is a call from a client to a server. The **response** is the answer the server sends back.
+
+**Observability** is the ability to understand a system’s internal behaviour by examining the data it produces. This course focuses on three types of data, commonly called **signals**:
+
+| Signal | What it tells you | Tools used in this course |
 | --- | --- | --- |
-| Metric | A number measured over time, for example requests per second | Prometheus, shown in Grafana |
-| Log | A line of text a program writes when something happens | `kubectl logs`, and the OpenTelemetry Collector for the whole cluster |
-| Trace | The path of one request through several services, with the time each step took | Jaeger, collected by the OpenTelemetry Collector |
-
-**OpenTelemetry** is a vendor-neutral standard for producing and sending all three signals. Its **Collector** receives the data, changes it if needed, and sends it on to the right backend.
+| Metric | A numeric measurement recorded over time, such as the number of requests per second. | Prometheus, with visualisation in Grafana |
+| Log | A record of an event produced by an application or system. | `kubectl logs` for container logs; the OpenTelemetry Collector for collecting and forwarding logs |
+| Trace | The journey of a request through a system, including the duration of individual operations. | The OpenTelemetry Collector for collecting and forwarding traces; Jaeger for storing and exploring them |
 
 ## The example app in your playground
 
-Every playground and lab runs the same small app, named after a fleet of spaceships. It lives in the namespaces `starfleet` and `outpost`. The `scout` Deployment is an HTTP API on port `9898` that publishes its own Prometheus metrics. The `probe` Deployment is an HTTP echo server on port `8080`: you can ask it for a slow response or an error on purpose. You send your test requests from the `shuttle` pod, a client with `curl`.
+Every playground and lab uses the same small application, with components named after a fleet of spaceships. It runs in the `starfleet` and `outpost` namespaces and includes:
 
-Many playgrounds and labs, and all of the incident section, start with something broken on purpose. That is the material, not a fault in the course.
+- **`scout`**: a Deployment running an HTTP API on port `9898` that exposes Prometheus metrics.
+- **`probe`**: a Deployment running an HTTP echo server on port `8080` that can deliberately return slow responses or errors.
+- **`shuttle`**: a client Pod with `curl`, used to send test requests to the application.
 
-## How the course is laid out
-
-The course has five sections. They follow the order you build observability on a platform: collect metrics first, then show them and the logs, then follow single requests, then measure the platform as a whole, and last use all of it to fix incidents.
-
-| Section | What it covers |
-| --- | --- |
-| 010 | Metrics And Alerting With Prometheus |
-| 020 | Dashboards And Logs |
-| 030 | Distributed Tracing With OpenTelemetry And Jaeger |
-| 040 | Measuring Platform Efficiency |
-| 050 | Diagnosing And Remediating Incidents |
-
-Each section has one or more **modules**, and each module teaches one skill. A module brings together four kinds of material:
-
-| What | What it is for | Graded? |
-| --- | --- | --- |
-| **Reading** | A short landing page, a few chapters that teach one idea each, and a summary | No |
-| **Playground** | A small cluster on your own machine, to try everything you read | No |
-| **Lab** | A cluster with a task, and a grader that checks your work | Yes |
-| **Capstone** | The last lab in a section, with several tasks or faults at once | Yes |
-
-The best order is simple: read the chapters with the playground open next to them, take each lab when a chapter sends you to it, and finish each section with its capstone. The next part of this page explains how a module's pages guide you through that order.
+Many playgrounds and labs, along with the entire incident section, begin with deliberately introduced faults. These faults are part of the exercises and give you opportunities to practise investigating and resolving problems.
 
 ## How to read a page
 
-A module starts with a **landing page**. It says what the module teaches, what you should know first, and the order of its chapters. At the bottom of the landing page you start the module's playground, and you keep it running while you read.
+Each module begins with a **landing page** that introduces its learning objectives, prerequisites, and chapter order. Start the module’s playground at the bottom of that page and keep it running as you work through the chapters.
 
-The chapters (the parts of a module) read like the chapters of a technical book. Each one opens with the problem it solves, explains one idea in connected paragraphs, and closes with what you now know. The hands-on steps sit right in the text: a sentence or two on what to run and why, the command, the real output, and then what that output shows. Run each step in your playground as you reach it. You learn more from one real result than from a page of text.
+The chapters read like a technical book. Each chapter introduces a problem, explains the concepts needed to solve it, and closes with a recap of what you have learned. Practical steps appear alongside the explanations: what to run, why it matters, the command, its expected output, and how to interpret the result. Run each step in your playground as you reach it to connect the explanation with real behaviour.
 
-Every chapter ends with a box of common pitfalls, the mistakes people make most often with what the chapter taught, and how to spot them. Now and then a page also has a tip box with a habit or shortcut you can use again, well beyond that page. The two boxes look like this:
+Every chapter ends with a **Common pitfalls** box describing frequent mistakes and how to recognise them. Some pages also include a **Tip** box with a useful habit or shortcut you can apply elsewhere. These boxes look like this:
 
 > [!TIP]
-> **A tip.** A habit or shortcut you can use again, well beyond this one page.
+> **A useful habit or shortcut.** Practical advice you can apply throughout the course and in your own work.
 
 > [!WARNING]
-> **Common pitfalls.** The mistakes people make most often with what you just learned, and how to spot them. Every chapter ends with one.
+> **Common pitfalls.** Frequent mistakes related to the chapter’s concepts, with guidance on how to recognise them.
 
-When a graded lab tests what a chapter taught, that chapter ends with a **Your mission** section. It tells you what the lab asks, then gives every command you need, in order: pause the playground with `astrona stop`, start the lab with `astrona run`, and send your work for grading with `astrona submit`. Solve the lab on your own before you look at its solution. When the lab is done, remove it with `astrona destroy` and start the playground again with `astrona start`, so you can carry on reading where you left off.
+When a chapter has an associated graded lab, it ends with a **Your mission** section. This introduces the task and provides the commands for managing the lab environment, in order:
 
-The last page of every module is the **Summary**. It sums up what you learned in a few short paragraphs, organised by idea. It also ends the module's hands-on work: the Summary page removes the playground, so your machine is clean before the next module.
+1. Pause the playground with `astrona stop`.
+2. Start the lab with `astrona run`.
+3. Complete the task and submit your work for grading with `astrona submit`.
+4. Remove the lab with `astrona destroy`.
+5. Restart the playground with `astrona start` and continue reading.
 
-One rule holds on every page. Code blocks are exactly what you type or what you will see. Never change a command to make it "look right". If the result is different from the page, that difference is the lesson.
+Attempt the lab independently before consulting its solution.
+
+Each module ends with a **Summary** page that reviews the main ideas in a few short paragraphs. This page also includes the step to remove the playground, leaving your machine ready for the next module.
+
+Throughout the course, code blocks distinguish commands to run from output to inspect. Copy commands as written unless the instructions explicitly ask you to replace a value. If your output differs from the example, investigate the difference—it may reveal something useful about your environment or the problem you are solving.
