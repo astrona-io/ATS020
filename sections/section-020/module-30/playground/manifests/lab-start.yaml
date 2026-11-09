@@ -294,7 +294,7 @@ spec:
     spec:
       containers:
         - name: shuttle
-          image: curlimages/curl:8.22.0
+          image: curlimages/curl:8.23.0
           command: ["/bin/sh", "/scripts/loop.sh"]
           volumeMounts:
             - name: scripts
@@ -340,7 +340,7 @@ spec:
     spec:
       containers:
         - name: depot
-          image: curlimages/curl:8.22.0
+          image: curlimages/curl:8.23.0
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -371,7 +371,7 @@ spec:
     spec:
       containers:
         - name: beacon
-          image: curlimages/curl:8.22.0
+          image: curlimages/curl:8.23.0
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -402,7 +402,7 @@ spec:
     spec:
       containers:
         - name: scout
-          image: curlimages/curl:8.22.0
+          image: curlimages/curl:8.23.0
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -433,7 +433,7 @@ spec:
     spec:
       containers:
         - name: relay
-          image: curlimages/curl:8.22.0
+          image: curlimages/curl:8.23.0
           command: ["/bin/sh", "-c"]
           args:
             - |

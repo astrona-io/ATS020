@@ -19,7 +19,7 @@ runtime:
       - otel/opentelemetry-collector-contrib:0.165.0
       - jaegertracing/jaeger:2.23.0
       - ghcr.io/stefanprodan/podinfo:6.17.0
-      - curlimages/curl:8.22.0
+      - curlimages/curl:8.23.0
 
 bootstrap:
   init:

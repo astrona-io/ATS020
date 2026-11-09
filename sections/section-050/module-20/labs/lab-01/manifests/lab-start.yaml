@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
         - name: shuttle
-          image: curlimages/curl:8.22.0
+          image: curlimages/curl:8.23.0
           command: ["sleep", "infinity"]
           resources:
             requests: {cpu: 10m, memory: 16Mi}
@@ -148,7 +148,7 @@ spec:
     spec:
       containers:
         - name: drifter
-          image: curlimages/curl:8.22.0
+          image: curlimages/curl:8.23.0
           command: ["sleep", "infinity"]
           resources:
             requests: {cpu: 10m, memory: 16Mi}

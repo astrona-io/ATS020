@@ -22,7 +22,7 @@ runtime:
       - docker.io/grafana/grafana:13.2.3-distroless
       - quay.io/kiwigrid/k8s-sidecar:2.14.1
       - ghcr.io/stefanprodan/podinfo:6.17.0
-      - curlimages/curl:8.22.0
+      - curlimages/curl:8.23.0
 
 bootstrap:
   init:
