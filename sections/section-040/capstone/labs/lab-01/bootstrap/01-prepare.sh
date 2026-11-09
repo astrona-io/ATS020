@@ -9,7 +9,7 @@
 #      one Prometheus, kube-state-metrics and the kubelet scrape job) into
 #      `monitoring`,
 #   3. installs Gitea 28.1.0 (plumbing: the Git server) into `gitea`,
-#   4. installs Argo CD 3.5.4 into `argocd` and scales down the parts that
+#   4. installs Argo CD 3.6.1 into `argocd` and scales down the parts that
 #      this lab does not use,
 #   5. tells Prometheus to scrape the Argo CD application controller,
 #   6. creates the project `default`, the repository `starfleet-deploy` and the Application `scout`,
@@ -22,7 +22,7 @@ set -euo pipefail
 
 HELM_VERSION="v4.3.0"
 CHART_VERSION="92.3.0"
-ARGOCD_VERSION="v3.5.4"
+ARGOCD_VERSION="v3.6.1"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 find_file() {

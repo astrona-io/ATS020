@@ -26,7 +26,7 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. Setup t
 | Namespace | Workload | What it is |
 | --- | --- | --- |
 | `monitoring` | `prometheus-kps-prometheus` | One Prometheus (Prometheus Operator, kube-prometheus-stack 92.3.0). It scrapes every 15 seconds and keeps 6 hours of data. Alertmanager, Grafana, node exporter and kube-state-metrics are not installed |
-| `argocd` | `argocd-application-controller` | Argo CD 3.5.4. The Application `scout` syncs automatically from a Git repository. A ServiceMonitor makes Prometheus scrape the controller |
+| `argocd` | `argocd-application-controller` | Argo CD 3.6.1. The Application `scout` syncs automatically from a Git repository. A ServiceMonitor makes Prometheus scrape the controller |
 | `gitea` | `gitea` | Gitea 28.1.0, a small Git server. It holds the repository `starfleet/starfleet-deploy` with the manifests of `scout` |
 | `starfleet` | `scout`, `shuttle` | `scout` is created by Argo CD from the repository. `shuttle` is a client pod with `curl` |
 
