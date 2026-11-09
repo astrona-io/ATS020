@@ -105,7 +105,7 @@ The output should include these resources. Addresses and ages will differ:
 
 ```text
 NAME                                           MODE         VERSION   READY   AGE   IMAGE                                          MANAGEMENT
-opentelemetrycollector.opentelemetry.io/otel   deployment   0.160.0   1/1     27s   otel/opentelemetry-collector-contrib:0.162.0   managed
+opentelemetrycollector.opentelemetry.io/otel   deployment   0.162.0   1/1     27s   otel/opentelemetry-collector-contrib:0.162.0   managed
 
 NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/jaeger           1/1     1            1           2m26s

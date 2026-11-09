@@ -9,13 +9,13 @@ request across both services in Jaeger. There is no grading.
 ## What's in the box
 
 The cluster runs Kubernetes 1.35.8. cert-manager 1.21.3 and the OpenTelemetry
-Operator 0.160.0 are installed and ready. A Prometheus stack is not installed,
+Operator 0.162.0 are installed and ready. A Prometheus stack is not installed,
 to save memory.
 
 | Namespace | Contents |
 | --- | --- |
 | `cert-manager` | cert-manager 1.21.3, which issues the certificate for the Operator's webhook |
-| `opentelemetry-operator-system` | The OpenTelemetry Operator 0.160.0 |
+| `opentelemetry-operator-system` | The OpenTelemetry Operator 0.162.0 |
 | `observability` | Jaeger 2.22.0 in one pod with in-memory storage, and the Collector `otel` (contrib 0.162.0, `deployment` mode). The Service `otel-collector` takes OTLP on `4317` (gRPC) and `4318` (HTTP) |
 | `starfleet` | `scout`, `relay` and `shuttle` |
 
