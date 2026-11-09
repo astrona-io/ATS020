@@ -24,7 +24,7 @@ runtime:
       - ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.162.0
       - jaegertracing/jaeger:2.22.0
       - ghcr.io/stefanprodan/podinfo:6.15.0
-      - curlimages/curl:8.22.0
+      - curlimages/curl:8.23.0
       - python:3.13.18-alpine3.24
 
 bootstrap:

@@ -21,7 +21,7 @@ runtime:
       - jaegertracing/jaeger:2.22.0
       - ghcr.io/stefanprodan/podinfo:6.15.0
       - node:22-alpine
-      - curlimages/curl:8.22.0
+      - curlimages/curl:8.23.0
 
 bootstrap:
   init:
