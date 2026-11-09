@@ -89,7 +89,7 @@ The `file_log` receiver reads the files, and the `debug` exporter prints what co
 
 ## Deploy the Collector
 
-The receiver is named `file_log`. In older releases it was named `filelog`; version 0.162.0 still accepts the old name but prints a deprecation warning, so this module uses the new name. Its fields:
+The receiver is named `file_log`. In older releases it was named `filelog`; version 0.165.0 still accepts the old name but prints a deprecation warning, so this module uses the new name. Its fields:
 
 - `include` lists the files to read. The pattern `/var/log/pods/*/*/*.log` matches every container log.
 - `exclude` skips files. The Collector must not read its own log, or each line it prints would create a new line to read.
@@ -107,7 +107,7 @@ metadata:
   namespace: monitoring
 spec:
   mode: daemonset
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   volumes:
     - name: varlogpods
       hostPath:
@@ -172,8 +172,8 @@ kubectl -n monitoring logs ds/logs-collector | grep -E "Starting otelcol|Everyth
 You should see lines like these. The command shortens each line to its first 120 characters, so the JSON that follows on the real line is not shown:
 
 ```text
-2026-11-02T19:36:42.398Z	info	service@v0.162.0/service.go:233	Starting otelcol-contrib...	{"resource": {"service.instanc
-2026-11-02T19:36:42.398Z	info	service@v0.162.0/service.go:256	Everything is ready. Begin running and processing data.	{"resource": {"service.
+2026-11-02T19:36:42.398Z	info	service@v0.165.0/service.go:233	Starting otelcol-contrib...	{"resource": {"service.instanc
+2026-11-02T19:36:42.398Z	info	service@v0.165.0/service.go:256	Everything is ready. Begin running and processing data.	{"resource": {"service.
 2026-11-02T19:36:42.603Z	info	fileconsumer/file.go:470	Started watching file	{"resource": {"service.instance.id": "4749654a-d9
 2026-11-02T19:36:42.603Z	info	fileconsumer/file.go:470	Started watching file	{"resource": {"service.instance.id": "4749654a-d9
 ```
@@ -215,7 +215,7 @@ The `file_log` receiver now delivers every line of every container on the node, 
 > - **Reading old files by mistake.** With `start_at: beginning` the Collector reads all existing data on the first start. Use `end` unless you want the history.
 > - **No `exclude` for the Collector's own log.** With the `debug` exporter, the Collector writes a line for every record it reads, including those lines. Exclude `monitoring_logs-collector-*`.
 > - **Missing `hostPath` mount.** Without the `volumes` and `volumeMounts` fields, the Collector starts and finds no files. Check for `Started watching file` lines.
-> - **Using `filelog` or `k8sattributes` from older examples.** Version 0.162.0 accepts these names but logs a deprecation warning. The new names are `file_log` and `k8s_attributes`.
+> - **Using `filelog` or `k8sattributes` from older examples.** Version 0.165.0 accepts these names but logs a deprecation warning. The new names are `file_log` and `k8s_attributes`.
 
 ## Your mission: Repair Container Log File Collection
 

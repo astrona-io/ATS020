@@ -10,7 +10,7 @@ Three more parts finish the chain:
 
 - The `delta_to_cumulative` processor. The count connector emits a delta, the number of matching records since the last export. Prometheus expects a counter that only grows. Without this processor, the value in Prometheus stays at 1.
 - The `prometheus` exporter. It opens a port (here `8889`) and serves the metrics in the Prometheus text format on `/metrics`. Prometheus scrapes it like any other target.
-- The setting `resource_to_telemetry_conversion`. It copies the resource attributes of the record into labels, so `k8s.deployment.name` becomes the label `k8s_deployment_name`. Version 0.162.0 prints a deprecation warning for this setting, but it works and it is the setting that adds the labels in this configuration.
+- The setting `resource_to_telemetry_conversion`. It copies the resource attributes of the record into labels, so `k8s.deployment.name` becomes the label `k8s_deployment_name`. Version 0.165.0 prints a deprecation warning for this setting, but it works and it is the setting that adds the labels in this configuration.
 
 The flow has two pipelines:
 
@@ -40,7 +40,7 @@ metadata:
   namespace: monitoring
 spec:
   mode: daemonset
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   env:
     - name: K8S_NODE_NAME
       valueFrom:

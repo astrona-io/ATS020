@@ -21,7 +21,7 @@ Work through one practical outcome at a time. Each graded lab follows the lesson
 
 You need Kubernetes basics (`kubectl get`, `kubectl logs`, `kubectl apply`), a first look at RBAC (Role-Based Access Control: ClusterRole and ClusterRoleBinding), and PromQL (Prometheus Query Language) at the level of `rate()` and `sum by`.
 
-Your playground is a single-node `kind` cluster running Kubernetes 1.35. The namespace `monitoring` holds one Prometheus server (version 3.15.0, Service `kps-prometheus` on port `9090`) with the Prometheus Operator. Alertmanager, Grafana and the node and object exporters are not installed. The namespace `cert-manager` holds cert-manager, which the OpenTelemetry Operator 0.162.0 needs for its webhook certificate. The operator turns an `OpenTelemetryCollector` resource into a running Collector. No Collector exists yet. The Collector image is `otel/opentelemetry-collector-contrib:0.162.0`.
+Your playground is a single-node `kind` cluster running Kubernetes 1.35. The namespace `monitoring` holds one Prometheus server (version 3.15.0, Service `kps-prometheus` on port `9090`) with the Prometheus Operator. Alertmanager, Grafana and the node and object exporters are not installed. The namespace `cert-manager` holds cert-manager, which the OpenTelemetry Operator 0.162.0 needs for its webhook certificate. The operator turns an `OpenTelemetryCollector` resource into a running Collector. No Collector exists yet. The Collector image is `otel/opentelemetry-collector-contrib:0.165.0`.
 
 | Namespace | Workload | What it is |
 | --- | --- | --- |

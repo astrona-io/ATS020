@@ -15,7 +15,7 @@ metadata:
   namespace: observability
 spec:
   mode: deployment
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   config:
     receivers:
       otlp/grpc:

@@ -4,9 +4,9 @@
 #
 # Environment preparation only; there is no task and no grading. This script:
 #   1. puts Helm 4.3.1 on the PATH if it is missing,
-#   2. installs a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator
+#   2. installs a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator
 #      and one Prometheus) into `monitoring`,
-#   3. installs Gitea 28.1.0 (plumbing: the Git server) into `gitea`,
+#   3. installs Gitea 28.3.0 (plumbing: the Git server) into `gitea`,
 #   4. installs Argo CD 3.6.1 into `argocd` and scales down the parts that
 #      this module does not use,
 #   5. tells Prometheus to scrape the Argo CD application controller,
@@ -19,7 +19,7 @@
 set -euo pipefail
 
 HELM_VERSION="v4.3.1"
-CHART_VERSION="92.3.0"
+CHART_VERSION="92.22.0"
 ARGOCD_VERSION="v3.6.1"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -55,7 +55,7 @@ helm upgrade --install kps kube-prometheus-stack \
   -f "$(find_file kps-values.yaml)" --wait --timeout 10m
 kubectl -n monitoring rollout status statefulset/prometheus-kps-prometheus --timeout=300s
 
-echo "[playground] Installing Gitea 28.1.0 (plumbing)..."
+echo "[playground] Installing Gitea 28.3.0 (plumbing)..."
 kubectl apply -f "$(find_file gitea.yaml)"
 kubectl -n gitea rollout status deployment/gitea --timeout=300s
 

@@ -9,7 +9,7 @@ estimated_duration: 15m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8. The bootstrap installs a
-trimmed kube-prometheus-stack 92.3.0 (the Prometheus Operator and one
+trimmed kube-prometheus-stack 92.22.0 (the Prometheus Operator and one
 Prometheus, no Alertmanager, no Grafana) and the workload `scout` in
 `starfleet`, with two pods behind a Service. Then it applies a ServiceMonitor
 `scout` with three mistakes: the wrong `release` label, a port name the

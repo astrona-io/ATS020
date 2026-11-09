@@ -6,7 +6,7 @@
 - **Type:** Astrona playground — no grading
 
 A single-node kind cluster running Kubernetes 1.35.8, with a trimmed
-kube-prometheus-stack 92.3.0, Gitea 28.1.0 (plumbing) and Argo CD 3.6.1. The
+kube-prometheus-stack 92.22.0, Gitea 28.3.0 (plumbing) and Argo CD 3.6.1. The
 bootstrap creates the Git repository `starfleet-deploy` and the Argo CD
 Application `scout`, then makes ten commits (two of them bad on purpose) and
 waits for Argo CD to sync each one. Prometheus scrapes Argo CD during the seed,

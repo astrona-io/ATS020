@@ -9,7 +9,7 @@ if ! command -v jq >/dev/null || ! command -v curl >/dev/null; then
 fi
 
 HELM_VERSION="v4.3.1"
-CHART_VERSION="92.3.0"
+CHART_VERSION="92.22.0"
 
 BIN_DIR="/usr/local/bin"
 [ -w "$BIN_DIR" ] || BIN_DIR="$HOME/.local/bin"

@@ -17,7 +17,7 @@ Each section ends with a **capstone lab** combining its modules and a knowledge-
 
 [`astrona.yaml`](astrona.yaml) is the manifest: every section, module, reading, playground, lab and capstone in the order they are meant to be taken.
 
-Everything targets **kind v0.33.0**, **kubernetes 1.35**, **kind_node_image kindest/node:v1.35.8**, **kube_prometheus_stack_chart 92.3.0**, **metrics_server 0.9.0**, **grafana 13.2.3**, **opentelemetry_operator 0.162.0**, **opentelemetry_collector 0.162.0**, **jaeger 2.23.0**, **cert_manager 1.21.3**, **argo_cd 3.6.1**, **flux 2.9.6**, **gitea 28.1.0**, **helm 4.3.1**, **podinfo 6.17.0**, **go_httpbin 2.25.0** on `kind`.
+Everything targets **kind v0.33.0**, **kubernetes 1.35**, **kind_node_image kindest/node:v1.35.8**, **kube_prometheus_stack_chart 92.22.0**, **metrics_server 0.9.0**, **grafana 13.2.3**, **opentelemetry_operator 0.162.0**, **opentelemetry_collector 0.165.0**, **jaeger 2.23.0**, **cert_manager 1.21.3**, **argo_cd 3.6.1**, **flux 2.9.6**, **gitea 28.3.0**, **helm 4.3.1**, **podinfo 6.17.0**, **go_httpbin 2.25.0** on `kind`.
 
 ---
 

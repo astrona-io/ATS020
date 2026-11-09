@@ -113,7 +113,7 @@ The `telemetrygen` tool creates test telemetry. Sending a known trace to the Col
 kubectl -n observability run telemetrygen \
   --restart=Never \
   --rm -i \
-  --image=ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.162.0 \
+  --image=ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.165.0 \
   -- traces \
   --otlp-insecure \
   --otlp-endpoint otel-collector.observability:4317 \

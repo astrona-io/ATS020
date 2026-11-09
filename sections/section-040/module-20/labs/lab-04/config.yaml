@@ -23,7 +23,7 @@ runtime:
 bootstrap:
   init:
   - name: prepare
-    description: Install a trimmed kube-prometheus-stack 92.3.0 with kube-state-metrics in monitoring
+    description: Install a trimmed kube-prometheus-stack 92.22.0 with kube-state-metrics in monitoring
     type: file
     source: bootstrap/01-prepare.sh
   manifests:

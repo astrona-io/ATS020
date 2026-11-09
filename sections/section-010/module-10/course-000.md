@@ -24,7 +24,7 @@ Work through one practical outcome at a time. Each graded lab follows the lesson
 
 You need Kubernetes basics: namespaces, Deployments, Services with named ports, labels and selectors, and the commands `kubectl get`, `kubectl apply`, `kubectl exec` and `kubectl port-forward`. You also need `jq` on your machine; the commands use it to pick fields out of the JSON that Prometheus returns.
 
-Your playground is a single-node `kind` cluster running Kubernetes 1.35. It has a trimmed Prometheus stack in the namespace `monitoring`, installed from the `kube-prometheus-stack` Helm chart 92.3.0 with only two parts switched on: the Prometheus Operator (Deployment `kps-operator`) and one Prometheus server (pod `prometheus-kps-prometheus-0`, Service `kps-prometheus` on port `9090`). Alertmanager, Grafana and the exporters for nodes and Kubernetes objects are switched off to save memory. Prometheus runs version 3.15.0, and the operator runs version 0.94.1.
+Your playground is a single-node `kind` cluster running Kubernetes 1.35. It has a trimmed Prometheus stack in the namespace `monitoring`, installed from the `kube-prometheus-stack` Helm chart 92.22.0 with only two parts switched on: the Prometheus Operator (Deployment `kps-operator`) and one Prometheus server (pod `prometheus-kps-prometheus-0`, Service `kps-prometheus` on port `9090`). Alertmanager, Grafana and the exporters for nodes and Kubernetes objects are switched off to save memory. Prometheus runs version 3.15.0, and the operator runs version 0.94.1.
 
 The Starfleet workloads run in two namespaces:
 

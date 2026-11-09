@@ -25,7 +25,7 @@ runtime:
       - quay.io/jetstack/cert-manager-webhook:v1.21.3
       - quay.io/jetstack/cert-manager-cainjector:v1.21.3
       - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.162.0
-      - otel/opentelemetry-collector-contrib:0.162.0
+      - otel/opentelemetry-collector-contrib:0.165.0
       - quay.io/prometheus-operator/prometheus-operator:v0.94.1
       - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
       - quay.io/prometheus/prometheus:v3.15.0-distroless
@@ -36,7 +36,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install cert-manager 1.21.3, the OpenTelemetry Operator 0.162.0 and a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator and one Prometheus)"
+      description: "Install cert-manager 1.21.3, the OpenTelemetry Operator 0.162.0 and a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator and one Prometheus)"
       type: file
       source: bootstrap/prepare.sh
   manifests:

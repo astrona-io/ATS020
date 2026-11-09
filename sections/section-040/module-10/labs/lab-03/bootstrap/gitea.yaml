@@ -1,4 +1,4 @@
-# Gitea 28.1.0 is plumbing: it is only the Git server that holds the
+# Gitea 28.3.0 is plumbing: it is only the Git server that holds the
 # `starfleet-deploy` repository. One pod, SQLite, no persistent storage.
 apiVersion: v1
 kind: Namespace
@@ -26,7 +26,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: gitea
-          image: gitea/gitea:28.1.0-rootless
+          image: gitea/gitea:28.3.0-rootless
           env:
             - {name: GITEA__database__DB_TYPE, value: sqlite3}
             - {name: GITEA__security__INSTALL_LOCK, value: "true"}
