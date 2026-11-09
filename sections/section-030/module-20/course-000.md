@@ -27,7 +27,7 @@ The playground runs a single-node `kind` cluster with Kubernetes 1.35.8, cert-ma
 | --- | --- | --- |
 | `observability` | `jaeger` | In-memory trace storage; web interface and API on port `16686` |
 | `observability` | `otel` | Collector accepting OpenTelemetry Protocol (OTLP) on ports `4317` and `4318` |
-| `starfleet` | `scout` | `podinfo` 6.15.0 with tracing enabled, exporting to the Collector on port `4317` |
+| `starfleet` | `scout` | `podinfo` 6.17.0 with tracing enabled, exporting to the Collector on port `4317` |
 | `starfleet` | `relay` | A `node:22-alpine` application with no tracing code; forwards requests to `scout` |
 | `starfleet` | `shuttle` | Sends a request to `relay` every two seconds and an additional `/slow` request every fifth round |
 

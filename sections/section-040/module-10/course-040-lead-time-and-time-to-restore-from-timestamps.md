@@ -28,7 +28,7 @@ jq -r --slurpfile commits commits.json '.[] | . as $deploy | ($commits[0][] | se
 ```
 
 ```text
-0	febe9c0	Start scout 6.15.0	2794
+0	febe9c0	Start scout 6.17.0	2794
 1	8bede20	Change the welcome message	1801
 2	c36bf2a	Try a new image build	720
 3	8310751	Revert the new image build	241

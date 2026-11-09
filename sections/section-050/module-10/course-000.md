@@ -26,8 +26,8 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. The met
 | Workload | What it is | What is wrong |
 | --- | --- | --- |
 | `shuttle` | A client pod with `curl` | Nothing. You send test requests from it |
-| `scout` | `podinfo` 6.15.0, port `9898` | The pod stays `Pending` |
-| `bridge` | `podinfo` 6.15.0, port `9898` | The pod stays `Pending` |
+| `scout` | `podinfo` 6.17.0, port `9898` | The pod stays `Pending` |
+| `bridge` | `podinfo` 6.17.0, port `9898` | The pod stays `Pending` |
 | `probe` | `go-httpbin` 2.25.0, port `8080` | The container is restarted again and again |
 | `engine` | A small shell program | The container exits at once |
 | `cargo` | A Node.js server, port `8080` | The container is stopped with `OOMKilled` |

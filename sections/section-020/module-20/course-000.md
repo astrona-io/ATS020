@@ -26,7 +26,7 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. The nam
 
 | Namespace | Workload | What it is |
 | --- | --- | --- |
-| `starfleet` | `scout` | One pod of `podinfo` 6.15.0. It writes almost no log lines |
+| `starfleet` | `scout` | One pod of `podinfo` 6.17.0. It writes almost no log lines |
 | `starfleet` | `shuttle` | A client pod that sends one request per second to `scout` and to `probe`, and a `/status/500` request to `probe` every fourth second |
 | `outpost` | `probe` | One pod of `go-httpbin` 2.25.0. It logs one line per request, with `level=ERROR` for a `5xx` response |
 

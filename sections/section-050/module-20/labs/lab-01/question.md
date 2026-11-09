@@ -23,4 +23,4 @@ The `drifter` in `outpost` and the `scout` in `starfleet` must keep working. Tea
 
 The grader runs four checks. The first two create a real Deployment in `starfleet` and in `outpost`, and check that the webhook server logged a new request. The third reads `up{job="scout"}` and the loaded rules from the Prometheus API. The fourth checks that both webhook configurations, the webhook servers, the workloads, the ServiceMonitor, the PrometheusRule and the operator Deployment are still in place. The grader waits and retries for a few minutes, because endpoints and Prometheus update late.
 
-Hint: start with the error text of `kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.15.0`. It names the webhook, the Service and the reason.
+Hint: start with the error text of `kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.17.0`. It names the webhook, the Service and the reason.

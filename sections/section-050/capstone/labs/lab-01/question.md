@@ -19,7 +19,7 @@ The four faults are independent and none of them shows its cause in the `STATUS`
 ## Constraints
 
 - Keep the three Deployments, their Services and their names. Do not delete a Deployment and do not scale one to zero. Each keeps one replica.
-- `beacon` must use the existing image tag `ghcr.io/stefanprodan/podinfo:6.15.0`, not `latest`.
+- `beacon` must use the existing image tag `ghcr.io/stefanprodan/podinfo:6.17.0`, not `latest`.
 - Do not remove the liveness probe of `probe`. Make it check a port and path the server really serves.
 - Do not remove the memory limit of `cargo`. Size it to what the process really uses, and keep it below `1Gi`. Do not change the command of `cargo`.
 - Keep the `ValidatingWebhookConfiguration` `starfleet-policy` with `failurePolicy: Fail`. Do not delete it and do not set `failurePolicy: Ignore`. Fix the Service behind it, which is in the namespace `webhook-system`.
