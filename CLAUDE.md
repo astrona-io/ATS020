@@ -258,34 +258,36 @@ section is only true for this one.
 
 - **The version:** everything is built and checked on **Kubernetes 1.35**
   (the exam version) on a single-node `kind` cluster, `kind` v0.33.0 with the
-  node image `kindest/node:v1.35.8`. Pinned tools:
-
-  | Tool | Version |
-  | --- | --- |
-  | kube-prometheus-stack (Helm chart) | 92.3.0 |
-  | metrics-server | 0.9.0 |
-  | Grafana | 13.2.3 |
-  | OpenTelemetry Operator | 0.160.0 |
-  | OpenTelemetry Collector (contrib) | 0.162.0 |
-  | Jaeger | 2.22.0 |
-  | cert-manager (needed by the OpenTelemetry Operator) | 1.21.2 |
-  | Argo CD (section 040 only) | 3.5.4 |
-  | Flux (section 040 only) | 2.9.6 |
-  | Gitea (section 040 only, plumbing) | 28.1.0 |
-  | Loki (section 020 module 03 only) | 3.7.9 |
-  | Helm | 4.3.0 |
-  | Python metric fixture (section 010 module 01 lab 02 image) | 3.13.18-alpine3.24 |
+  node image `kindest/node:v1.35.8`. Every other pinned tool and image
+  version (charts, operators, Collector, Jaeger, Grafana, Loki, Argo CD,
+  Gitea, Helm, the example images) is in `versions.env`; read it there, not
+  from a copy. Flux is not run by any environment yet; add it to
+  `versions.env` when one does.
 
   Do not teach fields, flags or output from other versions without saying so.
-- **Versions live in `versions.env`.** For the sections listed on its
-  "Synced so far:" line (now `sections/section-030`), `versions.env` is the
-  single source of truth. Renovate changes only that file. Pages, manifests,
-  lab configs and bootstrap scripts keep the literal version, and
+- **Versions live in `versions.env`.** It is the single source of truth for
+  every path on its "Synced paths:" line (all of `sections/`, `README.md` and
+  `astrona.yaml`). Renovate changes only that file. Pages, manifests, lab
+  configs and bootstrap scripts keep the literal version, and
   `scripts/sync-versions.py` writes the new value into them (CI runs it with
-  `--check`). Merge a version bump only after the affected labs pass
-  `astrona test` and the command output on the pages is checked. A version in
-  a sentence about history ("Jaeger 2.21.0 removed both routes") is skipped
-  when a word such as `removed` or `added` follows it. A new way of writing a
+  `--check`). Renovate merges a minor or patch bump on its own once every
+  check is green: the `sync` commit, the `versions` check and the `labs`
+  workflow, which runs `astrona test` on every lab and playground. A person
+  merges a major bump and a kube-prometheus-stack or Argo CD bump, after
+  setting the hand-pinned images and checking the command output on the
+  pages. Three kinds
+  of version are left alone:
+  - A version in a sentence about history ("Jaeger 2.21.0 removed both
+    routes"), when a word such as `removed` or `added` follows it.
+  - A tag that is wrong on purpose (section 050's podinfo `6.15.99`), listed
+    in `FAULTS` in the script.
+  - The dated "Verified on ..." notes in this file, which record what was
+    checked on a given day.
+  A value with no `# renovate:` comment comes with another tool (Prometheus,
+  the Prometheus Operator, Alertmanager, Grafana and the sidecars with the
+  kube-prometheus-stack chart; Redis with the Argo CD install manifest;
+  metrics-server with the astrona addon). Update it by hand together with
+  that tool, from the images the tool really runs. A new way of writing a
   version needs a new rule in the script.
 - **The main sources:** the Prometheus and Prometheus Operator documentation,
   the OpenTelemetry Collector and Operator documentation, the Jaeger and
