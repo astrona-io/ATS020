@@ -28,7 +28,7 @@ spec:
     runAsUser: 0
   containers:
     - name: nodelogs
-      image: curlimages/curl:8.22.0
+      image: curlimages/curl:8.23.0
       command: ["sleep", "3600"]
       volumeMounts:
         - name: varlogpods
@@ -61,7 +61,7 @@ pod/nodelogs condition met
 outpost_probe-7749f6b9bc-gkdm6_a6581488-0aa5-4bf8-9ccd-e3fa002ed3cc
 starfleet_scout-674cfb4855-bvgwr_f049259a-f468-4800-ba1c-3949bf4187ce
 starfleet_shuttle-65f695c8c6-974tv_b5774096-5f91-4602-a0f1-524479501dce
-2026-11-02T19:36:35.682493244Z stderr F time=2026-11-02T19:36:35.682Z level=INFO msg="200 GET /get 0.0ms" status=200 method=GET uri=/get route="GET /get" size_bytes=254 duration_ms=0.038666 user_agent=curl/8.22.0 client_ip=10.244.0.14 request_size_bytes=0
+2026-11-02T19:36:35.682493244Z stderr F time=2026-11-02T19:36:35.682Z level=INFO msg="200 GET /get 0.0ms" status=200 method=GET uri=/get route="GET /get" size_bytes=254 duration_ms=0.038666 user_agent=curl/8.23.0 client_ip=10.244.0.14 request_size_bytes=0
 2026-11-02T19:36:35.886120084Z stderr F time=2026-11-02T19:36:35.885Z level=INFO msg="200 GET /status/200 0.0ms" status=200 method=GET uri=/status/200 route=/status/{code} size_bytes=0 duration_ms=0.019 user_agent=kube-probe/1.35 client_ip=10.244.0.1 request_size_bytes=0
 ```
 

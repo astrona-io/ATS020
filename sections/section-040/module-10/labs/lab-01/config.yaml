@@ -20,7 +20,7 @@ runtime:
       - quay.io/argoproj/argocd:v3.5.4
       - public.ecr.aws/docker/library/redis:8.2.3-alpine
       - ghcr.io/stefanprodan/podinfo:6.15.0
-      - curlimages/curl:8.22.0
+      - curlimages/curl:8.23.0
 
 bootstrap:
   init:

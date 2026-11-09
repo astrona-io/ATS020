@@ -23,7 +23,7 @@ runtime:
       - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
       - ghcr.io/stefanprodan/podinfo:6.15.0
       - mccutchen/go-httpbin:2.25.0
-      - curlimages/curl:8.22.0
+      - curlimages/curl:8.23.0
 
 bootstrap:
   init:
