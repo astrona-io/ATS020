@@ -58,7 +58,7 @@ metadata:
   namespace: observability
 spec:
   mode: daemonset
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   config:
     receivers:
       otlp:
@@ -118,7 +118,7 @@ metadata:
   namespace: starfleet
 spec:
   mode: sidecar
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   config:
     receivers:
       otlp:

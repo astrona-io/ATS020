@@ -21,7 +21,7 @@ runtime:
       - quay.io/jetstack/cert-manager-cainjector:v1.21.3
       - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.162.0
       - ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.78.0
-      - otel/opentelemetry-collector-contrib:0.162.0
+      - otel/opentelemetry-collector-contrib:0.165.0
       - jaegertracing/jaeger:2.23.0
       - ghcr.io/stefanprodan/podinfo:6.17.0
       - node:22-alpine

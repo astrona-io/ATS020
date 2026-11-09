@@ -19,8 +19,8 @@ kubectl -n observability port-forward svc/jaeger 16686:16686
 In your first terminal, run `telemetrygen`, a tool that creates test spans and sends them using the OpenTelemetry Protocol (OTLP). The first run reports the service name `scout` with `incident.code=slow-scan`; the second reports `shuttle` with `incident.code=queue-full`:
 
 ```sh
-kubectl -n observability run telemetrygen --restart=Never --rm -i --image=ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.162.0 -- traces --otlp-insecure --otlp-endpoint jaeger.observability:4317 --service scout --traces 6 --telemetry-attributes incident.code=\"slow-scan\"
-kubectl -n observability run telemetrygen --restart=Never --rm -i --image=ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.162.0 -- traces --otlp-insecure --otlp-endpoint jaeger.observability:4317 --service shuttle --traces 6 --telemetry-attributes incident.code=\"queue-full\"
+kubectl -n observability run telemetrygen --restart=Never --rm -i --image=ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.165.0 -- traces --otlp-insecure --otlp-endpoint jaeger.observability:4317 --service scout --traces 6 --telemetry-attributes incident.code=\"slow-scan\"
+kubectl -n observability run telemetrygen --restart=Never --rm -i --image=ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.165.0 -- traces --otlp-insecure --otlp-endpoint jaeger.observability:4317 --service shuttle --traces 6 --telemetry-attributes incident.code=\"queue-full\"
 ```
 
 Each temporary pod creates six traces, sends them directly to Jaeger, and exits. `--telemetry-attributes` adds the span attribute; the escaped quotes make its value a string. `--otlp-insecure` matches the playground's unencrypted receiver. Allow a few seconds for Jaeger to store the spans.

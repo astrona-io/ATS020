@@ -16,7 +16,7 @@ to save memory.
 | --- | --- |
 | `cert-manager` | cert-manager 1.21.3, which issues the certificate for the Operator's webhook |
 | `opentelemetry-operator-system` | The OpenTelemetry Operator 0.162.0 |
-| `observability` | Jaeger 2.23.0 in one pod with in-memory storage, and the Collector `otel` (contrib 0.162.0, `deployment` mode). The Service `otel-collector` takes OTLP on `4317` (gRPC) and `4318` (HTTP) |
+| `observability` | Jaeger 2.23.0 in one pod with in-memory storage, and the Collector `otel` (contrib 0.165.0, `deployment` mode). The Service `otel-collector` takes OTLP on `4317` (gRPC) and `4318` (HTTP) |
 | `starfleet` | `scout`, `relay` and `shuttle` |
 
 `scout` is `podinfo` 6.17.0 with its own OpenTelemetry tracing on. It sends its
