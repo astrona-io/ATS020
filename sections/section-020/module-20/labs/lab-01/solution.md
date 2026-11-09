@@ -22,7 +22,7 @@ You should see:
 
 ```text
 NAME                                           MODE        VERSION   READY   AGE     IMAGE                                          MANAGEMENT
-opentelemetrycollector.opentelemetry.io/logs   daemonset   0.160.0   1/1     6m28s   otel/opentelemetry-collector-contrib:0.162.0   managed
+opentelemetrycollector.opentelemetry.io/logs   daemonset   0.162.0   1/1     6m28s   otel/opentelemetry-collector-contrib:0.162.0   managed
 
 NAME                                                  AGE
 servicemonitor.monitoring.coreos.com/kps-operator     6m45s

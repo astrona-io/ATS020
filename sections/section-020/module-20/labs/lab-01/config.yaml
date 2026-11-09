@@ -20,7 +20,7 @@ runtime:
       - quay.io/jetstack/cert-manager-controller:v1.21.3
       - quay.io/jetstack/cert-manager-webhook:v1.21.3
       - quay.io/jetstack/cert-manager-cainjector:v1.21.3
-      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.160.0
+      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.162.0
       - otel/opentelemetry-collector-contrib:0.162.0
       - quay.io/prometheus-operator/prometheus-operator:v0.94.1
       - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
@@ -32,7 +32,7 @@ runtime:
 bootstrap:
   init:
     - name: install-stack
-      description: "Install cert-manager 1.21.3, the OpenTelemetry Operator 0.160.0 and a trimmed kube-prometheus-stack 92.3.0"
+      description: "Install cert-manager 1.21.3, the OpenTelemetry Operator 0.162.0 and a trimmed kube-prometheus-stack 92.3.0"
       type: file
       source: bootstrap/01-install-stack.sh
   manifests:

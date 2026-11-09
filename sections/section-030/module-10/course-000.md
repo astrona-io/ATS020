@@ -51,7 +51,7 @@ The playground uses a single-node `kind` cluster with:
 
 - Kubernetes **1.35**
 - cert-manager **1.21.3**
-- OpenTelemetry Operator **0.160.0**, with its webhook ready
+- OpenTelemetry Operator **0.162.0**, with its webhook ready
 - Jaeger **2.22.0**
 
 During this module, you will create and configure OpenTelemetry Collectors with the **contrib 0.162.0** image.
