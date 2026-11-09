@@ -1,4 +1,4 @@
-# Trimmed kube-prometheus-stack 92.3.0 for the platform efficiency
+# Trimmed kube-prometheus-stack 92.22.0 for the platform efficiency
 # capstone lab: the Prometheus Operator, one Prometheus, kube-state-metrics
 # (it exports the resource requests of every container) and the kubelet scrape
 # job (it reads cAdvisor, the container usage). Alertmanager, Grafana,

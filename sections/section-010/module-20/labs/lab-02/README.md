@@ -9,7 +9,7 @@ estimated_duration: 25m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8. The bootstrap installs a
-trimmed kube-prometheus-stack 92.3.0 (the Prometheus Operator and one
+trimmed kube-prometheus-stack 92.22.0 (the Prometheus Operator and one
 Prometheus, no Alertmanager, no Grafana), the `scout` workloads in `starfleet`
 and `outpost` with their ServiceMonitors, and a `shuttle` pod that sends steady
 traffic, including failing and slow requests. Then it applies a PrometheusRule

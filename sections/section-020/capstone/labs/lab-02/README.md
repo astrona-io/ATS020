@@ -13,7 +13,7 @@ both. The learner adds the Loki data source, corrects both panels, saves the two
 findings to files and fixes the Deployment. The grader compares the files with
 Prometheus and Loki and proves recovery from live data.
 
-The stack is a trimmed kube-prometheus-stack 92.3.0 (the Prometheus Operator, one
+The stack is a trimmed kube-prometheus-stack 92.22.0 (the Prometheus Operator, one
 Prometheus and Grafana 13.2.3), Loki 3.7.9 in single-binary mode and a Collector
 DaemonSet as plumbing. The services are a small Python application.
 

@@ -25,7 +25,7 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. It star
 | Namespace | Workload | What it is |
 | --- | --- | --- |
 | `kube-system` | `metrics-server` | metrics-server 0.9.0, so `kubectl top` works |
-| `monitoring` | `prometheus-kps-prometheus` | One Prometheus (Prometheus Operator, kube-prometheus-stack 92.3.0). It scrapes every 15 seconds and keeps 6 hours of data. kube-state-metrics and the kubelet scrape job (cAdvisor) are installed, because the module needs them. Alertmanager, Grafana and node exporter are not installed |
+| `monitoring` | `prometheus-kps-prometheus` | One Prometheus (Prometheus Operator, kube-prometheus-stack 92.22.0). It scrapes every 15 seconds and keeps 6 hours of data. kube-state-metrics and the kubelet scrape job (cAdvisor) are installed, because the module needs them. Alertmanager, Grafana and node exporter are not installed |
 | `starfleet` | `scout`, `probe`, `shuttle` | `scout` requests far more than it uses. `probe` requests less than it uses. `shuttle` runs a traffic loop that makes about 5 percent of the requests to `scout` fail |
 
 The numbers and pod names in the output of this module come from one run. Your playground makes new ones, so your values differ.

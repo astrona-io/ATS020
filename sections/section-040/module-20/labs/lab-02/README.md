@@ -9,7 +9,7 @@ estimated_duration: 20m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8. The bootstrap installs a
-trimmed kube-prometheus-stack 92.3.0 with kube-state-metrics and metrics-server
+trimmed kube-prometheus-stack 92.22.0 with kube-state-metrics and metrics-server
 (from the kind addon) and starts the Starfleet workloads. `scout` has 2
 replicas and requests 250m CPU and 256Mi memory, but uses about 3m CPU and 35Mi
 memory. `probe` requests 2Mi memory, but uses more. A traffic loop keeps both
