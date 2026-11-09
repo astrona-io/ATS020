@@ -5,7 +5,7 @@
 # Environment preparation only; there is no task and no grading. The reader
 # should start working with the Operator, not spend time installing it. This
 # script:
-#   1. installs cert-manager 1.21.2 (the OpenTelemetry Operator needs it for
+#   1. installs cert-manager 1.21.3 (the OpenTelemetry Operator needs it for
 #      its webhook certificate) and waits for it,
 #   2. installs the OpenTelemetry Operator 0.160.0 and waits for it,
 #   3. waits until the Operator's webhook accepts a Collector.
@@ -13,7 +13,7 @@
 # Collector is created: the reader creates it.
 set -euo pipefail
 
-CERT_MANAGER_VERSION="v1.21.2"
+CERT_MANAGER_VERSION="v1.21.3"
 OTEL_OPERATOR_VERSION="v0.160.0"
 
 echo "[playground] Installing cert-manager ${CERT_MANAGER_VERSION}..."

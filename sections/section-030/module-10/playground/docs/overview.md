@@ -8,13 +8,13 @@ is no grading.
 
 ## What's in the box
 
-The cluster runs Kubernetes 1.35.8. cert-manager 1.21.2 and the OpenTelemetry
+The cluster runs Kubernetes 1.35.8. cert-manager 1.21.3 and the OpenTelemetry
 Operator 0.160.0 are installed and ready, and the Operator's webhook already
 accepts a Collector. A Prometheus stack is not installed, to save memory.
 
 | Namespace | Contents |
 | --- | --- |
-| `cert-manager` | cert-manager 1.21.2, which issues the certificate for the Operator's webhook |
+| `cert-manager` | cert-manager 1.21.3, which issues the certificate for the Operator's webhook |
 | `opentelemetry-operator-system` | The OpenTelemetry Operator 0.160.0, which turns an OpenTelemetryCollector resource into a running Collector |
 | `observability` | Jaeger 2.22.0 in one pod with in-memory storage. The Service `jaeger` has OTLP on `4317` (gRPC) and `4318` (HTTP), and the web interface on `16686` |
 | `starfleet` | `scout`, which sends its spans over OTLP to `otel-collector.observability:4317`; `shuttle`, which sends a request to `scout` every 2 seconds; and `probe`, a small Python program that calls the address in its `TARGET_URL` variable every 2 seconds and sends one span for each call straight to Jaeger |

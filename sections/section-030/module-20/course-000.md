@@ -20,7 +20,7 @@ After this module you can:
 
 You need to know what a trace and a span are, how a Deployment creates pods from its pod template, and how to use `kubectl port-forward`, `kubectl logs` and `jq`. You need to read an annotation and a custom resource.
 
-Your playground is a single-node `kind` cluster running Kubernetes 1.35. cert-manager 1.21.2 and the OpenTelemetry Operator 0.160.0 are installed and ready. A working Collector (contrib image 0.162.0) sends spans to Jaeger 2.22.0. No Prometheus stack runs, to save memory.
+Your playground is a single-node `kind` cluster running Kubernetes 1.35. cert-manager 1.21.3 and the OpenTelemetry Operator 0.160.0 are installed and ready. A working Collector (contrib image 0.162.0) sends spans to Jaeger 2.22.0. No Prometheus stack runs, to save memory.
 
 | Namespace | Workload | What it is |
 | --- | --- | --- |
