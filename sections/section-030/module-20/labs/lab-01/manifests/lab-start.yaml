@@ -1,5 +1,5 @@
 # Starting workloads for the "Repair Missing Agent Injection" lab: Jaeger
-# 2.22.0 (one pod, in-memory storage) and a working Collector `otel` in
+# 2.23.0 (one pod, in-memory storage) and a working Collector `otel` in
 # `observability`; `scout` (podinfo) in `starfleet` with its own tracing on;
 # the ConfigMap and Service of `relay`; and a `shuttle` pod that sends steady
 # traffic to `relay`. The `relay` Deployment and the Instrumentation come from
@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: jaeger
-          image: jaegertracing/jaeger:2.22.0
+          image: jaegertracing/jaeger:2.23.0
           ports:
             - name: otlp-grpc
               containerPort: 4317

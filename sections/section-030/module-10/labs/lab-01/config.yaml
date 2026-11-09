@@ -17,7 +17,7 @@ runtime:
       - quay.io/jetstack/cert-manager-cainjector:v1.21.3
       - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.162.0
       - otel/opentelemetry-collector-contrib:0.162.0
-      - jaegertracing/jaeger:2.22.0
+      - jaegertracing/jaeger:2.23.0
       - ghcr.io/stefanprodan/podinfo:6.17.0
       - curlimages/curl:8.22.0
 
@@ -29,7 +29,7 @@ bootstrap:
       source: bootstrap/01-install-operator.sh
   manifests:
     - name: lab-start
-      description: "Jaeger 2.22.0 in observability, scout with tracing on in starfleet, and the shuttle traffic loop"
+      description: "Jaeger 2.23.0 in observability, scout with tracing on in starfleet, and the shuttle traffic loop"
       type: file
       source: manifests/lab-start.yaml
     - name: collector-start

@@ -9,10 +9,10 @@ estimated_duration: 20m
 - **Type:** Astrona lab, graded
 
 Three small Python workloads in `starfleet` send synthetic spans to Jaeger
-2.22.0 in `observability`. Each workload has a distinct `incident.code` span
+2.23.0 in `observability`. Each workload has a distinct `incident.code` span
 tag. The learner searches by tag, changes one Deployment environment variable,
 scales another Deployment and exports five complete traces as JSON to
-`/tmp/ats-020-incident-traces.json`. Jaeger 2.22.0 serves only the `/api/v3`
+`/tmp/ats-020-incident-traces.json`. Jaeger 2.23.0 serves only the `/api/v3`
 search API, so the grader counts distinct `traceId` values in its response.
 
 The fixture sends OpenTelemetry Protocol JSON directly to Jaeger. No Operator,

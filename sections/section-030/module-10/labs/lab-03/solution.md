@@ -34,7 +34,7 @@ kubectl -n observability port-forward service/jaeger 16686:16686
 ```
 
 To use the web interface, open `http://127.0.0.1:16686`. On the Search page,
-choose **All Services**, type `error=true` in the field that Jaeger 2.22.0
+choose **All Services**, type `error=true` in the field that Jaeger 2.23.0
 labels **Attributes**, then select **Find Traces**. Jaeger marks a span whose
 status is `ERROR` with the tag `error=true`, and the result rows show a red
 error marker and the service name.

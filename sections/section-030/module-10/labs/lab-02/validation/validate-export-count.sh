@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Grader: the file is one /api/v3/traces response. Jaeger 2.22.0 answers with
+# Grader: the file is one /api/v3/traces response. Jaeger 2.23.0 answers with
 # {"result":{"resourceSpans":[{"resource":...,"scopeSpans":[{"spans":[...]}]}]}}.
 # A trace can fill more than one resourceSpans entry, so the grader counts
 # distinct span traceId values, not entries. Every entry must name the service.
