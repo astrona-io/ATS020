@@ -54,7 +54,7 @@ The playground uses a single-node `kind` cluster with:
 - OpenTelemetry Operator **0.162.0**, with its webhook ready
 - Jaeger **2.23.0**
 
-During this module, you will create and configure OpenTelemetry Collectors with the **contrib 0.162.0** image.
+During this module, you will create and configure OpenTelemetry Collectors with the **contrib 0.165.0** image.
 
 A Prometheus stack is omitted to reduce memory usage.
 

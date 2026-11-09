@@ -15,7 +15,7 @@ Prometheus, Grafana and the OpenTelemetry Operator run in the namespace `monitor
 
 ## Constraints
 
-- Keep the Collector in DaemonSet mode, with the `file_log` receiver, the `k8s_attributes` processor and the `count` connector. Use the image `otel/opentelemetry-collector-contrib:0.162.0`.
+- Keep the Collector in DaemonSet mode, with the `file_log` receiver, the `k8s_attributes` processor and the `count` connector. Use the image `otel/opentelemetry-collector-contrib:0.165.0`.
 - The Collector's service account may read pods in every namespace and nothing more. It must not get a broad role such as `cluster-admin`.
 - Keep the dashboard as the ConfigMap `dashboard-outpost-overview` with its three panels and its UID `outpost-overview`. Do not create the dashboard by hand in the Grafana web interface, and do not change the data source.
 - The panel `Error log lines` must query the metric `log_error_lines_total`.

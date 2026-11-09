@@ -132,7 +132,7 @@ metadata:
   namespace: observability
 spec:
   mode: deployment
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   resources:
     requests: {cpu: 20m, memory: 64Mi}
     limits: {memory: 256Mi}

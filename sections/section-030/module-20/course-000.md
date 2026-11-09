@@ -21,7 +21,7 @@ After this module, you will be able to:
 
 You should know how Deployments create pods, how to read Kubernetes annotations, and how to use `kubectl logs` and `kubectl port-forward`. You will also use `curl` and `jq` to read Jaeger's application programming interface (API).
 
-The playground runs a single-node `kind` cluster with Kubernetes 1.35.8, cert-manager 1.21.3, and the OpenTelemetry Operator 0.162.0. A working Collector uses the contrib image 0.162.0 and exports to Jaeger 2.23.0. There is no Prometheus stack.
+The playground runs a single-node `kind` cluster with Kubernetes 1.35.8, cert-manager 1.21.3, and the OpenTelemetry Operator 0.162.0. A working Collector uses the contrib image 0.165.0 and exports to Jaeger 2.23.0. There is no Prometheus stack.
 
 | Namespace | Workload | Starting state |
 | --- | --- | --- |

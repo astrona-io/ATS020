@@ -20,7 +20,7 @@ metadata:
   namespace: observability
 spec:
   mode: deployment
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   config:
     receivers:
       otlp/grpc:
@@ -90,10 +90,10 @@ kubectl -n observability logs deploy/otel-collector | awk -F'\t' '/Starting|Ever
 The filtered log contains an HTTP server startup and no gRPC server startup:
 
 ```text
-info service@v0.162.0/service.go:233 Starting otelcol-contrib...
+info service@v0.165.0/service.go:233 Starting otelcol-contrib...
 info extensions/extensions.go:43 Starting extensions...
-info otlpreceiver@v0.162.0/otlp.go:175 Starting HTTP server
-info service@v0.162.0/service.go:256 Everything is ready. Begin running and processing data.
+info otlpreceiver@v0.165.0/otlp.go:175 Starting HTTP server
+info service@v0.165.0/service.go:256 Everything is ready. Begin running and processing data.
 ```
 
 Edit the pipeline in `opentelemetrycollector-otel-broken.yaml` so that its receiver list is `receivers: [otlp/grpc, otlp/http]`. Apply the same file again with `kubectl apply -f opentelemetrycollector-otel-broken.yaml` and allow about 40 seconds for the replacement pod. Check the Service again: it should now expose both ports.

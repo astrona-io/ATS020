@@ -57,7 +57,7 @@ metadata:
   namespace: observability
 spec:
   mode: deployment
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   config:
     receivers:
       otlp:
@@ -105,7 +105,7 @@ The output should include these resources. Addresses and ages will differ:
 
 ```text
 NAME                                           MODE         VERSION   READY   AGE   IMAGE                                          MANAGEMENT
-opentelemetrycollector.opentelemetry.io/otel   deployment   0.162.0   1/1     27s   otel/opentelemetry-collector-contrib:0.162.0   managed
+opentelemetrycollector.opentelemetry.io/otel   deployment   0.162.0   1/1     27s   otel/opentelemetry-collector-contrib:0.165.0   managed
 
 NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/jaeger           1/1     1            1           2m26s
@@ -191,11 +191,11 @@ kubectl -n observability logs deploy/otel-collector | awk -F'\t' '/Starting|Ever
 The relevant lines are:
 
 ```text
-info service@v0.162.0/service.go:233 Starting otelcol-contrib...
+info service@v0.165.0/service.go:233 Starting otelcol-contrib...
 info extensions/extensions.go:43 Starting extensions...
-info otlpreceiver@v0.162.0/otlp.go:120 Starting GRPC server
-info otlpreceiver@v0.162.0/otlp.go:175 Starting HTTP server
-info service@v0.162.0/service.go:256 Everything is ready. Begin running and processing data.
+info otlpreceiver@v0.165.0/otlp.go:120 Starting GRPC server
+info otlpreceiver@v0.165.0/otlp.go:175 Starting HTTP server
+info service@v0.165.0/service.go:256 Everything is ready. Begin running and processing data.
 ```
 
 The gRPC and HTTP server messages confirm that both receiver protocols started. They do not show whether any spans have arrived. For that, read the Collector's counters through its monitoring Service:

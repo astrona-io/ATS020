@@ -10,7 +10,7 @@ The count connector ends a logs pipeline and starts a metrics pipeline. It count
 
 Key facts:
 
-- The receiver is `file_log`, the processor is `k8s_attributes`, and the older names `filelog` and `k8sattributes` still work in version 0.162.0 with a deprecation warning.
+- The receiver is `file_log`, the processor is `k8s_attributes`, and the older names `filelog` and `k8sattributes` still work in version 0.165.0 with a deprecation warning.
 - Records from files need `pod_association` on `k8s.pod.uid` before `k8s_attributes` adds anything.
 - The count connector needs `delta_to_cumulative` before the Prometheus exporter, or the counter stays at 1.
 - A ServiceMonitor that Prometheus does not select shows no target at all.

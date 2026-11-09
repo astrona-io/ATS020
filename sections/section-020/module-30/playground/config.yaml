@@ -17,7 +17,7 @@ runtime:
       - docker.io/grafana/grafana:13.2.3-distroless
       - quay.io/kiwigrid/k8s-sidecar:2.14.1
       - grafana/loki:3.7.9
-      - otel/opentelemetry-collector-contrib:0.162.0
+      - otel/opentelemetry-collector-contrib:0.165.0
       - mccutchen/go-httpbin:2.25.0
       - curlimages/curl:8.22.0
 
