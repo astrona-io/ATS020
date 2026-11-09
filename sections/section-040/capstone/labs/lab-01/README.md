@@ -9,7 +9,7 @@ estimated_duration: 45m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8 with Argo CD, Gitea,
-metrics-server and a trimmed kube-prometheus-stack 92.3.0. The Application
+metrics-server and a trimmed kube-prometheus-stack 92.22.0. The Application
 `scout` has ten backdated deployments, two of them with a missing image tag.
 The pod `shuttle` makes about 5% of the requests to `scout` fail. The
 Deployment `beacon` requests far more than it uses. The learner writes the

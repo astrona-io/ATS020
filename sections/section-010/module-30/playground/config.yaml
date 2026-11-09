@@ -27,7 +27,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install Helm if missing and a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator, one Prometheus, one Alertmanager) in `monitoring`"
+      description: "Install Helm if missing and a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator, one Prometheus, one Alertmanager) in `monitoring`"
       type: file
       source: bootstrap/prepare.sh
   manifests:

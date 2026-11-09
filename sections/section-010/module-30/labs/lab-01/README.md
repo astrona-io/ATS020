@@ -9,7 +9,7 @@ estimated_duration: 25m
 - **Type:** Astrona lab, graded
 
 The learner writes one PrometheusRule, fixes a team matcher and creates a
-scoped maintenance silence. Bootstrap uses kube-prometheus-stack 92.3.0,
+scoped maintenance silence. Bootstrap uses kube-prometheus-stack 92.22.0,
 Kubernetes 1.35.8, the section's `scout` and `shuttle` workloads and the
 small Python webhook receiver. Grafana, default rules, node-exporter and
 kube-state-metrics are disabled. `ProbeMaintenance` is a constant diagnostic

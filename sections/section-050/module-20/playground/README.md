@@ -6,7 +6,7 @@
 - **Type:** Astrona playground — no grading
 
 A single-node kind cluster running Kubernetes 1.35.8 with a trimmed
-kube-prometheus-stack 92.3.0 (Prometheus Operator and one Prometheus). The
+kube-prometheus-stack 92.22.0 (Prometheus Operator and one Prometheus). The
 platform starts broken on purpose: the Service of the `starfleet-policy`
 webhook has no endpoints, the serving certificate of the `outpost-policy`
 webhook has expired, and the Prometheus Operator is scaled to zero. The

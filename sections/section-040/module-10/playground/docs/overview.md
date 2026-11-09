@@ -8,7 +8,7 @@ The cluster runs Kubernetes 1.35.8. Setup takes several minutes, because the boo
 
 | Namespace | Contents |
 | --- | --- |
-| `monitoring` | A trimmed kube-prometheus-stack 92.3.0: the Prometheus Operator and one Prometheus. No Alertmanager, no Grafana, no node exporter, no kube-state-metrics. The Service `kps-prometheus` serves port `9090`. Prometheus scrapes every 15 seconds and keeps 6 hours of data |
+| `monitoring` | A trimmed kube-prometheus-stack 92.22.0: the Prometheus Operator and one Prometheus. No Alertmanager, no Grafana, no node exporter, no kube-state-metrics. The Service `kps-prometheus` serves port `9090`. Prometheus scrapes every 15 seconds and keeps 6 hours of data |
 | `argocd` | Argo CD 3.6.1 with the application controller, the repository server and Redis. The API server, Dex, notifications and ApplicationSet controller are scaled to zero. The Application `scout` syncs automatically. A ServiceMonitor with the label `release: kps` makes Prometheus scrape the Service `argocd-metrics` on port `8082` |
 | `gitea` | Gitea 28.1.0, a small Git server, only so that the history has a real Git repository. The repository `starfleet/starfleet-deploy` holds the path `scout` with a Deployment and a Service |
 | `starfleet` | `scout`, created by Argo CD from the repository (three replicas of `podinfo` 6.17.0), and `shuttle`, a client pod with `curl` |

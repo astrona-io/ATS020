@@ -26,7 +26,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install Helm if missing and a trimmed kube-prometheus-stack 92.3.0 in `monitoring`, then scale the Prometheus Operator to zero"
+      description: "Install Helm if missing and a trimmed kube-prometheus-stack 92.22.0 in `monitoring`, then scale the Prometheus Operator to zero"
       type: file
       source: bootstrap/prepare.sh
   manifests:

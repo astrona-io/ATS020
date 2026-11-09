@@ -36,7 +36,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install cert-manager 1.21.3, the OpenTelemetry Operator 0.162.0 and a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator and one Prometheus)"
+      description: "Install cert-manager 1.21.3, the OpenTelemetry Operator 0.162.0 and a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator and one Prometheus)"
       type: file
       source: bootstrap/prepare.sh
   manifests:

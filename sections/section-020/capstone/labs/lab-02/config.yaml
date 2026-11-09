@@ -26,7 +26,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Remove old answer files, install Helm if missing, a trimmed kube-prometheus-stack 92.3.0 and the starting dashboard"
+      description: "Remove old answer files, install Helm if missing, a trimmed kube-prometheus-stack 92.22.0 and the starting dashboard"
       type: file
       source: bootstrap/01-prepare.sh
   manifests:
