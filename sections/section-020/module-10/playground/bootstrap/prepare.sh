@@ -3,7 +3,7 @@
 # playground (`ats-020-playground-020-01`).
 #
 # Environment preparation only — there is no task and no grading. This script:
-#   1. puts Helm 4.3.0 on the PATH if it is missing,
+#   1. puts Helm 4.3.1 on the PATH if it is missing,
 #   2. installs a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator and
 #      one Prometheus and Grafana) into the `monitoring` namespace,
 #   3. waits until Prometheus and Grafana are ready.
@@ -11,7 +11,7 @@
 # manifests/lab-start.yaml.
 set -euo pipefail
 
-HELM_VERSION="v4.3.0"
+HELM_VERSION="v4.3.1"
 CHART_VERSION="92.3.0"
 
 BIN_DIR="$HOME/.astrona/tools/ats020"
@@ -21,7 +21,7 @@ export HELM_CACHE_HOME="$HOME/.astrona/helm/cache"
 export HELM_CONFIG_HOME="$HOME/.astrona/helm/config"
 export HELM_DATA_HOME="$HOME/.astrona/helm/data"
 
-if ! command -v helm >/dev/null 2>&1 || ! helm version --short | grep -q "^v4.3.0"; then
+if ! command -v helm >/dev/null 2>&1 || ! helm version --short | grep -q "^v4.3.1"; then
   WORK="$(mktemp -d)"
   trap 'python3 -c "import shutil,sys; shutil.rmtree(sys.argv[1])" "$WORK"' EXIT
   OS="$(uname -s | tr '[:upper:]' '[:lower:]')"

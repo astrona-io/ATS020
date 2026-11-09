@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Environment setup for the lab "Record The Error Ratio And p95 Latency"
 # (`ats-020-lab-010-02`). This script:
-#   1. puts Helm 4.3.0 on the PATH if it is missing,
+#   1. puts Helm 4.3.1 on the PATH if it is missing,
 #   2. installs a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator and
 #      one Prometheus) into the `monitoring` namespace,
 #   3. waits until Prometheus is ready.
@@ -10,7 +10,7 @@
 # from manifests/rules-start.yaml (the fault is the material).
 set -euo pipefail
 
-HELM_VERSION="v4.3.0"
+HELM_VERSION="v4.3.1"
 CHART_VERSION="92.3.0"
 
 BIN_DIR="/usr/local/bin"

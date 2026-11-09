@@ -3,7 +3,7 @@
 # playground (`ats-020-playground-010-02`).
 #
 # Environment preparation only — there is no task and no grading. This script:
-#   1. puts Helm 4.3.0 on the PATH if it is missing,
+#   1. puts Helm 4.3.1 on the PATH if it is missing,
 #   2. installs a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator and
 #      one Prometheus) into the `monitoring` namespace,
 #   3. waits until Prometheus is ready.
@@ -11,7 +11,7 @@
 # manifests/lab-start.yaml.
 set -euo pipefail
 
-HELM_VERSION="v4.3.0"
+HELM_VERSION="v4.3.1"
 CHART_VERSION="92.3.0"
 
 BIN_DIR="/usr/local/bin"
