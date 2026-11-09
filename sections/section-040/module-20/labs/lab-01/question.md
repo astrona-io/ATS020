@@ -6,7 +6,9 @@ The platform team promises an availability SLO (service level objective) of 99 p
 
 The team stores the alert and two recording rules in the PrometheusRule `scout-slo` in the namespace `monitoring`. The rules `scout:error_ratio:rate5m` and `scout:error_ratio:rate1h` store the share of failed requests over five minutes and over one hour. The alert `ScoutErrorBudgetBurn` reads both. Prometheus shows no alert and no error ratio. The team asks you to fix it.
 
-## Task
+Allow 10–15 minutes for task work. Cluster startup and telemetry collection add time.
+
+## Tasks
 
 1. Find out why the alert `ScoutErrorBudgetBurn` is not active. Read the rules in the PrometheusRule `scout-slo` and run their expressions in Prometheus, one part at a time.
 2. Change the PrometheusRule so that the recording rules return the real error ratio of `scout`.

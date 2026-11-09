@@ -6,69 +6,68 @@ metadata:
     prerequisites: prerequisites.md
     question: question.md
     solution: solution.md
-
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
-      - docker.io/grafana/grafana:13.2.3-distroless
-      - quay.io/kiwigrid/k8s-sidecar:2.14.1
-      - grafana/loki:3.7.9
-      - otel/opentelemetry-collector-contrib:0.162.0
-      - mccutchen/go-httpbin:2.25.0
-      - curlimages/curl:8.22.0
-
+    - docker.io/grafana/grafana:13.2.3-distroless
+    - quay.io/kiwigrid/k8s-sidecar:2.14.1
+    - grafana/loki:3.7.9
+    - otel/opentelemetry-collector-contrib:0.162.0
+    - mccutchen/go-httpbin:2.25.0
+    - curlimages/curl:8.22.0
 bootstrap:
   init:
-    - name: prepare
-      description: "Install Helm if missing, Grafana 13.2.3, the Loki data source and the starting dashboard"
-      type: file
-      source: bootstrap/01-prepare.sh
+  - name: prepare
+    description: Install Helm if missing, Grafana 13.2.3, the Loki data source and the starting dashboard
+    type: file
+    source: bootstrap/01-prepare.sh
   manifests:
-    - name: lab-start
-      description: "Loki, the Collector and the workloads that write log lines"
-      type: file
-      source: manifests/lab-start.yaml
+  - name: lab-start
+    description: Starting resources for repair a loki error dashboard
+    type: file
+    source: manifests/lab-start.yaml
   waitFor:
-    - resource: deploy/loki
-      namespace: logging
-    - resource: daemonset/collector
-      namespace: logging
-    - resource: deploy/probe
-      namespace: outpost
-    - resource: statefulset/cargo
-      namespace: outpost
-    - resource: deploy/beacon
-      namespace: outpost
-    - resource: deploy/scout
-      namespace: outpost
-    - resource: deploy/relay
-      namespace: starfleet
-    - resource: deploy/shuttle
-      namespace: starfleet
-
+  - resource: deploy/loki
+    namespace: logging
+  - resource: daemonset/collector
+    namespace: logging
+  - resource: deploy/probe
+    namespace: outpost
+  - resource: statefulset/cargo
+    namespace: outpost
+  - resource: deploy/beacon
+    namespace: outpost
+  - resource: deploy/scout
+    namespace: outpost
+  - resource: deploy/relay
+    namespace: starfleet
+  - resource: deploy/shuttle
+    namespace: starfleet
 testing:
   init:
-    - name: solution
-      description: Reference solution applied by `astrona test`
-      type: file
-      source: solution/apply.sh
-
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+  - name: wait-for-logs
+    description: Wait for the error streams used by the saved panels
+    type: file
+    source: testing/wait-for-logs.sh
 validation:
   scripts:
-    - name: data-source
-      description: The Loki data source is editable, healthy and has Maximum lines set to 250
-      type: file
-      source: validation/validate-data-source.sh
-    - name: panels
-      description: The two saved panels query the outpost error lines and count their streams
-      type: file
-      source: validation/validate-panels.sh
-    - name: scaled
-      description: Every controller in outpost that wrote ERROR lines runs no Pods and the others still run
-      type: file
-      source: validation/validate-scaled.sh
-
+  - name: data-source
+    description: The Loki data source is editable, healthy and has Maximum lines set to 250
+    type: file
+    source: validation/validate-data-source.sh
+  - name: panels
+    description: The two saved panels query the outpost error lines and count their streams
+    type: file
+    source: validation/validate-panels.sh
 teardown:
   keepCluster: false

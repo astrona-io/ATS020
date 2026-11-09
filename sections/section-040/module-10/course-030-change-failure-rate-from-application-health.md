@@ -1,6 +1,6 @@
 # Change Failure Rate From Application Health
 
-Change failure rate is the share of deployments that cause a failure. The obvious way to measure it is to count failed syncs and divide by all syncs. That query returns zero for this Application, even though two deployments broke production. This part shows why, finds the signal that does record the failures, and turns it into a rate.
+Two seeded deployments applied successfully but made `scout` unhealthy. Count the known degraded episodes and compare them with successful deployments. A failed-sync counter measures a different event and misses these application failures.
 
 ## A failed deployment with a successful sync
 
@@ -111,8 +111,6 @@ promql 'dora:change_failure_rate:ratio6h'
 
 The change failure rate is `0.22`: two failures out of nine counted deployments. The count is nine and not ten because `increase()` sees the counter grow from `1` to `10`, and it has no sample at `0`. If a scrape was late and the counter started at `2`, the count is eight and the rate is `0.25`. Both values are correct for the samples Prometheus holds, so read the rate as about `0.2` to `0.25`. A rate near `0.33` or higher means a third deployment went `Degraded`, and that is a different problem: the seed history has exactly two bad commits. If the query returns nothing, wait another minute.
 
-You can now measure the change failure rate and you know why the sync phase cannot do it. Two deployments failed, and the health gauge recorded both. The time-based metrics are still open: how long a change waits before it runs, and how long a failure lasts.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -122,27 +120,26 @@ You can now measure the change failure rate and you know why the sync phase cann
 > - **Forgetting to divide by two.** One failure flips the flag twice.
 > - **A hard-coded number.** A rule such as `vector(2)` shows the right value today and the wrong one after the next failure.
 
-## Your mission: Fix The Change Failure Rate Rule
+## Your mission: Repair The Change Failure Rate Rule
 
-You can now compute the change failure rate from the health of an Application and store it as a recording rule. The mission gives you a PrometheusRule whose failed deployment count is wrong and returns `0`. Fix it so that Prometheus returns the real change failure rate.
+The platform team measures the delivery of the workload `scout` with DORA (DevOps Research and Assessment) metrics. Argo CD, a GitOps controller, deploys `scout` into the namespace `starfleet` from the Application `scout` in the namespace `argocd`. Prometheus scrapes the Argo CD application controller. It has already deployed `scout` ten times, and two of those deployments used an image tag that does not exist.
 
-Pause the playground, then start the lab:
+This independent lab has 3 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
 
 ```sh
 astrona stop ats-020-playground-040-01
-```
-
-```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-040/module-10/labs/lab-01
 ```
 
-The task is on the next page. When you have fixed the rule, grade your work:
+Submit after verifying the result:
 
 ```sh
 astrona submit -c sections/section-040/module-10/labs/lab-01
 ```
 
-When the lab is done, remove it and start the playground again:
+Remove the lab and resume the playground:
 
 ```sh
 astrona destroy ats-020-lab-040-01

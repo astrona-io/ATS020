@@ -1,6 +1,6 @@
 # Silences
 
-Some alerts are true and still unwanted. During planned maintenance, or while someone already works on the problem, every new notification only adds noise. Deleting or editing the alerting rule would hide the problem for everyone and is easy to forget to undo. Alertmanager has a cleaner tool: a **silence** mutes matching alerts for a fixed time and leaves Prometheus untouched. This part silences `ScoutHighErrorRatio`, proves from the receiver that no notification goes out, and lets the silence end.
+A maintenance silence suppresses notifications while the rule keeps firing. Create a time-bounded silence for one alert and namespace, then prove that it suppresses that alert without hiding a separate service failure.
 
 ## Where a silence acts
 
@@ -123,8 +123,6 @@ starfleet/starfleet/starfleet-webhook resolved ScoutHighErrorRatio namespace=sta
 
 Two new lines arrived. As soon as the silence expired, the alert was still firing and its repeat interval had long passed, so Alertmanager sent it again at the next flush. When the loop ended, the one-minute error ratio dropped below 5%, the alert left `firing` in Prometheus, and Alertmanager sent `resolved`, because the receiver has `sendResolved: true`. Expiring a silence while the problem still exists brings the notifications straight back.
 
-You can now mute an alert for a planned window with a silence, read its state from the API, prove from the receiver and the counter that nothing was sent, and end the silence early. A silence is a decision a person makes and dates. The open question is how Alertmanager mutes an alert on its own, when another alert already says the same thing.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -133,3 +131,29 @@ You can now mute an alert for a planned window with a silence, read its state fr
 > - **Expecting a silence to change Prometheus.** The alert keeps `firing` there; only Alertmanager stops notifying.
 > - **Expiring a silence while the problem still exists.** The next notification goes out right away.
 > - **Expecting a silence to recall a notification.** It acts at the silence stage of the next flush; what already left stays sent.
+
+## Your mission: Silence A Maintenance Alert
+
+`ProbeMaintenance` fires in Prometheus and has reached Alertmanager. Suppress its notifications during a planned maintenance window.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-010-03
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-30/labs/lab-03
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-010/module-30/labs/lab-03
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-010-03-03
+astrona start ats-020-playground-010-03
+```

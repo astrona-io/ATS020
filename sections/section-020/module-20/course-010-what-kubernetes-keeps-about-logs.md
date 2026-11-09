@@ -1,6 +1,6 @@
 # What Kubernetes Keeps About Logs
 
-When a workload misbehaves, the first thing an engineer reads is its log. Kubernetes already gives you that, with no extra tool. This part reads the logs and the events of a pod that keeps crashing, and then shows exactly where this built-in log access stops. That limit is the reason a cluster needs a log pipeline.
+Read container output and pod events as separate evidence. `kubectl logs` reads application output; events describe Kubernetes actions such as image pulls and restarts. Use `--previous` when the failure belongs to an earlier container instance.
 
 ## Read the log of a running pod
 

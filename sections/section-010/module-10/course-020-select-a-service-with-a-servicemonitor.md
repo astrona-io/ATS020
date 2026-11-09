@@ -1,6 +1,6 @@
 # Select A Service With A ServiceMonitor
 
-`scout` serves metrics, and Prometheus does not scrape it. This part writes the ServiceMonitor that connects the two. The first version looks correct and is ignored, because a second selection decides which monitors Prometheus reads at all. Once you know both selections, a missing target stops being a mystery.
+The `scout` Service exposes metrics, but a Service alone does not configure Prometheus. Create a ServiceMonitor, connect its selector and port to the Service, and check that the Prometheus instance selects the monitor.
 
 ## Two selections, not one
 
@@ -158,8 +158,6 @@ You should see:
 ```
 
 The real output also prints a line with `target_label: __tmp_prometheus_job_name` under each job; it is left out here. The job name follows the pattern `serviceMonitor/<namespace>/<name>/<endpoint index>`, so `/0` is the first entry of `endpoints`. When a ServiceMonitor has no job in this list, Prometheus never read it, and the first thing to check is the selector label.
-
-You can now write a ServiceMonitor, check which ServiceMonitors a Prometheus reads, and prove the scrape with one `up == 1` series per endpoint. You have also seen that a ServiceMonitor without the selected label fails silently. The open question is the workload that has no Service at all, the `scout` copy in `outpost`.
 
 ## Common pitfalls
 

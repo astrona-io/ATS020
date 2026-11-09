@@ -1,6 +1,6 @@
 # Inhibition
 
-When a node goes down, every pod on it stops answering, and an alert per pod adds nothing to the alert about the node. A silence cannot help here: nobody knows in advance when the node will fail. Alertmanager has a second way to mute, and it needs no person: an **inhibition rule** mutes alerts that match a target while an alert that matches a source is firing, when both carry the same values for a list of labels. This part writes such a rule for a pair of diagnostic alerts, proves the muting from the API, and shows how to tell inhibition and silencing apart when both apply.
+An inhibition rule suppresses a target alert while a related source alert fires. Match the source and target labels separately, then use equal labels to limit the relationship to the same affected service. Both alerts must continue to exist.
 
 ## How an inhibition rule decides
 
@@ -17,9 +17,9 @@ flowchart TB
     E -->|"yes"| M["suppressed, inhibitedBy"]
 ```
 
-The diagram shows the three tests an alert must fail to pass the inhibit stage; a label named in `equal` that is missing from both alerts counts as equal, since both sides have the empty value.
+All three conditions must hold for inhibition; a label named in `equal` that is missing from both alerts counts as equal, since both sides have the empty value.
 
-Two rules of the stage matter in practice. An alert that matches both the source and the target of the same rule does not inhibit itself, so a rule whose target is broader than its source is safe. And the inhibit stage runs before the silence stage, so an alert that is both inhibited and silenced carries both `inhibitedBy` and `silencedBy`.
+Two rules of the stage matter in practice. Alerts that match both the source and target sides of a rule cannot inhibit one another or themselves. Keep source and target matchers distinct so the intended relationship is clear. And the inhibit stage runs before the silence stage, so an alert that is both inhibited and silenced carries both `inhibitedBy` and `silencedBy`.
 
 The Helm chart's default Alertmanager configuration already has such rules. The first one, in the running configuration, reads:
 
@@ -165,8 +165,6 @@ The silence shows `expired`, `silencedBy` is empty again, and the warning alert 
 
 Choose the `equal` labels with care. Since a label missing from both alerts counts as equal, an `equal` list of labels the alerts do not carry lets one critical alert mute every warning in the namespace. Use labels both alerts carry, and source and target matchers that name the intended severities.
 
-You can now write an inhibition rule, predict which alert it mutes and why, and read `silencedBy` and `inhibitedBy` to name every reason an alert is suppressed. Muting is settled; the open question is what happens when more than one route wants the same alert.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -174,3 +172,29 @@ You can now write an inhibition rule, predict which alert it mutes and why, and 
 > - **Using absent labels in `equal`.** Two missing values compare equal and can broaden inhibition.
 > - **Deleting a firing rule for maintenance.** Use a silence with a duration and comment so evaluation continues and the suppression ends.
 > - **Forgetting the chart's own rules.** A `critical` alert already mutes `warning` and `info` alerts with the same `namespace` and `alertname`.
+
+## Your mission: Inhibit A Related Warning Alert
+
+Two diagnostic alerts fire: `ScoutUnavailable` is critical and `ScoutLatency` is warning. The team wants the critical alert to suppress the related warning automatically. Their different names keep the chart's default same-alertname rule from hiding a mistake in your custom inhibition rule.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-010-03
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-30/labs/lab-04
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-010/module-30/labs/lab-04
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-010-03-04
+astrona start ats-020-playground-010-03
+```

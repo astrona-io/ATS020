@@ -1,6 +1,6 @@
 # A Namespace Variable For Every Panel
 
-A Grafana dashboard is a page of panels that query a data source, a connection to a backend such as Prometheus. The dashboard works for `starfleet`, but `scout` also runs in `outpost`. Copying the dashboard for every namespace doubles the files and the chance that one copy is fixed while the other is not.
+A namespace variable lets one dashboard query several namespaces. Connect the variable and every panel to the same provisioned data-source UID, then switch namespaces and verify that all queries follow the selection.
 
 A **dashboard variable** solves this: one dashboard, a drop-down list at the top, and every panel's query follows the value the viewer picks. This part adds a `namespace` variable and points all four queries at it.
 
@@ -204,8 +204,6 @@ status=200	0.9266399999999999
 
 `outpost` only gets normal requests, so there is a single line for `200`. The error ratio returns no data at all, which the helper prints as `null`. The selector `status=~"5.."` finds no series in `outpost`, so the top half of the division is empty, and an empty side makes the whole result empty. On the dashboard, the stat panel says "No data", not `0%`. That is correct PromQL behaviour, but it can scare an on-call engineer. If you want the panel to show `0` instead, add `or vector(0)` to the top half of the division, so it returns a zero series when there are no errors.
 
-You can now make one dashboard serve every namespace with a query variable. The dashboard definition lives outside Grafana's database in a ConfigMap. The open question is what happens to a dashboard someone builds by clicking in the web interface, and how to bring it into a file.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -213,3 +211,29 @@ You can now make one dashboard serve every namespace with a query variable. The 
 > - **Writing `namespace="$namespace"` without the escaped quotes in JSON.** Inside the JSON string it must be `namespace=\"$namespace\"`.
 > - **Reading "No data" as zero.** An empty ratio means a side of the division has no series. Check each half on its own.
 > - **A variable query on a metric that does not exist.** The drop-down list is then empty and every panel shows nothing. Test the `label_values()` metric name first.
+
+## Your mission: Repair Dashboard Data Source References
+
+The team stores `Scout Overview` (UID `scout-overview`) in `monitoring/dashboard-scout-overview`. Grafana uses the provisioned Prometheus data source (UID `prometheus`).
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-020-01
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-10/labs/lab-03
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-020/module-10/labs/lab-03
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-020-01-03
+astrona start ats-020-playground-020-01
+```

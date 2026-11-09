@@ -1,6 +1,6 @@
 # Routing Alerts With Alertmanager
 
-An alert that reaches no one is the same as no alert. Alertmanager decides where each alert goes by matching its labels against a tree of routes, and it groups alerts so that one incident sends one message instead of fifty. This part sends `ScoutHighErrorRatio` to the webhook receiver with an AlertmanagerConfig, and reads the configuration the operator generates from it, including one matcher you did not write.
+Alertmanager matches an alert's labels against routes to choose its receivers. Read the actual alert labels, repair the matching route, and prove that the named webhook receives the firing alert.
 
 ## How Alertmanager routes
 
@@ -125,8 +125,6 @@ starfleet/starfleet/starfleet-webhook firing ScoutHighErrorRatio namespace=starf
 
 The alert now goes to `starfleet/starfleet/starfleet-webhook`, and the receiver printed one notification: the receiver name, the status `firing`, the alert name, its labels and the time it started. Alertmanager also counts what it sends: `curl -s http://127.0.0.1:9093/metrics | grep -E '^alertmanager_notifications_total\{.*webhook'` prints `alertmanager_notifications_total{integration="webhook"} 1`.
 
-You can now route alerts by label to a receiver with an AlertmanagerConfig, read the merged routing tree, and prove delivery from the receiver's side. You also know the namespace matcher the operator adds. The open question is the opposite need: keeping a known alert quiet while someone works on it.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -134,3 +132,29 @@ You can now route alerts by label to a receiver with an AlertmanagerConfig, read
 > - **Matching on a label the rule does not set.** Routes can only match labels the alert carries; check them in `/api/v2/alerts`.
 > - **Expecting the change at once.** The new route reaches Alertmanager through a mounted Secret; give it about a minute.
 > - **Using `groupWait`, `groupInterval` and `repeatInterval` from a demo in production.** Very short values send many messages for one incident.
+
+## Your mission: Route An Alert To Its Receiver
+
+`ScoutErrorRate` is already installed. The AlertmanagerConfig `starfleet/scout-routing` matches the wrong team, so the webhook receives no notification.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-010-03
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-30/labs/lab-02
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-010/module-30/labs/lab-02
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-010-03-02
+astrona start ats-020-playground-010-03
+```

@@ -1,5 +1,5 @@
 ---
-estimated_duration: 25m
+estimated_duration: 15m
 ---
 
 # Fix The Change Failure Rate Rule Lab

@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: scout-route-check
+  namespace: starfleet
+  labels:
+    release: kps
+spec:
+  groups:
+  - name: scout-route-check
+    interval: 15s
+    rules:
+    - alert: ScoutRouteCheck
+      expr: up{namespace="starfleet",job="scout"} == 1
+      for: 1m
+      labels:
+        team: scout
+        severity: warning

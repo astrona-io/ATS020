@@ -1,6 +1,6 @@
 # Panels For Rate, Error Ratio And Latency
 
-Three questions come first in almost every incident: how many requests arrive, how many of them fail, and how long they take. A Grafana panel draws the result of a query against a data source, the connection to a backend such as Prometheus. Each question needs a query and a display suited to its number. This part writes a dashboard for `scout` as a JSON file inside a ConfigMap, with one panel per question, and checks that every panel's query returns data through Grafana.
+Build one panel each for request rate, error ratio and latency. Each panel needs a valid query and the UID of the Prometheus data source. Check the returned data before choosing units or display options.
 
 ## Three questions, three visualisations
 
@@ -188,8 +188,6 @@ status=500	0.11134277777777779
 Read it panel by panel. `scout` in `starfleet` serves about 1.00 successful and 0.11 failed requests per second, so the error ratio is about 0.10. With the unit `percentunit`, the stat panel shows it as about 10%, in red because it is above the `0.05` threshold. The median request takes about 2.7 milliseconds, but the p99 is about 2.3 seconds, because the `/delay/1` requests sit in the histogram bucket between 1 and 2.5 seconds and `histogram_quantile()` estimates inside that bucket. The ratio and the quantiles have no labels, so the label column is empty.
 
 A percentile estimates a boundary, rather than the longest individual request. Choose the percentile that matches your service-level question, and remember that histogram bucket widths limit precision. A p99 above a second means that estimated boundary exceeds a second; it does not report the maximum.
-
-You can now write a dashboard as JSON, give each panel the visualisation and unit that fits its number, and check every query through Grafana. Every query still names `starfleet`, though. The open question is how to show `outpost` without copying the whole dashboard.
 
 ## Common pitfalls
 

@@ -1,6 +1,6 @@
 # Counters, Gauges And rate()
 
-A request total that only grows tells you little about now. What an operator wants is a speed: requests per second, errors per second. PromQL gets there with `rate()`, but only if the metric is the right type. This part reads the types in `scout`'s own metrics, turns a counter into a rate, and shows what goes wrong when `rate()` meets a value of the wrong kind.
+The request counter grows for the lifetime of a process. Convert it to requests per second with `rate()`, keeping counter resets and the query window in mind. A gauge already represents a current measurement and needs different treatment.
 
 ## The metric types in scout
 
@@ -92,8 +92,6 @@ flowchart TB
 ```
 
 The diagram shows the path from raw counter samples through `rate()` to an aggregated value, and the separate path a gauge must take.
-
-You can now tell the metric types apart from their `# TYPE` line and their name, turn a counter into a rate or an increase over a window, and avoid `rate()` on a gauge. The rates still come per pod and per status, though, and nobody wants four lines when they asked one question. The open question is how to combine series into the one number you need.
 
 ## Common pitfalls
 

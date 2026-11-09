@@ -88,7 +88,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe"
     source_readings:
-      - sections/section-050/module-10/course-020-crashloopbackoff-and-failing-probes.md
+      - sections/section-050/module-10/course-030-repair-a-failing-liveness-probe.md
     prompt: |-
       A container shows `CrashLoopBackOff`. The describe output shows `Last State: Terminated`, `Reason: Completed`, `Exit Code: 0`, and the events show `Liveness probe failed: HTTP probe failed with statuscode: 404` and `Killing`. What is the cause?
     options:
@@ -112,7 +112,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe"
     source_readings:
-      - sections/section-050/module-10/course-020-crashloopbackoff-and-failing-probes.md
+      - sections/section-050/module-10/course-020-diagnose-a-crashing-process.md
     prompt: |-
       A pod went from `Error` to `CrashLoopBackOff`. You want the log of the run that crashed, and the current container has just started again. Which command do you run?
     options:
@@ -136,7 +136,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix an OOMKilled container by reading its usage and setting a fitting memory limit"
     source_readings:
-      - sections/section-050/module-10/course-030-oomkilled-and-memory-limits.md
+      - sections/section-050/module-10/course-040-oomkilled-and-memory-limits.md
     prompt: |-
       A container restarts and `kubectl logs --previous` prints nothing. `kubectl describe pod` shows `Last State: Terminated`, `Reason: OOMKilled`, `Exit Code: 137`. Which fix is correct?
     options:
@@ -160,7 +160,7 @@ questions:
     difficulty: advanced
     learning_objective: "Fix an OOMKilled container by reading its usage and setting a fitting memory limit"
     source_readings:
-      - sections/section-050/module-10/course-030-oomkilled-and-memory-limits.md
+      - sections/section-050/module-10/course-040-oomkilled-and-memory-limits.md
     prompt: |-
       Why does the cause of an `OOMKilled` container not appear in the events of the pod?
     options:
@@ -184,7 +184,7 @@ questions:
     difficulty: beginner
     learning_objective: "Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret"
     source_readings:
-      - sections/section-050/module-10/course-040-imagepullbackoff-and-image-references.md
+      - sections/section-050/module-10/course-050-imagepullbackoff-and-image-references.md
     prompt: |-
       The event of a pod reads `Failed to pull image "ghcr.io/stefanprodan/podinfo:6.15.99": ... not found`. What do you change?
     options:
@@ -208,7 +208,7 @@ questions:
     difficulty: intermediate
     learning_objective: "Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret"
     source_readings:
-      - sections/section-050/module-10/course-040-imagepullbackoff-and-image-references.md
+      - sections/section-050/module-10/course-050-imagepullbackoff-and-image-references.md
     prompt: |-
       A pull event reads `failed to authorize: ... 403 Forbidden`. Which statement is correct?
     options:

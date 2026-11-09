@@ -1,0 +1,46 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: scout-inhibition
+  namespace: starfleet
+spec:
+  route:
+    receiver: scout-webhook
+    matchers:
+    - name: team
+      value: scout-inhibit
+      matchType: '='
+    groupBy:
+    - namespace
+    - alertname
+    groupWait: 10s
+    groupInterval: 1m
+    repeatInterval: 5m
+  receivers:
+  - name: scout-webhook
+    webhookConfigs:
+    - url: http://alert-receiver.monitoring:8080/
+  inhibitRules:
+  - sourceMatch:
+    - name: team
+      value: scout-inhibit
+      matchType: '='
+    - name: severity
+      value: critical
+      matchType: '='
+    - name: alertname
+      value: ScoutUnavailable
+      matchType: '='
+    targetMatch:
+    - name: team
+      value: scout-inhibit
+      matchType: '='
+    - name: severity
+      value: warning
+      matchType: '='
+    - name: alertname
+      value: ScoutLatency
+      matchType: '='
+    equal:
+    - namespace
+    - team

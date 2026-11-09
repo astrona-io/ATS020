@@ -1,5 +1,5 @@
 ---
-estimated_duration: 20m
+estimated_duration: 15m
 ---
 
 # Fix The Burn-Rate Alert Lab

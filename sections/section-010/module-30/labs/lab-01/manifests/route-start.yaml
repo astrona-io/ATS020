@@ -8,7 +8,7 @@ spec:
     receiver: scout-webhook
     matchers:
     - name: team
-      value: outpost
+      value: scout
       matchType: '='
     groupBy:
     - namespace

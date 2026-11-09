@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-010-03-04
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+    - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+    - quay.io/prometheus/prometheus:v3.15.0-distroless
+    - quay.io/prometheus/alertmanager:v0.34.1
+    - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+    - ghcr.io/stefanprodan/podinfo:6.17.0
+    - curlimages/curl:8.22.0
+    - python:3.13.18-alpine3.24
+bootstrap:
+  init:
+  - name: prepare
+    description: Install the monitoring stack and terminal prerequisites
+    type: file
+    source: bootstrap/01-prepare.sh
+  - name: seed
+    description: Deploy workloads and wait for ProbeMaintenance
+    type: file
+    source: bootstrap/02-seed.sh
+  waitFor:
+  - resource: deploy/scout
+    namespace: starfleet
+  - resource: deploy/shuttle
+    namespace: starfleet
+  - resource: deploy/alert-receiver
+    namespace: monitoring
+testing:
+  init:
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: alert-behaviour
+    description: The live alert state and grouping match the task
+    type: file
+    source: validation/validate-alert-behaviour.sh
+teardown:
+  keepCluster: false

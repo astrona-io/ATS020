@@ -1,22 +1,22 @@
 # Diagnose And Fix Broken Platform Components
 
-A broken workload shows its failure in its own pod. A broken platform component shows its failure somewhere else. A `kubectl create` fails with an error about a webhook you never touched. A new rule is accepted by the API server and never appears in Prometheus. On the exam these faults cost the most time, because the symptom does not point at the component that caused it.
+Work through one practical outcome at a time. Each graded lab follows the lesson that prepares it and starts from its own cluster state. The 4 labs each have 3–5 tasks, with 10–15 minutes of task work plus startup and telemetry delays.
 
-This module teaches how to follow a platform symptom back to the component that produces it. You read the error text, name the component that should have done the work, read the object that component owns, and fix the cause without removing the safety it provides. You then prove the fix with the behaviour that was lost, such as a create that works or a Prometheus target that reports `1`.
+## Learning sequence
 
-The module has four parts. **A Webhook Service Without Endpoints** follows an admission webhook error from the API server to a Service that no pod matches. **An Expired Webhook Certificate** reads an `x509` error, checks a certificate with `openssl` and signs a new one. **A Controller Scaled To Zero** finds a stopped Prometheus Operator and ends with a graded lab on all three faults. **A GitOps Application Out Of Sync Or Degraded** reads the sync and health status of an Argo CD Application and finds a bad path, a bad revision, a failing hook and a degraded child resource.
+| Lesson | Practice after reading |
+| --- | --- |
+| A Webhook Service Without Endpoints | Repair A Webhook Service Port |
+| An Expired Webhook Certificate | Renew An Expired Webhook Certificate |
+| A Controller Scaled To Zero | Restore The Prometheus Operator |
+| Recover A GitOps Source Path | Recover A GitOps Source Path |
 
-## Learning objectives
+## What you will prove
 
-After this module you can:
-
-- Read the error text of a failing admission webhook and name the webhook, the Service and the reason.
-- Fix a webhook Service that has no endpoints by comparing its selector with the pod labels, without deleting the webhook or setting `failurePolicy: Ignore`.
-- Find an expired serving certificate from the `x509` error and `openssl`, sign a new one with the platform CA and restart the webhook server.
-- Find a controller that does not run from its Deployment and events, and explain why the status of its resources can still look healthy.
-- Read the sync status and the health status of an Argo CD Application, and find with `argocd app diff` and `kubectl describe application` why it is `OutOfSync` or `Degraded`.
-- Fix a bad source path, a bad `targetRevision`, a failing hook or a degraded child resource in Git, not on the live object.
-- Prove each fix with the behaviour it restores: a create that works, a webhook log line, a target with `up == 1`, a rule loaded in Prometheus.
+- Repair A Webhook Service Port.
+- Renew An Expired Webhook Certificate.
+- Restore The Prometheus Operator.
+- Recover A GitOps Source Path.
 
 ## Before you start
 
@@ -32,6 +32,6 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. A trimm
 | `shuttle`, `drifter` | Client pods with `curl` in `starfleet` and `outpost` | Nothing. You send test requests from them |
 | `scout` | `podinfo` 6.17.0, port `9898` | Nothing. It is the workload that Prometheus should scrape |
 
-Launch your playground now, and keep it running next to you while you read the parts:
+Launch the playground for the reading exercises:
 
 <!-- astrona:playground -->

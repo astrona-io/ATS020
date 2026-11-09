@@ -11,33 +11,9 @@ spec:
     interval: 15s
     rules:
     - alert: ScoutErrorRate
-      expr: sum by (namespace) (rate(http_requests_total{job="scout",namespace="starfleet",status="500"}[1m]))
-        > 0.1
+      expr: sum by (namespace) (rate(http_requests_total{job="scout",namespace="starfleet",status="500"}[1m])) >
+        0.1
       for: 1m
       labels:
         team: scout
         severity: warning
----
-apiVersion: monitoring.coreos.com/v1alpha1
-kind: AlertmanagerConfig
-metadata:
-  name: scout-routing
-  namespace: starfleet
-spec:
-  route:
-    receiver: scout-webhook
-    matchers:
-    - name: team
-      value: scout
-      matchType: '='
-    groupBy:
-    - namespace
-    - alertname
-    groupWait: 5s
-    groupInterval: 15s
-    repeatInterval: 5m
-  receivers:
-  - name: scout-webhook
-    webhookConfigs:
-    - url: http://alert-receiver.monitoring:8080/
-      sendResolved: true

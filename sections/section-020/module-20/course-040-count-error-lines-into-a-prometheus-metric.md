@@ -1,6 +1,6 @@
 # Count Error Lines Into A Prometheus Metric
 
-Reading log lines is useful during an incident. Alerting and dashboards need a number instead. Prometheus stores numbers, not log lines, so the Collector must turn the lines into a metric. This part counts the `level=ERROR` lines of `probe` with the count connector, exposes the count on a port, makes Prometheus scrape it and queries it with PromQL.
+The count connector turns matching error records into a metric. Follow that metric through the metrics pipeline and exporter to Prometheus. A healthy scrape target proves connectivity; an increasing error counter proves the logs are being processed.
 
 ## From log records to a counter
 
@@ -208,26 +208,28 @@ The chain is now complete. Container log files on each node become log records, 
 > - **Querying the dotted name.** The Prometheus names use underscores. Ask for `k8s_deployment_name`, not `k8s.deployment.name`.
 > - **Querying too early.** Prometheus scrapes every 15 seconds here, and `rate()` over one minute needs at least two samples. Wait a minute after a change.
 
-## Your mission: Count Error Log Lines With The OpenTelemetry Collector Lab
+## Your mission: Scrape Collector Error Metrics
 
-You can now count log lines into a metric and find where a log pipeline breaks. The mission gives you a Collector that does not deliver the metric you need. You find the faults, fix them without widening access, and prove the result with a query.
+The `logs` Collector runs as a DaemonSet in `monitoring`. It reads `probe` error logs and exposes `log_error_lines_total` for Prometheus.
 
-Pause the playground first:
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
 
 ```sh
 astrona stop ats-020-playground-020-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-20/labs/lab-02
 ```
 
-Start the lab and, when you are ready, submit it for grading:
+Submit after verifying the result:
 
 ```sh
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-20/labs/lab-01
-astrona submit -c sections/section-020/module-20/labs/lab-01
+astrona submit -c sections/section-020/module-20/labs/lab-02
 ```
 
-When you are done, remove the lab and start the playground again:
+Remove the lab and resume the playground:
 
 ```sh
-astrona destroy ats-020-lab-020-02
+astrona destroy ats-020-lab-020-02-02
 astrona start ats-020-playground-020-02
 ```

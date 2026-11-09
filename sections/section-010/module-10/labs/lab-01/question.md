@@ -6,7 +6,9 @@ The `scout` workload in the namespace `starfleet` runs two pods behind the Servi
 
 The platform team applied the ServiceMonitor `scout` in the namespace `starfleet` so that Prometheus scrapes it. Prometheus shows no `scout` target and no `up` series for it. The Prometheus Operator and Prometheus run in the namespace `monitoring`. Prometheus is the Service `kps-prometheus` on port `9090`.
 
-## Task
+Allow 10–15 minutes for task work. Cluster startup and telemetry collection add time.
+
+## Tasks
 
 1. Find out why Prometheus shows no `scout` target. Compare the ServiceMonitor with the labels the Prometheus resource `kps-prometheus` selects, and with the Service `scout`.
 2. Fix the ServiceMonitor `scout` until Prometheus scrapes both `scout` pods. More than one field is wrong.

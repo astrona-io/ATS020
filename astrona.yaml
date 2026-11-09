@@ -1,30 +1,8 @@
-# Course manifest for ATS020 - Observability and Operations (Certified Cloud Native Platform Engineer).
-#
-# One entry per section under `modules:`. Each section lists, in order: its
-# README, then for each module the landing page (course-000.md), its parts
-# (course-0N0-*.md), and right after the part a lab tests, the lab's
-# question.md reading and the `type: lab` entry. The module's wrap-up page
-# comes last. The section capstone closes the section. Playgrounds are not
-# listed: the landing page's playground marker shows them. solution.md is
-# never listed.
-#
-# Every `path:` is relative to this file.
-
 training:
   id: ATS020
-  title: "CNPE: Observability and Operations"
-  description: >
-    Training material covering the Certified Cloud Native Platform Engineer
-    (CNPE) Observability and Operations domain: scraping workloads with
-    Prometheus, PromQL, alerting rules and Alertmanager routing, Grafana
-    dashboards, log collection with the OpenTelemetry Collector,
-    distributed tracing with OpenTelemetry and Jaeger, DORA delivery metrics,
-    service level objectives and resource efficiency, and diagnosing and
-    fixing broken workloads and platform components. Each module pairs a
-    layered reader with an ungraded hands-on playground. Each section closes
-    with an integration capstone.
-    Built and verified against Kubernetes 1.35.
-
+  title: 'CNPE: Observability and Operations'
+  description: |
+    Training material covering the Certified Cloud Native Platform Engineer (CNPE) Observability and Operations domain: scraping workloads with Prometheus, PromQL, alerting rules and Alertmanager routing, Grafana dashboards, log collection with the OpenTelemetry Collector, distributed tracing with OpenTelemetry and Jaeger, DORA delivery metrics, service level objectives and resource efficiency, and diagnosing and fixing broken workloads and platform components. Each module pairs a layered reader with an ungraded hands-on playground. Each section closes with an integration capstone. Built and verified against Kubernetes 1.35.
   certification:
     name: Certified Cloud Native Platform Engineer
     code: CNPE
@@ -32,779 +10,1515 @@ training:
     domain: Observability and Operations
     weight: 20
     competencies:
-      - "Implementing Monitoring, Alerting, Logging, and Tracing Solutions"
-      - "Measuring and Improving Platform Efficiency Using Deployment Metrics and Performance Indicators"
-      - "Diagnosing and Remediating Platform Issue and Incident Scenarios"
-
+    - Implementing Monitoring, Alerting, Logging, and Tracing Solutions
+    - Measuring and Improving Platform Efficiency Using Deployment Metrics and Performance Indicators
+    - Diagnosing and Remediating Platform Issue and Incident Scenarios
 modules:
-
-  - id: module-intro
-    title: "Introduction"
-    description: >
-      Start here. What this course trains you to do, how it is laid out, how
-      to get your machine ready with the astrona command-line tool, how the
-      content is written and checked, who maintains it, and how to report a
-      mistake.
-
-    content:
-      - type: reading
-        title: Introduction
-        path: sections/intro/00-introduction.md
-      - type: reading
-        title: "Welcome To The Course"
-        path: sections/intro/10-welcome.md
-      - type: reading
-        title: "Get Your Machine Ready"
-        path: sections/intro/20-get-your-machine-ready.md
-      - type: reading
-        title: "How This Course Is Made"
-        path: sections/intro/30-how-this-course-is-made.md
-
-  - id: module-010
-    title: "Metrics And Alerting With Prometheus"
-    description: >
-      Makes the reader able to get any workload's metrics into
-      Prometheus through the Prometheus Operator or raw scrape configuration, query them with
-      PromQL, and turn a query into an alert that reaches a receiver.
-      It comes first because every later section (dashboards, SLOs,
-      DORA metrics, incident triage) reads these metrics.
-
-    content:
-      - type: reading
-        title: Section Overview
-        path: sections/section-010/README.md
-
-      - type: reading
-        title: "Scrape Workloads With ServiceMonitor And PodMonitor"
-        path: sections/section-010/module-10/course-000.md
-      - type: reading
-        title: "Targets And The up Metric"
-        path: sections/section-010/module-10/course-010-targets-and-the-up-metric.md
-      - type: reading
-        title: "Select A Service With A ServiceMonitor"
-        path: sections/section-010/module-10/course-020-select-a-service-with-a-servicemonitor.md
-      - type: reading
-        title: "Scrape Pods Without A Service With A PodMonitor"
-        path: sections/section-010/module-10/course-030-scrape-pods-with-a-podmonitor.md
-      - type: reading
-        title: "Finding A Missing Target"
-        path: sections/section-010/module-10/course-040-finding-a-missing-target.md
-      - type: reading
-        title: Question
-        path: sections/section-010/module-10/labs/lab-01/question.md
-      - type: lab
-        title: "Get A Workload Scraped With A ServiceMonitor Lab"
-        path: sections/section-010/module-10/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 20m
-        topic: metrics-and-alerting
-        task_kind: troubleshooting
-      - type: reading
-        title: "Scrape Pods With Raw Prometheus Configuration"
-        path: sections/section-010/module-10/course-050-raw-prometheus-configuration.md
-      - type: reading
-        title: Question
-        path: sections/section-010/module-10/labs/lab-02/question.md
-      - type: lab
-        title: "Extend Raw Prometheus Discovery And Scale A Workload Lab"
-        path: sections/section-010/module-10/labs/lab-02
-        difficulty: intermediate
-        estimated_duration: 20m
-        topic: metrics
-        task_kind: troubleshooting
-        tags: [prometheus, scrape-target, label-selector, promql]
-        learning_goals:
-          - Extend a Pod discovery keep rule to include another label value
-          - Load the changed configuration and prove all selected Pods are healthy targets
-          - Compare workload totals with sum by and scale the busiest Deployment
-        resources:
-          - name: "Prometheus 3.15: scrape configuration and Kubernetes discovery"
-            url: https://github.com/prometheus/prometheus/blob/v3.15.0/docs/configuration/configuration.md
-          - name: "Prometheus 3.15: configuration reload"
-            url: https://github.com/prometheus/prometheus/blob/v3.15.0/docs/management_api.md
-          - name: "Prometheus 3.15: aggregation operators"
-            url: https://github.com/prometheus/prometheus/blob/v3.15.0/docs/querying/operators.md
-      - type: reading
-        title: Summary
-        path: sections/section-010/module-10/course-100-summary.md
-
-      - type: reading
-        title: "Query Metrics With PromQL"
-        path: sections/section-010/module-20/course-000.md
-      - type: reading
-        title: "Selecting Time Series"
-        path: sections/section-010/module-20/course-010-selecting-time-series.md
-      - type: reading
-        title: "Counters, Gauges And rate()"
-        path: sections/section-010/module-20/course-020-counters-gauges-and-rate.md
-      - type: reading
-        title: "Aggregation, Error Ratio And Latency"
-        path: sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
-      - type: reading
-        title: "Running Queries From The Command Line"
-        path: sections/section-010/module-20/course-040-running-queries-from-the-command-line.md
-      - type: reading
-        title: Summary
-        path: sections/section-010/module-20/course-100-summary.md
-
-      - type: reading
-        title: "Alert With PrometheusRule And Alertmanager"
-        path: sections/section-010/module-30/course-000.md
-      - type: reading
-        title: "Recording And Alerting Rules"
-        path: sections/section-010/module-30/course-010-recording-and-alerting-rules.md
-      - type: reading
-        title: Question
-        path: sections/section-010/module-20/labs/lab-02/question.md
-      - type: lab
-        title: "Record The Error Ratio And p95 Latency Lab"
-        path: sections/section-010/module-20/labs/lab-02
-        difficulty: intermediate
-        estimated_duration: 25m
-        topic: metrics-and-alerting
-        task_kind: troubleshooting
-      - type: reading
-        title: "Selecting And Loading PrometheusRules"
-        path: sections/section-010/module-30/course-020-selecting-and-loading-prometheusrules.md
-      - type: reading
-        title: "The Alert Lifecycle"
-        path: sections/section-010/module-30/course-030-the-alert-lifecycle.md
-      - type: reading
-        title: "Routing Alerts With Alertmanager"
-        path: sections/section-010/module-30/course-040-routing-alerts-with-alertmanager.md
-      - type: reading
-        title: "Silences"
-        path: sections/section-010/module-30/course-050-silences.md
-      - type: reading
-        title: "Inhibition"
-        path: sections/section-010/module-30/course-060-inhibition.md
-      - type: reading
-        title: "Route Precedence And Grouping"
-        path: sections/section-010/module-30/course-070-route-precedence-and-grouping.md
-      - type: reading
-        title: Question
-        path: sections/section-010/module-30/labs/lab-01/question.md
-      - type: lab
-        title: "Route A Team Alert And Silence Maintenance Lab"
-        path: sections/section-010/module-30/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 25m
-        topic: alerting
-        task_kind: troubleshooting
-        tags: [prometheusrule, alerting-rule, alertmanager, alertmanager-route, silence]
-        learning_goals:
-          - Load a team alerting rule and prove it fires on live request metrics
-          - Route the firing alert to the named webhook receiver and prove delivery
-          - Suppress a separate firing alert with a scoped maintenance silence
-        resources:
-          - name: "Prometheus: Alerting rules"
-            url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-          - name: "Alertmanager: Configuration"
-            url: https://prometheus.io/docs/alerting/latest/configuration/
-          - name: "Prometheus Operator: API reference"
-            url: https://prometheus-operator.dev/docs/api-reference/api/
-      - type: reading
-        title: Summary
-        path: sections/section-010/module-30/course-100-summary.md
-
-      - type: reading
-        title: Question
-        path: sections/section-010/capstone/labs/lab-01/question.md
-      - type: lab
-        title: "Metrics And Alerting Capstone"
-        path: sections/section-010/capstone/labs/lab-01
-        difficulty: advanced
-        estimated_duration: 45m
-        topic: metrics-and-alerting
-        task_kind: build
-      - type: quiz
-        title: "Knowledge Check: Metrics And Alerting With Prometheus"
-        path: sections/section-010/quiz.yaml
-        question_count: 22
-        pass_score: 70
-
-  - id: module-020
-    title: "Dashboards And Logs"
-    description: >
-      Makes the reader able to show metrics on a Grafana dashboard
-      that is stored as code, and to collect pod logs with the
-      OpenTelemetry Collector, enrich and filter them, and turn error
-      lines into a Prometheus metric that a dashboard can draw. It also
-      stores logs in Loki, queries them with LogQL and acts on the
-      result. It follows metrics because dashboards draw PromQL queries, and logs
-      are the next signal an operator reads.
-
-    content:
-      - type: reading
-        title: Section Overview
-        path: sections/section-020/README.md
-
-      - type: reading
-        title: "Build Grafana Dashboards As Code"
-        path: sections/section-020/module-10/course-000.md
-      - type: reading
-        title: "Grafana's Parts And A Provisioned Data Source"
-        path: sections/section-020/module-10/course-010-grafana-parts-and-a-provisioned-data-source.md
-      - type: reading
-        title: "Panels For Rate, Error Ratio And Latency"
-        path: sections/section-020/module-10/course-020-panels-for-rate-error-ratio-and-latency.md
-      - type: reading
-        title: "A Namespace Variable For Every Panel"
-        path: sections/section-020/module-10/course-030-a-namespace-variable-for-every-panel.md
-      - type: reading
-        title: "Dashboards That Survive A Restart"
-        path: sections/section-020/module-10/course-040-dashboards-that-survive-a-restart.md
-      - type: reading
-        title: Question
-        path: sections/section-020/module-10/labs/lab-01/question.md
-      - type: lab
-        title: "Fix A Grafana Dashboard That Is Provisioned From A ConfigMap"
-        path: sections/section-020/module-10/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 25m
-        topic: dashboards-and-logs
-        task_kind: troubleshooting
-      - type: reading
-        title: Question
-        path: sections/section-020/module-10/labs/lab-02/question.md
-      - type: lab
-        title: "Bring Grafana Back After A Namespace Move Lab"
-        path: sections/section-020/module-10/labs/lab-02
-        difficulty: intermediate
-        estimated_duration: 25m
-        topic: grafana
-        task_kind: troubleshooting
-        tags: [grafana, troubleshooting, secrets, volumes, resource-limits, oomkilled]
-        learning_goals:
-          - Read a Pod's status and events to find why a container does not start, one fault at a time
-          - Replace a read-only ConfigMap volume behind a data directory with a writable volume
-          - Add the Secret key a container reads instead of renaming the environment variable
-          - Raise a memory limit that kills a container on start and confirm the rollout and the login
-        resources:
-          - name: "Grafana: Configure Grafana"
-            url: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
-          - name: "Kubernetes: Secrets"
-            url: https://kubernetes.io/docs/concepts/configuration/secret/
-          - name: "Kubernetes: Debug Pods"
-            url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
-      - type: reading
-        title: Summary
-        path: sections/section-020/module-10/course-100-summary.md
-
-      - type: reading
-        title: "Collect Pod Logs With The OpenTelemetry Collector"
-        path: sections/section-020/module-20/course-000.md
-      - type: reading
-        title: "What Kubernetes Keeps About Logs"
-        path: sections/section-020/module-20/course-010-what-kubernetes-keeps-about-logs.md
-      - type: reading
-        title: "A DaemonSet Collector Reads The Log Files"
-        path: sections/section-020/module-20/course-020-a-daemonset-collector-reads-the-log-files.md
-      - type: reading
-        title: "Add Kubernetes Metadata And Drop Records"
-        path: sections/section-020/module-20/course-030-add-kubernetes-metadata-and-drop-records.md
-      - type: reading
-        title: "Count Error Lines Into A Prometheus Metric"
-        path: sections/section-020/module-20/course-040-count-error-lines-into-a-prometheus-metric.md
-      - type: reading
-        title: Question
-        path: sections/section-020/module-20/labs/lab-01/question.md
-      - type: lab
-        title: "Count Error Log Lines With The OpenTelemetry Collector"
-        path: sections/section-020/module-20/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 20m
-        topic: dashboards-and-logs
-        task_kind: build
-      - type: reading
-        title: Summary
-        path: sections/section-020/module-20/course-100-summary.md
-
-      - type: reading
-        title: "Query Logs With Loki And LogQL"
-        path: sections/section-020/module-30/course-000.md
-      - type: reading
-        title: "Connect Grafana To Loki"
-        path: sections/section-020/module-30/course-010-connect-grafana-to-loki.md
-      - type: reading
-        title: "Query Logs With LogQL"
-        path: sections/section-020/module-30/course-020-query-logs-with-logql.md
-      - type: reading
-        title: "Edit A Panel And Act On The Result"
-        path: sections/section-020/module-30/course-030-edit-a-panel-and-act-on-the-result.md
-      - type: reading
-        title: Question
-        path: sections/section-020/module-30/labs/lab-01/question.md
-      - type: lab
-        title: "Query Loki And Stop The Failing Workloads Lab"
-        path: sections/section-020/module-30/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 25m
-        topic: logging
-        task_kind: troubleshooting
-        tags: [loki, logql, grafana, grafana-dashboard, data-source]
-        learning_goals:
-          - Change Maximum lines on a Loki data source in Grafana and read it back through the API
-          - Correct and save two dashboard panels with LogQL log and metric queries
-          - Use a Loki query result to scale exactly the controllers whose Pods write error lines to zero
-        resources:
-          - name: "Grafana: Loki data source"
-            url: https://grafana.com/docs/grafana/latest/datasources/loki/
-          - name: "Loki: LogQL log queries"
-            url: https://grafana.com/docs/loki/latest/query/log_queries/
-          - name: "Loki: LogQL metric queries"
-            url: https://grafana.com/docs/loki/latest/query/metric_queries/
-      - type: reading
-        title: Summary
-        path: sections/section-020/module-30/course-100-summary.md
-      - type: quiz
-        title: "Knowledge Check: Query Logs With Loki And LogQL"
-        path: sections/section-020/module-30/quiz.yaml
-        question_count: 10
-        pass_score: 70
-
-      - type: reading
-        title: Question
-        path: sections/section-020/capstone/labs/lab-01/question.md
-      - type: lab
-        title: "Dashboards And Logs Capstone"
-        path: sections/section-020/capstone/labs/lab-01
-        difficulty: advanced
-        estimated_duration: 60m
-        topic: dashboards-and-logs
-        task_kind: build
-      - type: reading
-        title: Question
-        path: sections/section-020/capstone/labs/lab-02/question.md
-      - type: lab
-        title: "Trace One Incident Through Grafana, Prometheus And Loki"
-        path: sections/section-020/capstone/labs/lab-02
-        difficulty: advanced
-        estimated_duration: 35m
-        topic: logging
-        task_kind: troubleshooting
-        tags: [loki, logql, promql, grafana, grafana-dashboard, data-source]
-        learning_goals:
-          - Add a Loki data source and correct a dashboard with one Prometheus panel and one Loki panel
-          - Find the failing service from a Prometheus metric and its cause from Loki log lines
-          - Fix the Deployment and prove recovery from live metrics and logs
-        resources:
-          - name: "Grafana: Loki data source"
-            url: https://grafana.com/docs/grafana/latest/datasources/loki/
-          - name: "Loki: LogQL log queries"
-            url: https://grafana.com/docs/loki/latest/query/log_queries/
-          - name: "Prometheus: Querying basics"
-            url: https://prometheus.io/docs/prometheus/latest/querying/basics/
-      - type: quiz
-        title: "Knowledge Check: Dashboards And Logs"
-        path: sections/section-020/quiz.yaml
-        pass_score: 70
-
-  - id: module-030
-    title: "Distributed Tracing With OpenTelemetry And Jaeger"
-    description: >
-      Makes the reader able to run an OpenTelemetry Collector with the
-      OpenTelemetry Operator, send traces to Jaeger, and add tracing
-      to an application without changing its code. It comes after
-      metrics and logs because tracing reuses the Collector pipeline
-      idea and answers the question metrics cannot — where in a chain
-      of services the time went.
-
-    content:
-      - type: reading
-        title: Section Overview
-        path: sections/section-030/README.md
-
-      - type: reading
-        title: "Run An OpenTelemetry Collector With The Operator"
-        path: sections/section-030/module-10/course-000.md
-      - type: reading
-        title: "The Operator And Its Webhook"
-        path: sections/section-030/module-10/course-010-the-operator-and-its-webhook.md
-      - type: reading
-        title: "A Collector With An OTLP Receiver And A Jaeger Exporter"
-        path: sections/section-030/module-10/course-020-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
-      - type: reading
-        title: "Reading And Analyzing Traces In Jaeger"
-        path: sections/section-030/module-10/course-030-reading-a-trace-in-jaeger.md
-      - type: reading
-        title: "Choosing A Collector Mode"
-        path: sections/section-030/module-10/course-040-choosing-a-collector-mode.md
-      - type: reading
-        title: "Diagnosing A Broken Collector Pipeline"
-        path: sections/section-030/module-10/course-050-diagnosing-a-broken-collector-pipeline.md
-      - type: reading
-        title: Question
-        path: sections/section-030/module-10/labs/lab-01/question.md
-      - type: lab
-        title: "Fix A Broken Collector Pipeline Lab"
-        path: sections/section-030/module-10/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 20m
-        topic: tracing
-        task_kind: troubleshooting
-        tags: [otel-collector, collector-pipeline, otlp, jaeger, opentelemetry]
-        learning_goals:
-          - Find the faults in the exporter of a running Collector from its Service ports and logs
-          - Fix the OpenTelemetryCollector without changing its mode, its Service or the address scout sends to
-          - Prove the fix with rising Collector counters and scout spans in Jaeger
-        resources:
-          - name: "OpenTelemetry Collector configuration"
-            url: https://opentelemetry.io/docs/collector/configuration/
-          - name: "OpenTelemetry Operator for Kubernetes"
-            url: https://opentelemetry.io/docs/platforms/kubernetes/operator/
-      - type: reading
-        title: "Finding A Service By Tag"
-        path: sections/section-030/module-10/course-060-finding-a-service-by-tag.md
-      - type: reading
-        title: "Acting On Trace Findings And Exporting Evidence"
-        path: sections/section-030/module-10/course-070-acting-on-trace-findings-and-exporting-evidence.md
-      - type: reading
-        title: Question
-        path: sections/section-030/module-10/labs/lab-02/question.md
-      - type: lab
-        title: "Find Tagged Traces And Remediate Deployments Lab"
-        path: sections/section-030/module-10/labs/lab-02
-        difficulty: intermediate
-        estimated_duration: 20m
-        topic: tracing
-        task_kind: troubleshooting
-        tags: [jaeger, opentelemetry, otlp, trace-search]
-        learning_goals:
-          - Find a service by a span tag in the Jaeger web interface and through the /api/v3 query API
-          - Change an environment variable on one Deployment and scale another from the search result
-          - Export an exact number of traces for a service as JSON and count them by distinct trace ID
-        resources:
-          - name: "Jaeger 2.22: APIs"
-            url: https://www.jaegertracing.io/docs/2.22/architecture/apis/
-          - name: "Jaeger 2.23.0: api_v3 query parameters"
-            url: https://github.com/jaegertracing/jaeger/blob/v2.23.0/cmd/jaeger/internal/extension/jaegerquery/internal/apiv3/query_parser.go
-          - name: "Kubernetes: kubectl set env"
-            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
-          - name: "Kubernetes: kubectl scale"
-            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
-      - type: reading
-        title: "Finding Failed Spans And Their Exceptions"
-        path: sections/section-030/module-10/course-080-finding-failed-spans-and-their-exceptions.md
-      - type: reading
-        title: Question
-        path: sections/section-030/module-10/labs/lab-03/question.md
-      - type: lab
-        title: "Export The Exceptions Of A Failed Trace Lab"
-        path: sections/section-030/module-10/labs/lab-03
-        difficulty: intermediate
-        estimated_duration: 20m
-        topic: tracing
-        task_kind: troubleshooting
-        tags: [jaeger, opentelemetry, otlp, span-status, exception-event]
-        learning_goals:
-          - Find the service whose spans carry the status ERROR in the Jaeger web interface and through the /api/v3 query API
-          - Export the exception span events of a failed trace as a JSON array with jq
-          - Read the exception message to find the cause and repair the Deployment environment variable behind it
-        resources:
-          - name: "Jaeger 2.22 documentation"
-            url: https://www.jaegertracing.io/docs/2.22/
-          - name: "OpenTelemetry semantic conventions: exceptions on spans"
-            url: https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/
-          - name: "Kubernetes: kubectl set env"
-            url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
-      - type: reading
-        title: Summary
-        path: sections/section-030/module-10/course-100-summary.md
-
-      - type: reading
-        title: "Add Tracing Without Code Changes Using Auto-Instrumentation"
-        path: sections/section-030/module-20/course-000.md
-      - type: reading
-        title: "What The Operator Injects Into A Pod"
-        path: sections/section-030/module-20/course-010-what-the-operator-injects-into-a-pod.md
-      - type: reading
-        title: Question
-        path: sections/section-030/module-20/labs/lab-03/question.md
-      - type: lab
-        title: "Enable Node.js Agent Injection Lab"
-        path: sections/section-030/module-20/labs/lab-03
-        difficulty: intermediate
-        estimated_duration: 10m
-        topic: tracing
-        task_kind: build
-        tags: [opentelemetry, auto-instrumentation, instrumentation, jaeger]
-        learning_goals:
-          - Configure agent settings and request injection through the pod template
-          - Verify injected settings and recent relay spans in Jaeger
-        resources:
-          - name: "OpenTelemetry Operator: automatic instrumentation"
-            url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
-      - type: reading
-        title: "Reading One Trace Across Two Services"
-        path: sections/section-030/module-20/course-020-reading-one-trace-across-two-services.md
-      - type: reading
-        title: Question
-        path: sections/section-030/module-20/labs/lab-02/question.md
-      - type: lab
-        title: "Identify The Slow Operation In A Trace Lab"
-        path: sections/section-030/module-20/labs/lab-02
-        difficulty: intermediate
-        estimated_duration: 15m
-        topic: tracing
-        task_kind: troubleshooting
-        tags: [opentelemetry, jaeger, trace-search, context-propagation]
-        learning_goals:
-          - Export a complete slow trace linking relay and scout through parent spans
-          - Identify the downstream operation that explains the delay
-          - Record the operation's identifiers and measured duration as evidence
-        resources:
-          - name: "Jaeger 2.22: APIs"
-            url: https://www.jaegertracing.io/docs/2.22/architecture/apis/
-          - name: "OpenTelemetry: traces"
-            url: https://opentelemetry.io/docs/concepts/signals/traces/
-      - type: reading
-        title: "Breaking And Restoring Context Propagation"
-        path: sections/section-030/module-20/course-030-breaking-and-restoring-context-propagation.md
-      - type: reading
-        title: Question
-        path: sections/section-030/module-20/labs/lab-04/question.md
-      - type: lab
-        title: "Restore Trace Context Propagation Lab"
-        path: sections/section-030/module-20/labs/lab-04
-        difficulty: intermediate
-        estimated_duration: 10m
-        topic: tracing
-        task_kind: troubleshooting
-        tags: [opentelemetry, auto-instrumentation, context-propagation, jaeger]
-        learning_goals:
-          - Identify missing trace context propagation in an injected agent
-          - Restore the propagators and replace the pod to use them
-          - Verify a new trace linking relay and scout through a parent span
-        resources:
-          - name: "OpenTelemetry Operator: automatic instrumentation"
-            url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
-      - type: reading
-        title: "Finding Why A Pod Is Not Instrumented"
-        path: sections/section-030/module-20/course-040-finding-why-a-pod-is-not-instrumented.md
-      - type: reading
-        title: Question
-        path: sections/section-030/module-20/labs/lab-01/question.md
-      - type: lab
-        title: "Repair Missing Agent Injection Lab"
-        path: sections/section-030/module-20/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 15m
-        topic: tracing
-        task_kind: troubleshooting
-        tags: [opentelemetry, auto-instrumentation, instrumentation, jaeger]
-        learning_goals:
-          - Find a misplaced injection annotation and incorrect resource selection
-          - Repair the pod template and verify injection in its replacement pod
-          - Confirm a new linked trace without changing application code
-        resources:
-          - name: "OpenTelemetry Operator: automatic instrumentation"
-            url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
-      - type: reading
-        title: Summary
-        path: sections/section-030/module-20/course-100-summary.md
-
-      - type: reading
-        title: Question
-        path: sections/section-030/capstone/labs/lab-01/question.md
-      - type: lab
-        title: "Distributed Tracing Capstone"
-        path: sections/section-030/capstone/labs/lab-01
-        difficulty: advanced
-        estimated_duration: 60m
-        topic: tracing
-        task_kind: build
-      - type: quiz
-        title: "Knowledge Check: Distributed Tracing With OpenTelemetry And Jaeger"
-        path: sections/section-030/quiz.yaml
-        pass_score: 70
-
-  - id: module-040
-    title: "Measuring Platform Efficiency"
-    description: >
-      Makes the reader able to measure how well the platform delivers
-      and how well it uses resources: the four DORA metrics from
-      GitOps history, service level objectives with error budgets, and
-      the gap between requested and used CPU and memory. It comes
-      after the collection sections because every number here is a
-      Prometheus query on data those sections taught to collect.
-
-    content:
-      - type: reading
-        title: Section Overview
-        path: sections/section-040/README.md
-
-      - type: reading
-        title: "Measure Delivery With DORA Metrics"
-        path: sections/section-040/module-10/course-000.md
-      - type: reading
-        title: "The Four DORA Metrics And Where The Data Lives"
-        path: sections/section-040/module-10/course-010-the-four-dora-metrics-and-where-the-data-lives.md
-      - type: reading
-        title: "Deployment Frequency From The Sync Counter"
-        path: sections/section-040/module-10/course-020-deployment-frequency-from-the-sync-counter.md
-      - type: reading
-        title: "Change Failure Rate From Application Health"
-        path: sections/section-040/module-10/course-030-change-failure-rate-from-application-health.md
-      - type: reading
-        title: Question
-        path: sections/section-040/module-10/labs/lab-01/question.md
-      - type: lab
-        title: "Fix The Change Failure Rate Rule Lab"
-        path: sections/section-040/module-10/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 25m
-        topic: platform-efficiency
-        task_kind: troubleshooting
-      - type: reading
-        title: "Lead Time And Time To Restore From Timestamps"
-        path: sections/section-040/module-10/course-040-lead-time-and-time-to-restore-from-timestamps.md
-      - type: reading
-        title: Summary
-        path: sections/section-040/module-10/course-100-summary.md
-
-      - type: reading
-        title: "Measure Service Levels And Resource Efficiency"
-        path: sections/section-040/module-20/course-000.md
-      - type: reading
-        title: "SLI, SLO And Error Budget From Request Counters"
-        path: sections/section-040/module-20/course-010-sli-slo-and-error-budget-from-request-counters.md
-      - type: reading
-        title: "Burn-Rate Alerts With Two Windows"
-        path: sections/section-040/module-20/course-020-burn-rate-alerts-with-two-windows.md
-      - type: reading
-        title: Question
-        path: sections/section-040/module-20/labs/lab-01/question.md
-      - type: lab
-        title: "Fix The Burn-Rate Alert Lab"
-        path: sections/section-040/module-20/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 20m
-        topic: platform-efficiency
-        task_kind: troubleshooting
-      - type: reading
-        title: "Requests Versus Usage With kubectl top And Prometheus"
-        path: sections/section-040/module-20/course-030-requests-versus-usage-with-kubectl-top-and-prometheus.md
-      - type: reading
-        title: "Find And Fix Over- And Under-Provisioned Workloads"
-        path: sections/section-040/module-20/course-040-find-and-fix-over-and-under-provisioned-workloads.md
-      - type: reading
-        title: Question
-        path: sections/section-040/module-20/labs/lab-02/question.md
-      - type: lab
-        title: "Right-Size Two Deployments Lab"
-        path: sections/section-040/module-20/labs/lab-02
-        difficulty: intermediate
-        estimated_duration: 20m
-        topic: platform-efficiency
-        task_kind: troubleshooting
-      - type: reading
-        title: Summary
-        path: sections/section-040/module-20/course-100-summary.md
-
-      - type: reading
-        title: Question
-        path: sections/section-040/capstone/labs/lab-01/question.md
-      - type: lab
-        title: "Platform Efficiency Capstone"
-        path: sections/section-040/capstone/labs/lab-01
-        difficulty: advanced
-        estimated_duration: 45m
-        topic: platform-efficiency
-        task_kind: build
-      - type: quiz
-        title: "Knowledge Check: Measuring Platform Efficiency"
-        path: sections/section-040/quiz.yaml
-        pass_score: 70
-
-  - id: module-050
-    title: "Diagnosing And Remediating Incidents"
-    description: >
-      Makes the reader able to find and fix the cause of a broken
-      workload or a broken platform component, using events, logs,
-      status conditions and metrics, and to prove the fix. It comes
-      last because it uses every tool the earlier sections taught,
-      under the time pressure of an incident.
-
-    content:
-      - type: reading
-        title: Section Overview
-        path: sections/section-050/README.md
-
-      - type: reading
-        title: "Triage And Fix Failing Workloads"
-        path: sections/section-050/module-10/course-000.md
-      - type: reading
-        title: "A Triage Order And Pending Pods"
-        path: sections/section-050/module-10/course-010-a-triage-order-and-pending-pods.md
-      - type: reading
-        title: "CrashLoopBackOff And Failing Probes"
-        path: sections/section-050/module-10/course-020-crashloopbackoff-and-failing-probes.md
-      - type: reading
-        title: "OOMKilled And Memory Limits"
-        path: sections/section-050/module-10/course-030-oomkilled-and-memory-limits.md
-      - type: reading
-        title: "ImagePullBackOff And Image References"
-        path: sections/section-050/module-10/course-040-imagepullbackoff-and-image-references.md
-      - type: reading
-        title: Question
-        path: sections/section-050/module-10/labs/lab-01/question.md
-      - type: lab
-        title: "Fix Four Failing Workloads Lab"
-        path: sections/section-050/module-10/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 40m
-        topic: incident-response
-        task_kind: troubleshooting
-      - type: reading
-        title: Summary
-        path: sections/section-050/module-10/course-100-summary.md
-
-      - type: reading
-        title: "Diagnose And Fix Broken Platform Components"
-        path: sections/section-050/module-20/course-000.md
-      - type: reading
-        title: "A Webhook Service Without Endpoints"
-        path: sections/section-050/module-20/course-010-a-webhook-service-without-endpoints.md
-      - type: reading
-        title: "An Expired Webhook Certificate"
-        path: sections/section-050/module-20/course-020-an-expired-webhook-certificate.md
-      - type: reading
-        title: "A Controller Scaled To Zero"
-        path: sections/section-050/module-20/course-030-a-controller-scaled-to-zero.md
-      - type: reading
-        title: Question
-        path: sections/section-050/module-20/labs/lab-01/question.md
-      - type: lab
-        title: "Restore A Platform After Three Failures Lab"
-        path: sections/section-050/module-20/labs/lab-01
-        difficulty: intermediate
-        estimated_duration: 40m
-        topic: incident-response
-        task_kind: troubleshooting
-      - type: reading
-        title: "A GitOps Application Out Of Sync Or Degraded"
-        path: sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
-      - type: reading
-        title: Summary
-        path: sections/section-050/module-20/course-100-summary.md
-
-      - type: reading
-        title: Question
-        path: sections/section-050/capstone/labs/lab-01/question.md
-      - type: lab
-        title: "Incident Response Capstone"
-        path: sections/section-050/capstone/labs/lab-01
-        difficulty: advanced
-        estimated_duration: 45m
-        topic: incident-response
-        task_kind: build
-      - type: quiz
-        title: "Knowledge Check: Diagnosing And Remediating Incidents"
-        path: sections/section-050/quiz.yaml
-        pass_score: 70
-
-      - type: quiz
-        title: "Final Knowledge Check: Observability and Operations"
-        path: sections/final-domain-quiz.yaml
-        pass_score: 70
+- id: module-intro
+  title: Introduction
+  description: |
+    Start here. What this course trains you to do, how it is laid out, how to get your machine ready with the astrona command-line tool, how the content is written and checked, who maintains it, and how to report a mistake.
+  content:
+  - type: reading
+    title: Introduction
+    path: sections/intro/00-introduction.md
+  - type: reading
+    title: Welcome To The Course
+    path: sections/intro/10-welcome.md
+  - type: reading
+    title: Get Your Machine Ready
+    path: sections/intro/20-get-your-machine-ready.md
+  - type: reading
+    title: How This Course Is Made
+    path: sections/intro/30-how-this-course-is-made.md
+- id: module-010
+  title: Metrics And Alerting With Prometheus
+  description: |
+    Makes the reader able to get any workload's metrics into Prometheus through the Prometheus Operator or raw scrape configuration, query them with PromQL, and turn a query into an alert that reaches a receiver. It comes first because every later section (dashboards, SLOs, DORA metrics, incident triage) reads these metrics.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-010/README.md
+  - type: reading
+    title: Scrape Workloads With ServiceMonitor And PodMonitor
+    path: sections/section-010/module-10/course-000.md
+  - type: reading
+    title: Targets And The up Metric
+    path: sections/section-010/module-10/course-010-targets-and-the-up-metric.md
+  - type: reading
+    title: Select A Service With A ServiceMonitor
+    path: sections/section-010/module-10/course-020-select-a-service-with-a-servicemonitor.md
+  - type: reading
+    title: Scrape Pods Without A Service With A PodMonitor
+    path: sections/section-010/module-10/course-030-scrape-pods-with-a-podmonitor.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-10/labs/lab-04/question.md
+  - type: lab
+    title: Scrape Pods With A PodMonitor Lab
+    path: sections/section-010/module-10/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: metrics
+    task_kind: build
+    tags:
+    - prometheus
+    - scrape-target
+    - label-selector
+    - servicemonitor
+    - podmonitor
+    learning_goals:
+    - Inspect Pod labels and named container ports.
+    - Verify one healthy podMonitor/outpost/scout/0 target for every ready scout Pod.
+    resources:
+    - name: 'Prometheus Operator: discovery resources'
+      url: https://prometheus-operator.dev/docs/developer/getting-started/
+    - name: 'Prometheus: configuration'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+  - type: reading
+    title: Finding A Missing Target
+    path: sections/section-010/module-10/course-040-finding-a-missing-target.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-10/labs/lab-01/question.md
+  - type: lab
+    title: Repair ServiceMonitor Discovery Lab
+    path: sections/section-010/module-10/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: metrics
+    task_kind: troubleshooting
+    tags:
+    - prometheus
+    - scrape-target
+    - label-selector
+    - servicemonitor
+    learning_goals:
+    - Find out why Prometheus shows no scout target. Compare the ServiceMonitor with the labels the Prometheus resource
+      kps-prometheus selects, and with the Service scout.
+    - Prove the fix. The query up{job="scout",namespace="starfleet"} must return one series for each scout pod,
+      and each value must be 1.
+    resources:
+    - name: 'Prometheus Operator: discovery resources'
+      url: https://prometheus-operator.dev/docs/developer/getting-started/
+    - name: 'Prometheus: configuration'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+  - type: reading
+    title: Scrape Pods With Raw Prometheus Configuration
+    path: sections/section-010/module-10/course-050-raw-prometheus-configuration.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-10/labs/lab-02/question.md
+  - type: lab
+    title: Extend Raw Prometheus Pod Discovery Lab
+    path: sections/section-010/module-10/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: metrics
+    task_kind: troubleshooting
+    tags:
+    - prometheus
+    - scrape-target
+    - label-selector
+    - servicemonitor
+    learning_goals:
+    - Read the active Pod discovery job and compare workload labels.
+    - Verify one healthy target per ready selected Pod, with the live address and namespace, pod and deployment
+      labels.
+    resources:
+    - name: 'Prometheus Operator: discovery resources'
+      url: https://prometheus-operator.dev/docs/developer/getting-started/
+    - name: 'Prometheus: configuration'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+  - type: reading
+    title: Scale A Workload From A Queue Metric
+    path: sections/section-010/module-10/course-060-scale-from-a-queue-metric.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-10/labs/lab-03/question.md
+  - type: lab
+    title: Scale From A Queue Metric Lab
+    path: sections/section-010/module-10/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: metrics
+    task_kind: troubleshooting
+    tags:
+    - prometheus
+    - scrape-target
+    - label-selector
+    - servicemonitor
+    learning_goals:
+    - Confirm that the primary and reserve Pods are healthy scrape targets.
+    - Verify three ready replicas and newly discovered targets, while the other two Deployments keep one ready replica
+      each.
+    resources:
+    - name: 'Prometheus Operator: discovery resources'
+      url: https://prometheus-operator.dev/docs/developer/getting-started/
+    - name: 'Prometheus: configuration'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-10/course-100-summary.md
+  - type: reading
+    title: Query Metrics With PromQL
+    path: sections/section-010/module-20/course-000.md
+  - type: reading
+    title: Selecting Time Series
+    path: sections/section-010/module-20/course-010-selecting-time-series.md
+  - type: reading
+    title: Counters, Gauges And rate()
+    path: sections/section-010/module-20/course-020-counters-gauges-and-rate.md
+  - type: reading
+    title: Aggregate Requests And Record An Error Ratio
+    path: sections/section-010/module-20/course-030-aggregate-requests-and-record-an-error-ratio.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-20/labs/lab-02/question.md
+  - type: lab
+    title: Repair An Error Ratio Recording Rule Lab
+    path: sections/section-010/module-20/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: metrics
+    task_kind: troubleshooting
+    tags:
+    - prometheus
+    - promql
+    - rate
+    - recording-rule
+    learning_goals:
+    - Query scout:error_ratio:rate5m and inspect its expression.
+    - Confirm that scout:error_ratio:rate5m returns exactly one series matching the measured traffic.
+    resources:
+    - name: 'Prometheus: query functions'
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+    - name: 'Prometheus: recording rules'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/
+  - type: reading
+    title: Calculate A Latency Percentile
+    path: sections/section-010/module-20/course-040-calculate-a-latency-percentile.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-20/labs/lab-03/question.md
+  - type: lab
+    title: Repair A Latency Percentile Recording Rule Lab
+    path: sections/section-010/module-20/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: metrics
+    task_kind: troubleshooting
+    tags:
+    - prometheus
+    - promql
+    - rate
+    - recording-rule
+    - histogram-quantile
+    learning_goals:
+    - Query scout:request_duration_seconds:p95_5m and inspect its expression.
+    - Confirm that scout:request_duration_seconds:p95_5m returns exactly one series matching the measured traffic.
+    resources:
+    - name: 'Prometheus: query functions'
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+    - name: 'Prometheus: recording rules'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/
+  - type: reading
+    title: Running Queries From The Command Line
+    path: sections/section-010/module-20/course-050-running-queries-from-the-command-line.md
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-20/course-100-summary.md
+  - type: reading
+    title: Alert With PrometheusRule And Alertmanager
+    path: sections/section-010/module-30/course-000.md
+  - type: reading
+    title: Recording And Alerting Rules
+    path: sections/section-010/module-30/course-010-recording-and-alerting-rules.md
+  - type: reading
+    title: Selecting And Loading PrometheusRules
+    path: sections/section-010/module-30/course-020-selecting-and-loading-prometheusrules.md
+  - type: reading
+    title: The Alert Lifecycle
+    path: sections/section-010/module-30/course-030-the-alert-lifecycle.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-30/labs/lab-01/question.md
+  - type: lab
+    title: Create And Verify An Alerting Rule Lab
+    path: sections/section-010/module-30/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: alerting
+    task_kind: build
+    tags:
+    - prometheusrule
+    - alerting-rule
+    - alertmanager
+    - alertmanager-route
+    learning_goals:
+    - Inspect the Prometheus rule selectors and the scout request counter.
+    - Wait for the alert to fire with namespace=starfleet, team=scout and severity=warning.
+    resources:
+    - name: 'Prometheus: alerting rules'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+    - name: 'Alertmanager: configuration'
+      url: https://prometheus.io/docs/alerting/latest/configuration/
+  - type: reading
+    title: Routing Alerts With Alertmanager
+    path: sections/section-010/module-30/course-040-routing-alerts-with-alertmanager.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-30/labs/lab-02/question.md
+  - type: lab
+    title: Route An Alert To Its Receiver Lab
+    path: sections/section-010/module-30/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: alerting
+    task_kind: troubleshooting
+    tags:
+    - prometheusrule
+    - alerting-rule
+    - alertmanager
+    - alertmanager-route
+    learning_goals:
+    - Confirm that ScoutErrorRate fires in Prometheus.
+    - Verify the active receiver in Alertmanager and a firing notification in the receiver log.
+    resources:
+    - name: 'Prometheus: alerting rules'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+    - name: 'Alertmanager: configuration'
+      url: https://prometheus.io/docs/alerting/latest/configuration/
+  - type: reading
+    title: Silences
+    path: sections/section-010/module-30/course-050-silences.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-30/labs/lab-03/question.md
+  - type: lab
+    title: Silence A Maintenance Alert Lab
+    path: sections/section-010/module-30/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: alerting
+    task_kind: build
+    tags:
+    - prometheusrule
+    - alerting-rule
+    - alertmanager
+    - alertmanager-route
+    - silence
+    learning_goals:
+    - Find the maintenance alert and read its labels.
+    - Confirm that ProbeMaintenance remains firing in Prometheus and ScoutErrorRate is not silenced.
+    resources:
+    - name: 'Prometheus: alerting rules'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+    - name: 'Alertmanager: configuration'
+      url: https://prometheus.io/docs/alerting/latest/configuration/
+  - type: reading
+    title: Inhibition
+    path: sections/section-010/module-30/course-060-inhibition.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-30/labs/lab-04/question.md
+  - type: lab
+    title: Inhibit A Related Warning Alert Lab
+    path: sections/section-010/module-30/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: alerting
+    task_kind: troubleshooting
+    tags:
+    - prometheusrule
+    - alerting-rule
+    - alertmanager
+    - alertmanager-route
+    - inhibition
+    learning_goals:
+    - Read both firing diagnostic alerts and their labels.
+    - Verify the warning is inhibited by the critical alert, with no silence, while both still fire in Prometheus.
+    resources:
+    - name: 'Prometheus: alerting rules'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+    - name: 'Alertmanager: configuration'
+      url: https://prometheus.io/docs/alerting/latest/configuration/
+  - type: reading
+    title: Route Precedence And Grouping
+    path: sections/section-010/module-30/course-070-route-precedence-and-grouping.md
+  - type: reading
+    title: Question
+    path: sections/section-010/module-30/labs/lab-05/question.md
+  - type: lab
+    title: Repair Route Precedence And Grouping Lab
+    path: sections/section-010/module-30/labs/lab-05
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: alerting
+    task_kind: troubleshooting
+    tags:
+    - prometheusrule
+    - alerting-rule
+    - alertmanager
+    - alertmanager-route
+    - grouping
+    learning_goals:
+    - Read the two ScoutRouteCheck alerts and predict which child routes match.
+    - Verify both alerts reach both receivers and appear together in one group per receiver.
+    resources:
+    - name: 'Prometheus: alerting rules'
+      url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+    - name: 'Alertmanager: configuration'
+      url: https://prometheus.io/docs/alerting/latest/configuration/
+  - type: reading
+    title: Summary
+    path: sections/section-010/module-30/course-100-summary.md
+  - type: reading
+    title: Question
+    path: sections/section-010/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Metrics And Alerting Capstone
+    path: sections/section-010/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 45m
+    topic: metrics-and-alerting
+    task_kind: build
+  - type: quiz
+    title: 'Knowledge Check: Metrics And Alerting With Prometheus'
+    path: sections/section-010/quiz.yaml
+    question_count: 22
+    pass_score: 70
+- id: module-020
+  title: Dashboards And Logs
+  description: |
+    Makes the reader able to show metrics on a Grafana dashboard that is stored as code, and to collect pod logs with the OpenTelemetry Collector, enrich and filter them, and turn error lines into a Prometheus metric that a dashboard can draw. It also stores logs in Loki, queries them with LogQL and acts on the result. It follows metrics because dashboards draw PromQL queries, and logs are the next signal an operator reads.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-020/README.md
+  - type: reading
+    title: Build Grafana Dashboards As Code
+    path: sections/section-020/module-10/course-000.md
+  - type: reading
+    title: Grafana's Parts And A Provisioned Data Source
+    path: sections/section-020/module-10/course-010-grafana-parts-and-a-provisioned-data-source.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-10/labs/lab-06/question.md
+  - type: lab
+    title: Provision The Prometheus Data Source Lab
+    path: sections/section-020/module-10/labs/lab-06
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: dashboards
+    task_kind: build
+    tags:
+    - grafana
+    - grafana-dashboard
+    - data-source
+    - volumes
+    learning_goals:
+    - Inspect the data source ConfigMap and the sidecar selector.
+    - Run a dashboard query and confirm Prometheus returns data.
+    resources:
+    - name: 'Grafana: provisioning'
+      url: https://grafana.com/docs/grafana/latest/administration/provisioning/
+    - name: 'Kubernetes: volumes'
+      url: https://kubernetes.io/docs/concepts/storage/volumes/
+  - type: reading
+    title: Panels For Rate, Error Ratio And Latency
+    path: sections/section-020/module-10/course-020-panels-for-rate-error-ratio-and-latency.md
+  - type: reading
+    title: A Namespace Variable For Every Panel
+    path: sections/section-020/module-10/course-030-a-namespace-variable-for-every-panel.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-10/labs/lab-03/question.md
+  - type: lab
+    title: Repair Dashboard Data Source References Lab
+    path: sections/section-020/module-10/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: dashboards
+    task_kind: troubleshooting
+    tags:
+    - grafana
+    - grafana-dashboard
+    - data-source
+    - volumes
+    learning_goals:
+    - Inspect the provisioned Prometheus data source UID and the dashboard JSON.
+    - Confirm every panel returns data with the namespace set to starfleet.
+    resources:
+    - name: 'Grafana: provisioning'
+      url: https://grafana.com/docs/grafana/latest/administration/provisioning/
+    - name: 'Kubernetes: volumes'
+      url: https://kubernetes.io/docs/concepts/storage/volumes/
+  - type: reading
+    title: Dashboards That Survive A Restart
+    path: sections/section-020/module-10/course-040-dashboards-that-survive-a-restart.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-10/labs/lab-01/question.md
+  - type: lab
+    title: Restore Dashboard Provisioning Lab
+    path: sections/section-020/module-10/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: dashboards
+    task_kind: troubleshooting
+    tags:
+    - grafana
+    - grafana-dashboard
+    - data-source
+    - volumes
+    learning_goals:
+    - Find the dashboard ConfigMap and inspect the sidecar label selector.
+    - Confirm the dashboard keeps three panels and returns data for starfleet.
+    resources:
+    - name: 'Grafana: provisioning'
+      url: https://grafana.com/docs/grafana/latest/administration/provisioning/
+    - name: 'Kubernetes: volumes'
+      url: https://kubernetes.io/docs/concepts/storage/volumes/
+  - type: reading
+    title: Restore Grafana Writable Storage
+    path: sections/section-020/module-10/course-050-restore-grafana-writable-storage.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-10/labs/lab-02/question.md
+  - type: lab
+    title: Restore Grafana Writable Storage Lab
+    path: sections/section-020/module-10/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: dashboards
+    task_kind: troubleshooting
+    tags:
+    - grafana
+    - grafana-dashboard
+    - data-source
+    - volumes
+    learning_goals:
+    - Inspect the pod and its volume mounts and the missing ConfigMap event.
+    - Sign in as admin with password starfleet and confirm HTTP status 200.
+    resources:
+    - name: 'Grafana: provisioning'
+      url: https://grafana.com/docs/grafana/latest/administration/provisioning/
+    - name: 'Kubernetes: volumes'
+      url: https://kubernetes.io/docs/concepts/storage/volumes/
+  - type: reading
+    title: Repair Grafana Secret Keys
+    path: sections/section-020/module-10/course-060-repair-grafana-secret-keys.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-10/labs/lab-04/question.md
+  - type: lab
+    title: Repair Grafana Secret Keys Lab
+    path: sections/section-020/module-10/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: dashboards
+    task_kind: troubleshooting
+    tags:
+    - grafana
+    - grafana-dashboard
+    - data-source
+    - volumes
+    - secrets
+    learning_goals:
+    - Inspect the pod and its Secret key reference and the keys present in each namespace.
+    - Sign in as admin with password starfleet and confirm HTTP status 200.
+    resources:
+    - name: 'Grafana: provisioning'
+      url: https://grafana.com/docs/grafana/latest/administration/provisioning/
+    - name: 'Kubernetes: volumes'
+      url: https://kubernetes.io/docs/concepts/storage/volumes/
+  - type: reading
+    title: Size Grafana Memory For Startup
+    path: sections/section-020/module-10/course-070-size-grafana-memory-for-startup.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-10/labs/lab-05/question.md
+  - type: lab
+    title: Size Grafana Memory For Startup Lab
+    path: sections/section-020/module-10/labs/lab-05
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: dashboards
+    task_kind: troubleshooting
+    tags:
+    - grafana
+    - grafana-dashboard
+    - data-source
+    - volumes
+    - resource-limits
+    learning_goals:
+    - Inspect the pod and its last termination reason and the memory limit.
+    - Sign in as admin with password starfleet and confirm HTTP status 200.
+    resources:
+    - name: 'Grafana: provisioning'
+      url: https://grafana.com/docs/grafana/latest/administration/provisioning/
+    - name: 'Kubernetes: volumes'
+      url: https://kubernetes.io/docs/concepts/storage/volumes/
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-10/course-100-summary.md
+  - type: reading
+    title: Collect Pod Logs With The OpenTelemetry Collector
+    path: sections/section-020/module-20/course-000.md
+  - type: reading
+    title: What Kubernetes Keeps About Logs
+    path: sections/section-020/module-20/course-010-what-kubernetes-keeps-about-logs.md
+  - type: reading
+    title: A DaemonSet Collector Reads The Log Files
+    path: sections/section-020/module-20/course-020-a-daemonset-collector-reads-the-log-files.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-20/labs/lab-03/question.md
+  - type: lab
+    title: Repair Container Log File Collection Lab
+    path: sections/section-020/module-20/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: logging
+    task_kind: troubleshooting
+    tags:
+    - otel-collector
+    - filelog-receiver
+    - k8sattributes
+    - count-connector
+    learning_goals:
+    - Inspect the Collector hostPath mount and receiver include pattern.
+    - Verify that fresh probe errors produce a rising labelled counter in Prometheus.
+    resources:
+    - name: 'OpenTelemetry: Kubernetes components'
+      url: https://opentelemetry.io/docs/platforms/kubernetes/collector/components/
+  - type: reading
+    title: Add Kubernetes Metadata And Drop Records
+    path: sections/section-020/module-20/course-030-add-kubernetes-metadata-and-drop-records.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-20/labs/lab-01/question.md
+  - type: lab
+    title: Restore Collector Kubernetes Metadata Lab
+    path: sections/section-020/module-20/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: logging
+    task_kind: troubleshooting
+    tags:
+    - otel-collector
+    - filelog-receiver
+    - k8sattributes
+    - count-connector
+    learning_goals:
+    - Inspect the Collector logs and test its service account permissions.
+    - Query log_error_lines_total{k8s_namespace_name="outpost",k8s_deployment_name="probe"} and confirm it rises.
+    resources:
+    - name: 'OpenTelemetry: Kubernetes components'
+      url: https://opentelemetry.io/docs/platforms/kubernetes/collector/components/
+  - type: reading
+    title: Count Error Lines Into A Prometheus Metric
+    path: sections/section-020/module-20/course-040-count-error-lines-into-a-prometheus-metric.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-20/labs/lab-02/question.md
+  - type: lab
+    title: Scrape Collector Error Metrics Lab
+    path: sections/section-020/module-20/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: logging
+    task_kind: troubleshooting
+    tags:
+    - otel-collector
+    - filelog-receiver
+    - k8sattributes
+    - count-connector
+    learning_goals:
+    - Compare the ServiceMonitor label with the Prometheus selector.
+    - Query the labelled log_error_lines_total counter twice and confirm it rises.
+    resources:
+    - name: 'OpenTelemetry: Kubernetes components'
+      url: https://opentelemetry.io/docs/platforms/kubernetes/collector/components/
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-20/course-100-summary.md
+  - type: reading
+    title: Query Logs With Loki And LogQL
+    path: sections/section-020/module-30/course-000.md
+  - type: reading
+    title: Connect Grafana To Loki
+    path: sections/section-020/module-30/course-010-connect-grafana-to-loki.md
+  - type: reading
+    title: Query Logs With LogQL
+    path: sections/section-020/module-30/course-020-query-logs-with-logql.md
+  - type: reading
+    title: Repair And Save A Loki Dashboard
+    path: sections/section-020/module-30/course-030-repair-and-save-a-loki-dashboard.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-30/labs/lab-01/question.md
+  - type: lab
+    title: Repair A Loki Error Dashboard Lab
+    path: sections/section-020/module-30/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: logging
+    task_kind: troubleshooting
+    tags:
+    - grafana
+    - data-source
+    - loki
+    - logql
+    learning_goals:
+    - Open the editable Loki data source and set Maximum lines to 250.
+    - Run both queries and confirm the saved dashboard uses the loki data source.
+    resources:
+    - name: 'Loki: LogQL'
+      url: https://grafana.com/docs/loki/latest/query/
+  - type: reading
+    title: Use Log Evidence To Stop Failing Workloads
+    path: sections/section-020/module-30/course-040-use-log-evidence-to-stop-failing-workloads.md
+  - type: reading
+    title: Question
+    path: sections/section-020/module-30/labs/lab-02/question.md
+  - type: lab
+    title: Find And Stop Error-Logging Workloads Lab
+    path: sections/section-020/module-30/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: logging
+    task_kind: troubleshooting
+    tags:
+    - grafana
+    - data-source
+    - loki
+    - logql
+    learning_goals:
+    - Query Loki for uppercase ERROR lines in outpost.
+    - Verify those Pods are gone and every other controller in outpost and starfleet keeps its original replicas.
+    resources:
+    - name: 'Loki: LogQL'
+      url: https://grafana.com/docs/loki/latest/query/
+  - type: reading
+    title: Summary
+    path: sections/section-020/module-30/course-100-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Query Logs With Loki And LogQL'
+    path: sections/section-020/module-30/quiz.yaml
+    question_count: 10
+    pass_score: 70
+  - type: reading
+    title: Question
+    path: sections/section-020/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Dashboards And Logs Capstone
+    path: sections/section-020/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 60m
+    topic: dashboards-and-logs
+    task_kind: build
+  - type: reading
+    title: Question
+    path: sections/section-020/capstone/labs/lab-02/question.md
+  - type: lab
+    title: Trace One Incident Through Grafana, Prometheus And Loki
+    path: sections/section-020/capstone/labs/lab-02
+    difficulty: advanced
+    estimated_duration: 35m
+    topic: logging
+    task_kind: troubleshooting
+    tags:
+    - loki
+    - logql
+    - promql
+    - grafana
+    - grafana-dashboard
+    - data-source
+    learning_goals:
+    - Add a Loki data source and correct a dashboard with one Prometheus panel and one Loki panel
+    - Find the failing service from a Prometheus metric and its cause from Loki log lines
+    - Fix the Deployment and prove recovery from live metrics and logs
+    resources:
+    - name: 'Grafana: Loki data source'
+      url: https://grafana.com/docs/grafana/latest/datasources/loki/
+    - name: 'Loki: LogQL log queries'
+      url: https://grafana.com/docs/loki/latest/query/log_queries/
+    - name: 'Prometheus: Querying basics'
+      url: https://prometheus.io/docs/prometheus/latest/querying/basics/
+  - type: quiz
+    title: 'Knowledge Check: Dashboards And Logs'
+    path: sections/section-020/quiz.yaml
+    pass_score: 70
+- id: module-030
+  title: Distributed Tracing With OpenTelemetry And Jaeger
+  description: "Makes the reader able to run an OpenTelemetry Collector with the OpenTelemetry Operator, send traces\
+    \ to Jaeger, and add tracing to an application without changing its code. It comes after metrics and logs because\
+    \ tracing reuses the Collector pipeline idea and answers the question metrics cannot \u2014 where in a chain\
+    \ of services the time went.\n"
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-030/README.md
+  - type: reading
+    title: Run An OpenTelemetry Collector With The Operator
+    path: sections/section-030/module-10/course-000.md
+  - type: reading
+    title: The Operator And Its Webhook
+    path: sections/section-030/module-10/course-010-the-operator-and-its-webhook.md
+  - type: reading
+    title: A Collector With An OTLP Receiver And A Jaeger Exporter
+    path: sections/section-030/module-10/course-020-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
+  - type: reading
+    title: Reading And Analyzing Traces In Jaeger
+    path: sections/section-030/module-10/course-030-reading-a-trace-in-jaeger.md
+  - type: reading
+    title: Choosing A Collector Mode
+    path: sections/section-030/module-10/course-040-choosing-a-collector-mode.md
+  - type: reading
+    title: Diagnosing A Broken Collector Pipeline
+    path: sections/section-030/module-10/course-050-diagnosing-a-broken-collector-pipeline.md
+  - type: reading
+    title: Question
+    path: sections/section-030/module-10/labs/lab-01/question.md
+  - type: lab
+    title: Fix A Broken Collector Pipeline Lab
+    path: sections/section-030/module-10/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: tracing
+    task_kind: troubleshooting
+    tags:
+    - otel-collector
+    - collector-pipeline
+    - otlp
+    - jaeger
+    - opentelemetry
+    learning_goals:
+    - Find the faults in the exporter of a running Collector from its Service ports and logs
+    - Fix the OpenTelemetryCollector without changing its mode, its Service or the address scout sends to
+    - Prove the fix with rising Collector counters and scout spans in Jaeger
+    resources:
+    - name: OpenTelemetry Collector configuration
+      url: https://opentelemetry.io/docs/collector/configuration/
+    - name: OpenTelemetry Operator for Kubernetes
+      url: https://opentelemetry.io/docs/platforms/kubernetes/operator/
+  - type: reading
+    title: Finding A Service By Tag
+    path: sections/section-030/module-10/course-060-finding-a-service-by-tag.md
+  - type: reading
+    title: Acting On Trace Findings And Exporting Evidence
+    path: sections/section-030/module-10/course-070-acting-on-trace-findings-and-exporting-evidence.md
+  - type: reading
+    title: Question
+    path: sections/section-030/module-10/labs/lab-02/question.md
+  - type: lab
+    title: Find Tagged Traces And Remediate Deployments Lab
+    path: sections/section-030/module-10/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: tracing
+    task_kind: troubleshooting
+    tags:
+    - jaeger
+    - opentelemetry
+    - otlp
+    - trace-search
+    learning_goals:
+    - Find a service by a span tag in the Jaeger web interface and through the /api/v3 query API
+    - Change an environment variable on one Deployment and scale another from the search result
+    - Export an exact number of traces for a service as JSON and count them by distinct trace ID
+    resources:
+    - name: 'Jaeger 2.22: APIs'
+      url: https://www.jaegertracing.io/docs/2.22/architecture/apis/
+    - name: 'Jaeger 2.23.0: api_v3 query parameters'
+      url: https://github.com/jaegertracing/jaeger/blob/v2.23.0/cmd/jaeger/internal/extension/jaegerquery/internal/apiv3/query_parser.go
+    - name: 'Kubernetes: kubectl set env'
+      url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
+    - name: 'Kubernetes: kubectl scale'
+      url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
+  - type: reading
+    title: Finding Failed Spans And Their Exceptions
+    path: sections/section-030/module-10/course-080-finding-failed-spans-and-their-exceptions.md
+  - type: reading
+    title: Question
+    path: sections/section-030/module-10/labs/lab-03/question.md
+  - type: lab
+    title: Export The Exceptions Of A Failed Trace Lab
+    path: sections/section-030/module-10/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 20m
+    topic: tracing
+    task_kind: troubleshooting
+    tags:
+    - jaeger
+    - opentelemetry
+    - otlp
+    - span-status
+    - exception-event
+    learning_goals:
+    - Find the service whose spans carry the status ERROR in the Jaeger web interface and through the /api/v3 query
+      API
+    - Export the exception span events of a failed trace as a JSON array with jq
+    - Read the exception message to find the cause and repair the Deployment environment variable behind it
+    resources:
+    - name: Jaeger 2.22 documentation
+      url: https://www.jaegertracing.io/docs/2.22/
+    - name: 'OpenTelemetry semantic conventions: exceptions on spans'
+      url: https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/
+    - name: 'Kubernetes: kubectl set env'
+      url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-10/course-100-summary.md
+  - type: reading
+    title: Add Tracing Without Code Changes Using Auto-Instrumentation
+    path: sections/section-030/module-20/course-000.md
+  - type: reading
+    title: What The Operator Injects Into A Pod
+    path: sections/section-030/module-20/course-010-what-the-operator-injects-into-a-pod.md
+  - type: reading
+    title: Question
+    path: sections/section-030/module-20/labs/lab-03/question.md
+  - type: lab
+    title: Enable Node.js Agent Injection Lab
+    path: sections/section-030/module-20/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: tracing
+    task_kind: build
+    tags:
+    - opentelemetry
+    - auto-instrumentation
+    - instrumentation
+    - jaeger
+    learning_goals:
+    - Configure agent settings and request injection through the pod template
+    - Verify injected settings and recent relay spans in Jaeger
+    resources:
+    - name: 'OpenTelemetry Operator: automatic instrumentation'
+      url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
+  - type: reading
+    title: Reading One Trace Across Two Services
+    path: sections/section-030/module-20/course-020-reading-one-trace-across-two-services.md
+  - type: reading
+    title: Question
+    path: sections/section-030/module-20/labs/lab-02/question.md
+  - type: lab
+    title: Identify The Slow Operation In A Trace Lab
+    path: sections/section-030/module-20/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: tracing
+    task_kind: troubleshooting
+    tags:
+    - opentelemetry
+    - jaeger
+    - trace-search
+    - context-propagation
+    learning_goals:
+    - Export a complete slow trace linking relay and scout through parent spans
+    - Identify the downstream operation that explains the delay
+    - Record the operation's identifiers and measured duration as evidence
+    resources:
+    - name: 'Jaeger 2.22: APIs'
+      url: https://www.jaegertracing.io/docs/2.22/architecture/apis/
+    - name: 'OpenTelemetry: traces'
+      url: https://opentelemetry.io/docs/concepts/signals/traces/
+  - type: reading
+    title: Breaking And Restoring Context Propagation
+    path: sections/section-030/module-20/course-030-breaking-and-restoring-context-propagation.md
+  - type: reading
+    title: Question
+    path: sections/section-030/module-20/labs/lab-04/question.md
+  - type: lab
+    title: Restore Trace Context Propagation Lab
+    path: sections/section-030/module-20/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: tracing
+    task_kind: troubleshooting
+    tags:
+    - opentelemetry
+    - auto-instrumentation
+    - context-propagation
+    - jaeger
+    learning_goals:
+    - Identify missing trace context propagation in an injected agent
+    - Restore the propagators and replace the pod to use them
+    - Verify a new trace linking relay and scout through a parent span
+    resources:
+    - name: 'OpenTelemetry Operator: automatic instrumentation'
+      url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
+  - type: reading
+    title: Finding Why A Pod Is Not Instrumented
+    path: sections/section-030/module-20/course-040-finding-why-a-pod-is-not-instrumented.md
+  - type: reading
+    title: Question
+    path: sections/section-030/module-20/labs/lab-01/question.md
+  - type: lab
+    title: Repair Missing Agent Injection Lab
+    path: sections/section-030/module-20/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: tracing
+    task_kind: troubleshooting
+    tags:
+    - opentelemetry
+    - auto-instrumentation
+    - instrumentation
+    - jaeger
+    learning_goals:
+    - Find a misplaced injection annotation and incorrect resource selection
+    - Repair the pod template and verify injection in its replacement pod
+    - Confirm a new linked trace without changing application code
+    resources:
+    - name: 'OpenTelemetry Operator: automatic instrumentation'
+      url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
+  - type: reading
+    title: Summary
+    path: sections/section-030/module-20/course-100-summary.md
+  - type: reading
+    title: Question
+    path: sections/section-030/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Distributed Tracing Capstone
+    path: sections/section-030/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 60m
+    topic: tracing
+    task_kind: build
+  - type: quiz
+    title: 'Knowledge Check: Distributed Tracing With OpenTelemetry And Jaeger'
+    path: sections/section-030/quiz.yaml
+    pass_score: 70
+- id: module-040
+  title: Measuring Platform Efficiency
+  description: |
+    Makes the reader able to measure how well the platform delivers and how well it uses resources: the four DORA metrics from GitOps history, service level objectives with error budgets, and the gap between requested and used CPU and memory. It comes after the collection sections because every number here is a Prometheus query on data those sections taught to collect.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-040/README.md
+  - type: reading
+    title: Measure Delivery With DORA Metrics
+    path: sections/section-040/module-10/course-000.md
+  - type: reading
+    title: The Four DORA Metrics And Where The Data Lives
+    path: sections/section-040/module-10/course-010-the-four-dora-metrics-and-where-the-data-lives.md
+  - type: reading
+    title: Deployment Frequency From The Sync Counter
+    path: sections/section-040/module-10/course-020-deployment-frequency-from-the-sync-counter.md
+  - type: reading
+    title: Question
+    path: sections/section-040/module-10/labs/lab-02/question.md
+  - type: lab
+    title: Measure Deployment Frequency Lab
+    path: sections/section-040/module-10/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: delivery-metrics
+    task_kind: troubleshooting
+    tags:
+    - dora-metrics
+    - deployment-frequency
+    - argocd
+    - recording-rule
+    learning_goals:
+    - Inspect the Application history and the labels on argocd_app_sync_total.
+    - Explain why a successfully applied deployment can still leave the application unhealthy.
+    resources:
+    - name: 'Argo CD: metrics'
+      url: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
+    - name: 'Argo CD: application specification'
+      url: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+  - type: reading
+    title: Change Failure Rate From Application Health
+    path: sections/section-040/module-10/course-030-change-failure-rate-from-application-health.md
+  - type: reading
+    title: Question
+    path: sections/section-040/module-10/labs/lab-01/question.md
+  - type: lab
+    title: Repair The Change Failure Rate Rule Lab
+    path: sections/section-040/module-10/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: delivery-metrics
+    task_kind: troubleshooting
+    tags:
+    - dora-metrics
+    - deployment-frequency
+    - argocd
+    - recording-rule
+    - change-failure-rate
+    learning_goals:
+    - Find out why dora:change_failure_rate:ratio6h is 0. Read the three rules in the PrometheusRule dora-scout
+      and query the metrics argocd_app_sync_total and argocd_app_info in Prometheus.
+    - Prove the fix. Prometheus must return the real change failure rate for dora:change_failure_rate:ratio6h.
+    resources:
+    - name: 'Argo CD: metrics'
+      url: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
+    - name: 'Argo CD: application specification'
+      url: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+  - type: reading
+    title: Calculate Lead Time From Git Revisions
+    path: sections/section-040/module-10/course-040-calculate-lead-time-from-git-revisions.md
+  - type: reading
+    title: Question
+    path: sections/section-040/module-10/labs/lab-03/question.md
+  - type: lab
+    title: Calculate Lead Time From Git Revisions Lab
+    path: sections/section-040/module-10/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: delivery-metrics
+    task_kind: build
+    tags:
+    - dora-metrics
+    - deployment-frequency
+    - argocd
+    - recording-rule
+    - lead-time
+    learning_goals:
+    - Export all ten Application history entries and the matching Git commits.
+    - Create ConfigMap delivery-evidence in starfleet with a report.json key and check the submitted data.
+    resources:
+    - name: 'Argo CD: metrics'
+      url: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
+    - name: 'Argo CD: application specification'
+      url: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+  - type: reading
+    title: Measure Time To Restore Service
+    path: sections/section-040/module-10/course-050-measure-time-to-restore-service.md
+  - type: reading
+    title: Question
+    path: sections/section-040/module-10/labs/lab-04/question.md
+  - type: lab
+    title: Measure Time To Restore Service Lab
+    path: sections/section-040/module-10/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: delivery-metrics
+    task_kind: build
+    tags:
+    - dora-metrics
+    - deployment-frequency
+    - argocd
+    - recording-rule
+    - time-to-restore
+    learning_goals:
+    - Export the Application history and use the commit messages to identify the two failed builds and their reverts.
+    - Create ConfigMap delivery-evidence in starfleet with a report.json key and explain why commit time is not
+      recovery time.
+    resources:
+    - name: 'Argo CD: metrics'
+      url: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/
+    - name: 'Argo CD: application specification'
+      url: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-10/course-100-summary.md
+  - type: reading
+    title: Measure Service Levels And Resource Efficiency
+    path: sections/section-040/module-20/course-000.md
+  - type: reading
+    title: SLI, SLO And Error Budget From Request Counters
+    path: sections/section-040/module-20/course-010-sli-slo-and-error-budget-from-request-counters.md
+  - type: reading
+    title: Question
+    path: sections/section-040/module-20/labs/lab-04/question.md
+  - type: lab
+    title: Record Availability And Error Budget Lab
+    path: sections/section-040/module-20/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: efficiency
+    task_kind: build
+    tags:
+    - prometheus
+    - promql
+    - resource-efficiency
+    - metrics-server
+    - sli
+    - error-budget
+    learning_goals:
+    - Inspect the request counter and confirm the status labels that represent failed requests.
+    - Query all three series and explain the meaning of a negative remaining budget.
+    resources:
+    - name: 'Kubernetes: resource management'
+      url: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    - name: 'Prometheus: query functions'
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+  - type: reading
+    title: Burn-Rate Alerts With Two Windows
+    path: sections/section-040/module-20/course-020-burn-rate-alerts-with-two-windows.md
+  - type: reading
+    title: Question
+    path: sections/section-040/module-20/labs/lab-01/question.md
+  - type: lab
+    title: Repair A Multi-Window Burn-Rate Alert Lab
+    path: sections/section-040/module-20/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: efficiency
+    task_kind: troubleshooting
+    tags:
+    - prometheus
+    - promql
+    - resource-efficiency
+    - metrics-server
+    - slo
+    learning_goals:
+    - Find out why the alert ScoutErrorBudgetBurn is not active. Read the rules in the PrometheusRule scout-slo
+      and run their expressions in Prometheus, one part at a time.
+    - Prove the fix. Prometheus must return the error ratio for both recording rules, and the alert ScoutErrorBudgetBurn
+      must reach the state firing.
+    resources:
+    - name: 'Kubernetes: resource management'
+      url: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    - name: 'Prometheus: query functions'
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+  - type: reading
+    title: Requests Versus Usage With kubectl top And Prometheus
+    path: sections/section-040/module-20/course-030-requests-versus-usage-with-kubectl-top-and-prometheus.md
+  - type: reading
+    title: Reduce Excess Resource Requests
+    path: sections/section-040/module-20/course-040-reduce-excess-resource-requests.md
+  - type: reading
+    title: Question
+    path: sections/section-040/module-20/labs/lab-02/question.md
+  - type: lab
+    title: Reduce Excess Resource Requests Lab
+    path: sections/section-040/module-20/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: efficiency
+    task_kind: troubleshooting
+    tags:
+    - prometheus
+    - promql
+    - resource-efficiency
+    - metrics-server
+    learning_goals:
+    - Measure the peak CPU and memory usage of scout in Prometheus.
+    - Wait for the rollout; verify unchanged replica counts, ready Pods without restarts, and a successful request
+      from shuttle.
+    resources:
+    - name: 'Kubernetes: resource management'
+      url: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    - name: 'Prometheus: query functions'
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+  - type: reading
+    title: Raise An Undersized Memory Request
+    path: sections/section-040/module-20/course-050-raise-an-undersized-memory-request.md
+  - type: reading
+    title: Question
+    path: sections/section-040/module-20/labs/lab-03/question.md
+  - type: lab
+    title: Raise An Undersized Memory Request Lab
+    path: sections/section-040/module-20/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: efficiency
+    task_kind: troubleshooting
+    tags:
+    - prometheus
+    - promql
+    - resource-efficiency
+    - metrics-server
+    - resource-limits
+    learning_goals:
+    - Measure the peak CPU and memory usage of probe in Prometheus.
+    - Wait for the rollout; verify unchanged replica counts, ready Pods without restarts, and a successful request
+      from shuttle.
+    resources:
+    - name: 'Kubernetes: resource management'
+      url: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+    - name: 'Prometheus: query functions'
+      url: https://prometheus.io/docs/prometheus/latest/querying/functions/
+  - type: reading
+    title: Summary
+    path: sections/section-040/module-20/course-100-summary.md
+  - type: reading
+    title: Question
+    path: sections/section-040/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Platform Efficiency Capstone
+    path: sections/section-040/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 45m
+    topic: platform-efficiency
+    task_kind: build
+  - type: quiz
+    title: 'Knowledge Check: Measuring Platform Efficiency'
+    path: sections/section-040/quiz.yaml
+    pass_score: 70
+- id: module-050
+  title: Diagnosing And Remediating Incidents
+  description: |
+    Makes the reader able to find and fix the cause of a broken workload or a broken platform component, using events, logs, status conditions and metrics, and to prove the fix. It comes last because it uses every tool the earlier sections taught, under the time pressure of an incident.
+  content:
+  - type: reading
+    title: Section Overview
+    path: sections/section-050/README.md
+  - type: reading
+    title: Triage And Fix Failing Workloads
+    path: sections/section-050/module-10/course-000.md
+  - type: reading
+    title: A Triage Order And Pending Pods
+    path: sections/section-050/module-10/course-010-a-triage-order-and-pending-pods.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-10/labs/lab-01/question.md
+  - type: lab
+    title: Schedule A Pending Workload Lab
+    path: sections/section-050/module-10/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: workload-incidents
+    task_kind: troubleshooting
+    tags:
+    - events
+    - probes
+    - crashloopbackoff
+    - resource-limits
+    - pending
+    learning_goals:
+    - Inspect the pod events and its node selector and node labels. Identify the cause of the failure.
+    - Send a request from shuttle to http://scout:9898/ and confirm HTTP status 200.
+    resources:
+    - name: 'Kubernetes: debug pods'
+      url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+  - type: reading
+    title: Diagnose A Crashing Process
+    path: sections/section-050/module-10/course-020-diagnose-a-crashing-process.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-10/labs/lab-05/question.md
+  - type: lab
+    title: Repair A Crashing Process Lab
+    path: sections/section-050/module-10/labs/lab-05
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: workload-incidents
+    task_kind: troubleshooting
+    tags:
+    - events
+    - probes
+    - crashloopbackoff
+    - resource-limits
+    learning_goals:
+    - Read the current and previous container logs.
+    - Verify a ready replacement pod and HTTP status 200 from shuttle.
+    resources:
+    - name: 'Kubernetes: debug pods'
+      url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+  - type: reading
+    title: Repair A Failing Liveness Probe
+    path: sections/section-050/module-10/course-030-repair-a-failing-liveness-probe.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-10/labs/lab-02/question.md
+  - type: lab
+    title: Repair A Failing Liveness Probe Lab
+    path: sections/section-050/module-10/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: workload-incidents
+    task_kind: troubleshooting
+    tags:
+    - events
+    - probes
+    - crashloopbackoff
+    - resource-limits
+    learning_goals:
+    - Inspect the pod events and its liveness probe port and container port. Identify the cause of the failure.
+    - Send a request from shuttle to http://probe:8080/ and confirm HTTP status 200.
+    resources:
+    - name: 'Kubernetes: debug pods'
+      url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+  - type: reading
+    title: OOMKilled And Memory Limits
+    path: sections/section-050/module-10/course-040-oomkilled-and-memory-limits.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-10/labs/lab-03/question.md
+  - type: lab
+    title: Repair An OOMKilled Workload Lab
+    path: sections/section-050/module-10/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: workload-incidents
+    task_kind: troubleshooting
+    tags:
+    - events
+    - probes
+    - crashloopbackoff
+    - resource-limits
+    - oomkilled
+    learning_goals:
+    - Inspect the pod events and its last termination reason and memory limit. Identify the cause of the failure.
+    - Send a request from shuttle to http://cargo:8080/ and confirm HTTP status 200.
+    resources:
+    - name: 'Kubernetes: debug pods'
+      url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+  - type: reading
+    title: ImagePullBackOff And Image References
+    path: sections/section-050/module-10/course-050-imagepullbackoff-and-image-references.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-10/labs/lab-04/question.md
+  - type: lab
+    title: Repair An Image Reference Lab
+    path: sections/section-050/module-10/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: workload-incidents
+    task_kind: troubleshooting
+    tags:
+    - events
+    - probes
+    - crashloopbackoff
+    - resource-limits
+    - imagepullbackoff
+    learning_goals:
+    - Inspect the pod events and its image reference and image pull events. Identify the cause of the failure.
+    - Send a request from shuttle to http://beacon:9898/ and confirm HTTP status 200.
+    resources:
+    - name: 'Kubernetes: debug pods'
+      url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-10/course-100-summary.md
+  - type: reading
+    title: Diagnose And Fix Broken Platform Components
+    path: sections/section-050/module-20/course-000.md
+  - type: reading
+    title: A Webhook Service Without Endpoints
+    path: sections/section-050/module-20/course-010-a-webhook-service-without-endpoints.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-20/labs/lab-01/question.md
+  - type: lab
+    title: Repair A Webhook Service Port Lab
+    path: sections/section-050/module-20/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: platform-incidents
+    task_kind: troubleshooting
+    tags:
+    - admission-webhook
+    - controller-down
+    - certificate-expiry
+    - argocd
+    learning_goals:
+    - Attempt a Deployment create and read the webhook connection error.
+    - Create a Deployment successfully, confirm a new admission request in the server log, and delete your test
+      Deployment.
+    resources:
+    - name: 'Kubernetes: admission webhooks'
+      url: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
+    - name: 'Argo CD: application specification'
+      url: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+  - type: reading
+    title: An Expired Webhook Certificate
+    path: sections/section-050/module-20/course-020-an-expired-webhook-certificate.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-20/labs/lab-02/question.md
+  - type: lab
+    title: Renew An Expired Webhook Certificate Lab
+    path: sections/section-050/module-20/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: platform-incidents
+    task_kind: troubleshooting
+    tags:
+    - admission-webhook
+    - controller-down
+    - certificate-expiry
+    - argocd
+    learning_goals:
+    - Attempt a Deployment create and read the certificate error.
+    - Create a Deployment successfully, confirm a new admission request in the server log, and delete your test
+      Deployment.
+    resources:
+    - name: 'Kubernetes: admission webhooks'
+      url: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
+    - name: 'Argo CD: application specification'
+      url: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+  - type: reading
+    title: A Controller Scaled To Zero
+    path: sections/section-050/module-20/course-030-a-controller-scaled-to-zero.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-20/labs/lab-03/question.md
+  - type: lab
+    title: Restore The Prometheus Operator Lab
+    path: sections/section-050/module-20/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: platform-incidents
+    task_kind: troubleshooting
+    tags:
+    - admission-webhook
+    - controller-down
+    - certificate-expiry
+    - argocd
+    learning_goals:
+    - Inspect the operator Deployment and its replica counts.
+    - Verify up{job="scout"} is 1 and the ScoutDown rule is loaded in Prometheus.
+    resources:
+    - name: 'Kubernetes: admission webhooks'
+      url: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
+    - name: 'Argo CD: application specification'
+      url: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+  - type: reading
+    title: Recover A GitOps Source Path
+    path: sections/section-050/module-20/course-040-a-gitops-application-out-of-sync-or-degraded.md
+  - type: reading
+    title: Question
+    path: sections/section-050/module-20/labs/lab-04/question.md
+  - type: lab
+    title: Recover A GitOps Source Path Lab
+    path: sections/section-050/module-20/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: platform-incidents
+    task_kind: troubleshooting
+    tags:
+    - admission-webhook
+    - controller-down
+    - certificate-expiry
+    - argocd
+    - stuck-sync
+    learning_goals:
+    - Inspect the Application conditions and distinguish source comparison from workload health.
+    - Verify Synced, Healthy, the deployed Git revision and an HTTP 200 response from scout.
+    resources:
+    - name: 'Kubernetes: admission webhooks'
+      url: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
+    - name: 'Argo CD: application specification'
+      url: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+  - type: reading
+    title: Summary
+    path: sections/section-050/module-20/course-100-summary.md
+  - type: reading
+    title: Question
+    path: sections/section-050/capstone/labs/lab-01/question.md
+  - type: lab
+    title: Incident Response Capstone
+    path: sections/section-050/capstone/labs/lab-01
+    difficulty: advanced
+    estimated_duration: 45m
+    topic: incident-response
+    task_kind: build
+  - type: quiz
+    title: 'Knowledge Check: Diagnosing And Remediating Incidents'
+    path: sections/section-050/quiz.yaml
+    pass_score: 70
+  - type: quiz
+    title: 'Final Knowledge Check: Observability and Operations'
+    path: sections/final-domain-quiz.yaml
+    pass_score: 70

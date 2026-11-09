@@ -1,19 +1,16 @@
-# Faulty starting state. A Collector DaemonSet reads the container log files,
-# adds Kubernetes metadata, and counts the lines with level=ERROR into the
-# metric log_error_lines_total on port 8889. Two things are wrong on purpose:
-#   1. The ClusterRole exists but no ClusterRoleBinding gives it to the
-#      Collector's service account, so the k8s_attributes processor cannot
-#      list pods and the metric has no k8s_deployment_name label.
-#   2. The ServiceMonitor has no `release: kps` label, so the Prometheus
-#      resource ignores it and the target never appears.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: logs-collector
 rules:
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["get", "list", "watch"]
+- apiGroups:
+  - ''
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
 ---
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
@@ -24,46 +21,46 @@ spec:
   mode: daemonset
   image: otel/opentelemetry-collector-contrib:0.162.0
   env:
-    - name: K8S_NODE_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
+  - name: K8S_NODE_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: spec.nodeName
   volumes:
-    - name: varlogpods
-      hostPath:
-        path: /var/log/pods
+  - name: varlogpods
+    hostPath:
+      path: /var/log/pods
   volumeMounts:
-    - name: varlogpods
-      mountPath: /var/log/pods
-      readOnly: true
+  - name: varlogpods
+    mountPath: /var/log/pods
+    readOnly: true
   config:
     receivers:
       file_log:
         include:
-          - /var/log/pods/*/*/*.log
+        - /var/log/pods/*/*/*.log
         exclude:
-          - /var/log/pods/monitoring_logs-collector-*/*/*.log
+        - /var/log/pods/monitoring_logs-collector-*/*/*.log
         start_at: end
         include_file_path: true
         operators:
-          - type: container
+        - type: container
     processors:
       k8s_attributes:
         filter:
           node_from_env_var: K8S_NODE_NAME
         pod_association:
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
         extract:
           metadata:
-            - k8s.deployment.name
-            - k8s.node.name
+          - k8s.deployment.name
+          - k8s.node.name
       filter/drop-info:
         error_mode: ignore
         logs:
           log_record:
-            - 'IsMatch(body, "level=INFO")'
+          - IsMatch(body, "level=INFO")
       delta_to_cumulative: {}
     connectors:
       count:
@@ -71,7 +68,7 @@ spec:
           log_error_lines:
             description: Log lines with level=ERROR
             conditions:
-              - 'IsMatch(body, "level=ERROR")'
+            - IsMatch(body, "level=ERROR")
     exporters:
       debug:
         verbosity: basic
@@ -82,24 +79,34 @@ spec:
     service:
       pipelines:
         logs:
-          receivers: [file_log]
-          processors: [k8s_attributes, filter/drop-info]
-          exporters: [debug, count]
+          receivers:
+          - file_log
+          processors:
+          - k8s_attributes
+          - filter/drop-info
+          exporters:
+          - debug
+          - count
         metrics:
-          receivers: [count]
-          processors: [delta_to_cumulative]
-          exporters: [prometheus]
+          receivers:
+          - count
+          processors:
+          - delta_to_cumulative
+          exporters:
+          - prometheus
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: logs-collector
   namespace: monitoring
+  labels:
+    release: kps
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/instance: monitoring.logs
       operator.opentelemetry.io/collector-service-type: base
   endpoints:
-    - port: prometheus
-      interval: 15s
+  - port: prometheus
+    interval: 15s

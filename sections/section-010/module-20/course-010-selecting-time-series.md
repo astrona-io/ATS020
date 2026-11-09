@@ -1,6 +1,6 @@
 # Selecting Time Series
 
-Every PromQL query starts by choosing which data to look at. Prometheus stores thousands of series, and a query that picks the wrong ones returns a believable number that answers the wrong question. This part shows what a single series is, how label matchers narrow the choice, and the two shapes of result a selector can return.
+Select the intended workload before calculating anything. Inspect the labels on `http_requests_total`, narrow the result with matchers, and check that the remaining series represent the population you want to measure.
 
 ## One metric, many series
 
@@ -107,8 +107,6 @@ Replace `<POD>` with one of your `scout` pod names from the output above. You sh
 ```
 
 The result type is `matrix`, the API's name for a range vector, and the series has four samples in one minute, one every 15 seconds, each a pair of a Unix timestamp and a value. The counter went from `56` to `61` in that minute, which is the kind of change the next step turns into a rate.
-
-You can now select exactly the series you mean, with exact and regular expression matchers, and you know that a selector with `[...]` returns a window of samples instead of one value. The raw totals themselves are hard to use, though: they only ever grow, and they reset when a pod restarts. The open question is how to turn them into a number that means something now.
 
 ## Common pitfalls
 

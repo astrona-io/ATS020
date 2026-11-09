@@ -1,21 +1,24 @@
 # Triage And Fix Failing Workloads
 
-A workload that does not run shows only a short word in the `STATUS` column: `Pending`, `CrashLoopBackOff`, `OOMKilled`, `ImagePullBackOff`. The word is a symptom. Many different causes lead to the same word, and the fix depends on the cause. On the exam you have a few minutes for each broken workload, so you need a fixed order of commands that finds the cause fast, and a proof that the fix works.
+Work through one practical outcome at a time. Each graded lab follows the lesson that prepares it and starts from its own cluster state. The 5 labs each have 3–5 tasks, with 10–15 minutes of task work plus startup and telemetry delays.
 
-This module teaches that order. You read the status, then the events, then the description of the pod, then the logs. You then fix the cause and prove the fix with a request from the `shuttle` pod and with the state of the pod. You never stop at "the pod is `Running`", because a pod can be `Running` and still not serve.
+## Learning sequence
 
-The module has four parts. **A Triage Order And Pending Pods** sets the order of commands and fixes two pods that the scheduler cannot place. **CrashLoopBackOff And Failing Probes** reads exit codes, container logs and probe events, and fixes a container that exits and a container that a liveness probe restarts. **OOMKilled And Memory Limits** reads the last state of a container, measures its memory use and sets a limit that fits. **ImagePullBackOff And Image References** reads the pull error, fixes a wrong tag and ends with a graded lab on all four fault families.
+| Lesson | Practice after reading |
+| --- | --- |
+| A Triage Order And Pending Pods | Schedule A Pending Workload |
+| Diagnose A Crashing Process | Repair A Crashing Process |
+| Repair A Failing Liveness Probe | Repair A Failing Liveness Probe |
+| OOMKilled And Memory Limits | Repair An OOMKilled Workload |
+| ImagePullBackOff And Image References | Repair An Image Reference |
 
-## Learning objectives
+## What you will prove
 
-After this module you can:
-
-- Follow a fixed triage order (status, events, describe, logs, previous logs) to find the cause of a pod failure.
-- Fix a `Pending` pod caused by a request that is too large, a missing PersistentVolumeClaim or a node selector that matches no node.
-- Fix a `CrashLoopBackOff` caused by a process that exits or by a liveness probe that fails.
-- Fix an `OOMKilled` container by reading its memory use and setting a limit that fits.
-- Fix an `ImagePullBackOff` caused by a wrong tag, and tell a missing tag from a missing pull secret.
-- Prove each fix with a request from `shuttle` and with the state of the pod.
+- Schedule A Pending Workload.
+- Repair A Crashing Process.
+- Repair A Failing Liveness Probe.
+- Repair An OOMKilled Workload.
+- Repair An Image Reference.
 
 ## Before you start
 
@@ -33,6 +36,6 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. The met
 | `cargo` | A Node.js server, port `8080` | The container is stopped with `OOMKilled` |
 | `beacon` | `podinfo` with a wrong tag, port `9898` | The pod is in `ImagePullBackOff` |
 
-Launch your playground now, and keep it running next to you while you read the parts:
+Launch the playground for the reading exercises:
 
 <!-- astrona:playground -->

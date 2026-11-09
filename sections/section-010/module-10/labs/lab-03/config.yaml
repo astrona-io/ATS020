@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-010-01-03
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - quay.io/prometheus/prometheus:v3.15.0-distroless
+    - python:3.13.18-alpine3.24
+bootstrap:
+  init:
+  - name: prepare
+    description: Check that the terminal has kubectl, curl and jq
+    type: file
+    source: bootstrap/01-prepare.sh
+  manifests:
+  - name: lab-start
+    description: Starting resources for scale from a queue metric
+    type: file
+    source: manifests/lab-start.yaml
+  waitFor:
+  - resource: deploy/prometheus-raw
+    namespace: monitoring
+  - resource: deploy/scout
+    namespace: starfleet
+  - resource: deploy/probe
+    namespace: starfleet
+  - resource: deploy/shuttle
+    namespace: starfleet
+testing:
+  init:
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Load the extended discovery job and scale the workload with the highest queue total
+    type: file
+    source: solution/apply.sh
+  - name: wait-for-targets
+    description: Wait until all selected Pods are healthy targets
+    type: file
+    source: testing/wait-for-targets.sh
+validation:
+  scripts:
+  - name: targets-up
+    description: The raw job scrapes all primary and reserve Pods and excludes disabled Pods
+    type: file
+    source: validation/validate-targets-up.sh
+  - name: busiest-scaled
+    description: The Deployment with the highest live queue total has three ready replicas; the others have one
+    type: file
+    source: validation/validate-busiest-scaled.sh
+teardown:
+  keepCluster: false

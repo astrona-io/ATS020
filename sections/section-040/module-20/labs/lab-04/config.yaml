@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-040-02-04
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    addons:
+      metricsServer: true
+    preloadImages:
+    - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+    - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+    - quay.io/prometheus/prometheus:v3.15.0-distroless
+    - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+    - ghcr.io/stefanprodan/podinfo:6.17.0
+    - mccutchen/go-httpbin:2.25.0
+    - curlimages/curl:8.22.0
+bootstrap:
+  init:
+  - name: prepare
+    description: Install a trimmed kube-prometheus-stack 92.3.0 with kube-state-metrics in monitoring
+    type: file
+    source: bootstrap/01-prepare.sh
+  manifests:
+  - name: lab-start
+    description: Starting resources for record availability and error budget
+    type: file
+    source: manifests/lab-start.yaml
+  waitFor:
+  - resource: deploy/scout
+    namespace: starfleet
+  - resource: deploy/probe
+    namespace: starfleet
+  - resource: deploy/shuttle
+    namespace: starfleet
+testing:
+  init:
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: sli-budget
+    description: Live recording rules report the request SLI and remaining budget for a 99 percent objective
+    type: file
+    source: validation/validate-sli.sh
+teardown:
+  keepCluster: false

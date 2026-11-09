@@ -1,17 +1,3 @@
-# Starting objects for the lab. The platform is broken on purpose in three
-# independent ways. Never fix a fault here.
-#
-# Fault 1: the Service starfleet-policy sends traffic to targetPort 8444, but the
-# webhook server listens on 8443. The Service has an endpoint, the connection is
-# refused, and every create of a Deployment in starfleet fails.
-# Fault 2: the serving certificate of the outpost webhook expired on 2025-01-08, so
-# every create of a Deployment in outpost fails with an x509 error. The CA that
-# signed it is in the Secret webhook-ca, so a new certificate can be signed.
-# Fault 3: the Prometheus Operator was scaled to zero in bootstrap/prepare.sh, so
-# the ServiceMonitor and PrometheusRule below never reach Prometheus.
-#
-# The webhooks check only CREATE of Deployments, and the configurations come last
-# in this file, so the workloads below are created before any webhook can reject them.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -20,139 +6,7 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: outpost
----
-apiVersion: v1
-kind: Namespace
-metadata:
   name: webhook-system
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: shuttle
-  namespace: starfleet
-  labels:
-    app: shuttle
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: shuttle
-  template:
-    metadata:
-      labels:
-        app: shuttle
-    spec:
-      containers:
-        - name: shuttle
-          image: curlimages/curl:8.22.0
-          command: ["sleep", "infinity"]
-          resources:
-            requests: {cpu: 10m, memory: 16Mi}
-            limits: {memory: 32Mi}
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: scout
-  namespace: starfleet
-  labels:
-    app: scout
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: scout
-  template:
-    metadata:
-      labels:
-        app: scout
-    spec:
-      containers:
-        - name: scout
-          image: ghcr.io/stefanprodan/podinfo:6.17.0
-          ports:
-            - name: http
-              containerPort: 9898
-          resources:
-            requests: {cpu: 20m, memory: 32Mi}
-            limits: {memory: 128Mi}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: scout
-  namespace: starfleet
-  labels:
-    app: scout
-spec:
-  selector:
-    app: scout
-  ports:
-    - name: http
-      port: 9898
-      targetPort: http
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: scout
-  namespace: starfleet
-  labels:
-    release: kps
-spec:
-  selector:
-    matchLabels:
-      app: scout
-  endpoints:
-    - port: http
-      path: /metrics
-      interval: 15s
----
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
-metadata:
-  name: scout-alerts
-  namespace: starfleet
-  labels:
-    release: kps
-spec:
-  groups:
-    - name: scout
-      rules:
-        - alert: ScoutDown
-          expr: up{job="scout"} == 0
-          for: 1m
-          labels:
-            severity: critical
-          annotations:
-            summary: The scout target is down
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: drifter
-  namespace: outpost
-  labels:
-    app: drifter
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: drifter
-  template:
-    metadata:
-      labels:
-        app: drifter
-    spec:
-      containers:
-        - name: drifter
-          image: curlimages/curl:8.22.0
-          command: ["sleep", "infinity"]
-          resources:
-            requests: {cpu: 10m, memory: 16Mi}
-            limits: {memory: 32Mi}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -300,64 +154,6 @@ stringData:
     lspkCruuxwAxcaQWPF2nnA==
     -----END PRIVATE KEY-----
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: outpost-policy-tls
-  namespace: webhook-system
-type: kubernetes.io/tls
-stringData:
-  tls.crt: |
-    -----BEGIN CERTIFICATE-----
-    MIIDTzCCAjegAwIBAgIUWkM6PYifapQ1eb5S3jsspeNXLCEwDQYJKoZIhvcNAQEL
-    BQAwHzEdMBsGA1UEAwwUc3RhcmZsZWV0LXdlYmhvb2stY2EwHhcNMjUwMTAxMDAw
-    MDAwWhcNMjUwMTA4MDAwMDAwWjAsMSowKAYDVQQDDCFvdXRwb3N0LXBvbGljeS53
-    ZWJob29rLXN5c3RlbS5zdmMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIB
-    AQCSe1lB7oUUAvkFFl+rwR+CLpz64QXlaSEtOT4PDc2+hH2X7mBdEN0J48PxJ4rh
-    fdtxjc9RU8qVNqOWyes5Bch7QhUBkO8nd/VTiGskzsstR9bA5hlMIOA5jpGB6uHQ
-    Nk1NqriTZsAyvsRSaydK8w+OrwtwFARIS7pyfQrv13QlPDtlsSBbx6/+ui/AT3fi
-    T029Welm1/U5A7espR0UzmcMAU4v1V6rMo3K/CVURrGR3ytANq27pyUjKChU4Kin
-    DYduOE7S4lzxADkO/B6jSsW9uTnaS+N0Y1iNPqFsZO9q6n2r23i+SH7fdtFjOXrU
-    gvVMzeyZJ/ByXTahNXQKsTM1AgMBAAGjdjB0MF0GA1UdEQRWMFSCIW91dHBvc3Qt
-    cG9saWN5LndlYmhvb2stc3lzdGVtLnN2Y4Ivb3V0cG9zdC1wb2xpY3kud2ViaG9v
-    ay1zeXN0ZW0uc3ZjLmNsdXN0ZXIubG9jYWwwEwYDVR0lBAwwCgYIKwYBBQUHAwEw
-    DQYJKoZIhvcNAQELBQADggEBAAhNOyRSIcNjau4/IHtedAH+SmgOXFjGL5Xi3WoI
-    OQY4MEGcCW9MgqeUv5jVpgRc6GPV1S7Osj8n26cJqWcKLUXXDyRzSjaRa7I0vDt0
-    IVASW4R8kjjdNcZCSQSFgvXitgkPKUJHsdACar6HGxVbWbyA8f4e/sZkC3OxkH44
-    g8Jy0ZY373UqrxS+RI4lD897hv/NfWtoo4y60kCU7qrtC9eL9elGiLtYEa16H4J8
-    ZFZJb+CcvxiYTwghuQMu2RVHwITcYeJSzW43dpTpEe2XYKaNW2x+vkMtJkT7xOEe
-    iICdq+u6TdX9n5DwpjyS3AocOs/13VBgNzxIHkOrdnsmm+E=
-    -----END CERTIFICATE-----
-  tls.key: |
-    -----BEGIN PRIVATE KEY-----
-    MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCSe1lB7oUUAvkF
-    Fl+rwR+CLpz64QXlaSEtOT4PDc2+hH2X7mBdEN0J48PxJ4rhfdtxjc9RU8qVNqOW
-    yes5Bch7QhUBkO8nd/VTiGskzsstR9bA5hlMIOA5jpGB6uHQNk1NqriTZsAyvsRS
-    aydK8w+OrwtwFARIS7pyfQrv13QlPDtlsSBbx6/+ui/AT3fiT029Welm1/U5A7es
-    pR0UzmcMAU4v1V6rMo3K/CVURrGR3ytANq27pyUjKChU4KinDYduOE7S4lzxADkO
-    /B6jSsW9uTnaS+N0Y1iNPqFsZO9q6n2r23i+SH7fdtFjOXrUgvVMzeyZJ/ByXTah
-    NXQKsTM1AgMBAAECggEABQ1n5PuZmNRIa3nSsJaRyK9AaDqyNdSmfjC4uJNGj3gE
-    6j/Oa90PE0UkomfaEtmlfzSSAKOl+659q6II8Nw+Ygf6k5NJyrbSC8ndmaLNoAWX
-    xn0m+91nbVg5tD1aOBC+2J/XJyqtgllswN8j7g/571vGfVOwj/sXRFVx23LbrDwP
-    a3HW75BNUmCfvw4jcdbfzXZOckEw0+Poq6tES/JtiL6kAx5s+bDTqIAG4Jhuw37H
-    a1aK1pBgiFLUh5ltLLoaZyQMIugl5CmqaCsxH6a0Ci6zqv1gP5aVEoF6+IlsBuaR
-    JhC1mjCveJxm9AezrsTQAcgdulP/RiKVfDnFHmZVqQKBgQDJkfRhpG57k2X9a4W0
-    D9L9yozisdvA+q3VUFNkfz2Zfpk+Feom8FmhiJJUrqekeElhxer3DqhHTzb3FDbS
-    BCRgBoADuIf5zBSxFo563okz5+VsOKLMC6F/iIdgyNS6TBNJI4OMOyIHWOazuZOe
-    NjDCniKKW7+MIoWWHwv/5/BFbQKBgQC6CUaSrCh/4oL1lo46LA4q6u4CQUR7Ndv+
-    smnOlEtgzLbaPb7cc9dTf9Gm3iOQEythkqIF9rfGPKA/I0vBpK3eU5hbh49DEjPx
-    eXZvp4pwc4bAujwteAqAFgymhssipOxelhp1Rjuryzk/w1J3/oAGfM8Sq89oCcnQ
-    GoIfYm8v6QKBgGURzyTKiy9haClaqY7wxE3HKz9cCSFJULJ99WKVvnBhnzsXR/JA
-    X+D0FtNpQ9vfCISC9d7tNYmT+a6ILzi9JPQVLkkvVNb28oUdF1IalVc2dr394/tF
-    9bN55M+tw6SqEp2AtiwxVk2y0PLbIV6aM3bSTeVsPa5pfOwaIy0swjg9AoGAMttu
-    S5J8z9kga/rojsaUaO8oeb1V90jWB17Gxg6MPL46DpdqoeGZL951deSsXCqhZV8s
-    o+y6eJsCQ8BmaV2XmnvH3t3EMFW9lXnbAtMOaYdrgyxmXxe95x4f/zZCOgpUA9eN
-    DBpTHbfEwsWmud79KMjd4wDNBmgGn7lfcSz7sGECgYAz2r4bhhRwZgRHNzg4mTTC
-    OoCpo5pTIOmw9RptvcDb/fi+Uo5dragFYxkS2/4SB9PJj7FWqJzbYFLuhfZDTTd4
-    dyoOq0TPBgjEC79f1sS3rnrBfDwPOOIFef99IoZXG70TYhvYUDa7d8FWubFYbK1y
-    fzLM0tMNdSIenDbstjMY6A==
-    -----END PRIVATE KEY-----
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -377,31 +173,36 @@ spec:
     spec:
       terminationGracePeriodSeconds: 5
       containers:
-        - name: server
-          image: node:22-alpine
-          command: ["node", "/app/server.js"]
-          ports:
-            - containerPort: 8443
-          readinessProbe:
-            tcpSocket:
-              port: 8443
-            periodSeconds: 5
-          resources:
-            requests: {cpu: 10m, memory: 48Mi}
-            limits: {memory: 128Mi}
-          volumeMounts:
-            - name: app
-              mountPath: /app
-            - name: tls
-              mountPath: /tls
-              readOnly: true
-      volumes:
+      - name: server
+        image: node:22-alpine
+        command:
+        - node
+        - /app/server.js
+        ports:
+        - containerPort: 8443
+        readinessProbe:
+          tcpSocket:
+            port: 8443
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 10m
+            memory: 48Mi
+          limits:
+            memory: 128Mi
+        volumeMounts:
         - name: app
-          configMap:
-            name: webhook-server
+          mountPath: /app
         - name: tls
-          secret:
-            secretName: starfleet-policy-tls
+          mountPath: /tls
+          readOnly: true
+      volumes:
+      - name: app
+        configMap:
+          name: webhook-server
+      - name: tls
+        secret:
+          secretName: starfleet-policy-tls
 ---
 apiVersion: v1
 kind: Service
@@ -412,114 +213,36 @@ spec:
   selector:
     app: starfleet-policy
   ports:
-    - port: 443
-      targetPort: 8444
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: outpost-policy
-  namespace: webhook-system
-  labels:
-    app: outpost-policy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: outpost-policy
-  template:
-    metadata:
-      labels:
-        app: outpost-policy
-    spec:
-      terminationGracePeriodSeconds: 5
-      containers:
-        - name: server
-          image: node:22-alpine
-          command: ["node", "/app/server.js"]
-          ports:
-            - containerPort: 8443
-          readinessProbe:
-            tcpSocket:
-              port: 8443
-            periodSeconds: 5
-          resources:
-            requests: {cpu: 10m, memory: 48Mi}
-            limits: {memory: 128Mi}
-          volumeMounts:
-            - name: app
-              mountPath: /app
-            - name: tls
-              mountPath: /tls
-              readOnly: true
-      volumes:
-        - name: app
-          configMap:
-            name: webhook-server
-        - name: tls
-          secret:
-            secretName: outpost-policy-tls
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: outpost-policy
-  namespace: webhook-system
-spec:
-  selector:
-    app: outpost-policy
-  ports:
-    - port: 443
-      targetPort: 8443
+  - port: 443
+    targetPort: 8444
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: starfleet-policy
 webhooks:
-  - name: starfleet-policy.astrona.io
-    admissionReviewVersions: ["v1"]
-    sideEffects: None
-    failurePolicy: Fail
-    timeoutSeconds: 5
-    namespaceSelector:
-      matchLabels:
-        kubernetes.io/metadata.name: starfleet
-    rules:
-      - apiGroups: ["apps"]
-        apiVersions: ["v1"]
-        operations: ["CREATE"]
-        resources: ["deployments"]
-    clientConfig:
-      service:
-        namespace: webhook-system
-        name: starfleet-policy
-        path: /validate
-        port: 443
-      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURBRENDQWVpZ0F3SUJBZ0lVUkV3ZXpoV3ZhNzB6WlpuTWN5UFVISXpsVDdVd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0h6RWRNQnNHQTFVRUF3d1VjM1JoY21ac1pXVjBMWGRsWW1odmIyc3RZMkV3SUJjTk1qWXhNVEF5TWpBMApOek01V2hnUE1qRXlOakV3TURreU1EUTNNemxhTUI4eEhUQWJCZ05WQkFNTUZITjBZWEptYkdWbGRDMTNaV0pvCmIyOXJMV05oTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF2a2V1YjgxSnNQZFMKQzc1WU9UTENmeXdqYjZhVnVSRzhzWFJKVkdoRENlcTV4YzNNaTZaWFBZR0x6SVZCMzBZNDNuTEVCSE80bi90QQpuRXU2V2JuZUJNcDFRTHB3d05pNlJ6SlpyWHFJdmJlYU9HbWVidlBhNUxjWFhFcFh0c093YzB4N2JIZis5SU90CnVVTHRPU0ZWeHZuSFczaWFnV0tpNDczN1NZZWRvVG5YcmlVUW8xd0NnWllsTkhZbUJHeXZPY1pJZWp0RVNUZWYKY0VVUU5RelNyNGkxQ251UnZsRWZuV2ZRTHp0OWdwcElJbHQ3NEYwNmFvT3Jiek5ZVEhaWGtSU0ZNRnhNcnozMQpjaDZIcUpZTGprZjRMMUtRUk9qV1hhQm9IRW9mMHVNUjZJSmJuUGVweFZwZkNqbGpQenlUTVNITDJobnFyWThsCmFQMWM0S0h2L3dJREFRQUJvekl3TURBZEJnTlZIUTRFRmdRVTBUSVRJOElnOGZQaXV6cUlnakM3MlBUcVdMa3cKRHdZRFZSMFRBUUgvQkFVd0F3RUIvekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBZi80cSt1NzZ6U3BFckdvWQoyNE13NXFZNGtEakhncUV1OWZEcjFxQm9VeFRYWmdpWCtCcE1KdVl6NEZzZjdaTElWb214Ty9ZbjR0SFpqWm9iCkY0c053V21DeDMydzRyOFhFZTVRcmYvVzlwWCt1MitTMHhFYjl1KzZ6SUsyU25xQjBHWHVnUUJ2SlFHdk1jTUgKVWIxYmdMM0RuekEyZW5KM1FVUEJZUTJwQUtSaEVVQTN5RDJXWllqOHBSRldJVkpNMWZSa0V5RnViRFhINXNCKwp5aHZqeEtOVklocUt6S2dHbW9TN3hDb3BLUEpzK2VORHNJOFZEcm8vR0sxUnNEQWg1Nzk0MXBDdjRQVXVUYUNuCjRiNk8ybVgyZ3MxbTZQV3VRZU0vdDBjSThiVVJDcTVCb1dobVRmRlQ2Q3RpRW9BcHJPdDQxOXZ5eUp3MlBjUm4KaGxxY3R3PT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
-metadata:
-  name: outpost-policy
-webhooks:
-  - name: outpost-policy.astrona.io
-    admissionReviewVersions: ["v1"]
-    sideEffects: None
-    failurePolicy: Fail
-    timeoutSeconds: 5
-    namespaceSelector:
-      matchLabels:
-        kubernetes.io/metadata.name: outpost
-    rules:
-      - apiGroups: ["apps"]
-        apiVersions: ["v1"]
-        operations: ["CREATE"]
-        resources: ["deployments"]
-    clientConfig:
-      service:
-        namespace: webhook-system
-        name: outpost-policy
-        path: /validate
-        port: 443
-      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURBRENDQWVpZ0F3SUJBZ0lVUkV3ZXpoV3ZhNzB6WlpuTWN5UFVISXpsVDdVd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0h6RWRNQnNHQTFVRUF3d1VjM1JoY21ac1pXVjBMWGRsWW1odmIyc3RZMkV3SUJjTk1qWXhNVEF5TWpBMApOek01V2hnUE1qRXlOakV3TURreU1EUTNNemxhTUI4eEhUQWJCZ05WQkFNTUZITjBZWEptYkdWbGRDMTNaV0pvCmIyOXJMV05oTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF2a2V1YjgxSnNQZFMKQzc1WU9UTENmeXdqYjZhVnVSRzhzWFJKVkdoRENlcTV4YzNNaTZaWFBZR0x6SVZCMzBZNDNuTEVCSE80bi90QQpuRXU2V2JuZUJNcDFRTHB3d05pNlJ6SlpyWHFJdmJlYU9HbWVidlBhNUxjWFhFcFh0c093YzB4N2JIZis5SU90CnVVTHRPU0ZWeHZuSFczaWFnV0tpNDczN1NZZWRvVG5YcmlVUW8xd0NnWllsTkhZbUJHeXZPY1pJZWp0RVNUZWYKY0VVUU5RelNyNGkxQ251UnZsRWZuV2ZRTHp0OWdwcElJbHQ3NEYwNmFvT3Jiek5ZVEhaWGtSU0ZNRnhNcnozMQpjaDZIcUpZTGprZjRMMUtRUk9qV1hhQm9IRW9mMHVNUjZJSmJuUGVweFZwZkNqbGpQenlUTVNITDJobnFyWThsCmFQMWM0S0h2L3dJREFRQUJvekl3TURBZEJnTlZIUTRFRmdRVTBUSVRJOElnOGZQaXV6cUlnakM3MlBUcVdMa3cKRHdZRFZSMFRBUUgvQkFVd0F3RUIvekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBZi80cSt1NzZ6U3BFckdvWQoyNE13NXFZNGtEakhncUV1OWZEcjFxQm9VeFRYWmdpWCtCcE1KdVl6NEZzZjdaTElWb214Ty9ZbjR0SFpqWm9iCkY0c053V21DeDMydzRyOFhFZTVRcmYvVzlwWCt1MitTMHhFYjl1KzZ6SUsyU25xQjBHWHVnUUJ2SlFHdk1jTUgKVWIxYmdMM0RuekEyZW5KM1FVUEJZUTJwQUtSaEVVQTN5RDJXWllqOHBSRldJVkpNMWZSa0V5RnViRFhINXNCKwp5aHZqeEtOVklocUt6S2dHbW9TN3hDb3BLUEpzK2VORHNJOFZEcm8vR0sxUnNEQWg1Nzk0MXBDdjRQVXVUYUNuCjRiNk8ybVgyZ3MxbTZQV3VRZU0vdDBjSThiVVJDcTVCb1dobVRmRlQ2Q3RpRW9BcHJPdDQxOXZ5eUp3MlBjUm4KaGxxY3R3PT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+- name: starfleet-policy.astrona.io
+  admissionReviewVersions:
+  - v1
+  sideEffects: None
+  failurePolicy: Fail
+  timeoutSeconds: 5
+  namespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: starfleet
+  rules:
+  - apiGroups:
+    - apps
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    resources:
+    - deployments
+  clientConfig:
+    service:
+      namespace: webhook-system
+      name: starfleet-policy
+      path: /validate
+      port: 443
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURBRENDQWVpZ0F3SUJBZ0lVUkV3ZXpoV3ZhNzB6WlpuTWN5UFVISXpsVDdVd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0h6RWRNQnNHQTFVRUF3d1VjM1JoY21ac1pXVjBMWGRsWW1odmIyc3RZMkV3SUJjTk1qWXhNVEF5TWpBMApOek01V2hnUE1qRXlOakV3TURreU1EUTNNemxhTUI4eEhUQWJCZ05WQkFNTUZITjBZWEptYkdWbGRDMTNaV0pvCmIyOXJMV05oTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF2a2V1YjgxSnNQZFMKQzc1WU9UTENmeXdqYjZhVnVSRzhzWFJKVkdoRENlcTV4YzNNaTZaWFBZR0x6SVZCMzBZNDNuTEVCSE80bi90QQpuRXU2V2JuZUJNcDFRTHB3d05pNlJ6SlpyWHFJdmJlYU9HbWVidlBhNUxjWFhFcFh0c093YzB4N2JIZis5SU90CnVVTHRPU0ZWeHZuSFczaWFnV0tpNDczN1NZZWRvVG5YcmlVUW8xd0NnWllsTkhZbUJHeXZPY1pJZWp0RVNUZWYKY0VVUU5RelNyNGkxQ251UnZsRWZuV2ZRTHp0OWdwcElJbHQ3NEYwNmFvT3Jiek5ZVEhaWGtSU0ZNRnhNcnozMQpjaDZIcUpZTGprZjRMMUtRUk9qV1hhQm9IRW9mMHVNUjZJSmJuUGVweFZwZkNqbGpQenlUTVNITDJobnFyWThsCmFQMWM0S0h2L3dJREFRQUJvekl3TURBZEJnTlZIUTRFRmdRVTBUSVRJOElnOGZQaXV6cUlnakM3MlBUcVdMa3cKRHdZRFZSMFRBUUgvQkFVd0F3RUIvekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBZi80cSt1NzZ6U3BFckdvWQoyNE13NXFZNGtEakhncUV1OWZEcjFxQm9VeFRYWmdpWCtCcE1KdVl6NEZzZjdaTElWb214Ty9ZbjR0SFpqWm9iCkY0c053V21DeDMydzRyOFhFZTVRcmYvVzlwWCt1MitTMHhFYjl1KzZ6SUsyU25xQjBHWHVnUUJ2SlFHdk1jTUgKVWIxYmdMM0RuekEyZW5KM1FVUEJZUTJwQUtSaEVVQTN5RDJXWllqOHBSRldJVkpNMWZSa0V5RnViRFhINXNCKwp5aHZqeEtOVklocUt6S2dHbW9TN3hDb3BLUEpzK2VORHNJOFZEcm8vR0sxUnNEQWg1Nzk0MXBDdjRQVXVUYUNuCjRiNk8ybVgyZ3MxbTZQV3VRZU0vdDBjSThiVVJDcTVCb1dobVRmRlQ2Q3RpRW9BcHJPdDQxOXZ5eUp3MlBjUm4KaGxxY3R3PT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=

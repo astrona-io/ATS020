@@ -1,6 +1,6 @@
 # Grafana's Parts And A Provisioned Data Source
 
-Grafana draws nothing until it knows where the data is. Before the first panel, it needs a data source, and that data source should come from a file, not from a form in the web interface. This part shows how the Grafana pod in the playground is built and adds Prometheus as a data source from a labelled ConfigMap.
+Grafana needs a configured data source before a panel can query Prometheus. Provision that connection from a ConfigMap, give it a stable UID, and check the data source through the Grafana API.
 
 A ConfigMap is a Kubernetes object that stores configuration text. A label is a key-value pair attached to an object so a selector can find it.
 
@@ -190,3 +190,29 @@ Grafana now has a data source that comes from a file and returns after any resta
 > - **Putting `127.0.0.1:9090` in the data source URL.** That is your port-forward, not an address Grafana can reach. Use the Service DNS name.
 > - **Using different data source UIDs.** A panel points at the UID, rather than the display name. Keep that UID the same in the data source file and dashboard.
 > - **Editing a provisioned data source in the web interface.** Grafana treats the file as the source of truth; change the ConfigMap instead.
+
+## Your mission: Provision The Prometheus Data Source
+
+Grafana loads the request dashboard, but its provisioned Prometheus data source is missing. The data source ConfigMap exists in `monitoring`.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-020-01
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-10/labs/lab-06
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-020/module-10/labs/lab-06
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-020-01-06
+astrona start ats-020-playground-020-01
+```

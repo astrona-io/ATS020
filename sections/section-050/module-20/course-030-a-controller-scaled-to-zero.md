@@ -1,6 +1,6 @@
 # A Controller Scaled To Zero
 
-The last two failures gave an error message. A stopped controller gives none. You create a resource, the API server accepts it, and then nothing happens. This part shows how to find a controller that does not run, why the status of its resources can still look healthy, and how to prove that the platform reconciles again. It uses the Prometheus Operator, the controller behind the Prometheus in `monitoring`.
+Monitoring resources exist, but no controller is reconciling them. Inspect the Prometheus Operator Deployment, restore its replica, then verify that the missing target and rule appear in the running Prometheus server.
 
 The commands need the playground as it starts: the Deployment `kps-operator` in `monitoring` scaled to zero, the Prometheus `kps-prometheus`, and the ServiceMonitor `scout` and PrometheusRule `scout-alerts` in `starfleet`. Prometheus needs about a minute to reflect a change, so wait a little before you query.
 
@@ -100,7 +100,7 @@ kubectl -n starfleet exec deploy/shuttle -- curl -s http://kps-prometheus.monito
 
 The first answer ends with `"1"`, so Prometheus scrapes `scout` and the target is up. The second answer lists the rule `ScoutDown` in its group `scout`, in the state `inactive`, because `scout` is up and the alert does not fire. The `head -c 300` command cut the second answer. The operator reconciled the `ServiceMonitor` and the `PrometheusRule` that it had missed while it was stopped.
 
-The three failures in this module have one method in common. Read the symptom, name the component that should have done the work, read the field or object that component owns, and prove the fix with the behaviour that was lost.
+These platform failures share one investigation method. Read the symptom, name the component that should have done the work, read the field or object that component owns, and prove the fix with the behaviour that was lost.
 
 ```mermaid
 flowchart TB
@@ -112,41 +112,30 @@ flowchart TB
     D -->|"READY 0/0"| G["Scale to one replica"]
 ```
 
-The diagram shows which object to read for each symptom and which field names the cause. You can now find a webhook with no endpoints, an expired serving certificate and a stopped controller, and prove each fix. The mission puts all three in front of you at once.
+Use the diagram to distinguish admission failures from a stopped reconciliation loop. The next lab isolates the Prometheus Operator failure and checks that it creates a working Prometheus pod after recovery.
 
-## Your mission: Restore A Platform After Three Failures Lab
+## Your mission: Restore The Prometheus Operator
 
-You can now read an admission webhook error, check a certificate with `openssl`, and find a controller that does not run. The mission starts a cluster in which a webhook Service refuses connections, a webhook certificate has expired, and the Prometheus Operator is stopped. You fix all three and prove each fix with a real request or query. The grader rejects the fixes that only hide the fault, such as `failurePolicy: Ignore` or deleting a webhook configuration.
+Prometheus runs, but it does not scrape `scout` or load `ScoutDown`. The Prometheus Operator Deployment `kps-operator` in `monitoring` has stopped.
 
-Pause the playground first, so that only one cluster runs:
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
 
 ```sh
 astrona stop ats-020-playground-050-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-050/module-20/labs/lab-03
 ```
 
-Start the lab, and read the task:
+Submit after verifying the result:
 
 ```sh
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-050/module-20/labs/lab-01
+astrona submit -c sections/section-050/module-20/labs/lab-03
 ```
 
-When you finish, submit your work for grading:
+Remove the lab and resume the playground:
 
 ```sh
-astrona submit -c sections/section-050/module-20/labs/lab-01
-```
-
-After the grader passes, remove the lab and start the playground again:
-
-```sh
-astrona destroy ats-020-lab-050-02
+astrona destroy ats-020-lab-050-02-03
 astrona start ats-020-playground-050-02
 ```
-
-## Common pitfalls
-
-> [!WARNING]
-> - **Trusting `RECONCILED True`.** The status is the last thing the controller wrote. If the controller does not run, the status is old.
-> - **Looking for an error message.** A stopped controller logs nothing and the API server reports nothing. Look for the objects that exist but have no effect.
-> - **Querying Prometheus right after the fix.** The operator writes the configuration and Prometheus reloads it, which takes about a minute. Wait and query again.
-> - **Starting a second Prometheus.** The target and the rule come from the operator. A new Prometheus does not fix the stopped controller.

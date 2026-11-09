@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Runs the saved queries of the two panels against Loki over the last six hours,
-# rather than only now, because scaling the failing workloads stops new lines.
+# Run the saved panel queries against the live Loki data.
 set -u
 fail() { echo "FAIL: $*"; exit 1; }
 
@@ -44,8 +43,8 @@ esac
 case "$compact" in *'namespace="outpost"'*) ;; *) fail "the panel 'Streams with errors' must select the outpost namespace" ;; esac
 case "$compact" in *'|="ERROR"'*) ;; *) fail "the panel 'Streams with errors' must filter on ERROR" ;; esac
 case "$compact" in *'[5m]'*) ;; *) fail "the panel 'Streams with errors' must use a five-minute range" ;; esac
-metric_result=$(kubectl get --raw "$LOKI_API/query_range?query=$(uri "$metric_expr")&since=6h&step=5m" 2>/dev/null) ||
+metric_result=$(kubectl get --raw "$LOKI_API/query?query=$(uri "$metric_expr")" 2>/dev/null) ||
   fail "Loki refuses the query of the panel 'Streams with errors'"
-echo "$metric_result" | jq -e '.data.resultType == "matrix" and ([.data.result[].values[]] | length >= 1)' >/dev/null ||
+echo "$metric_result" | jq -e '.data.resultType == "vector" and any(.data.result[]; (.["value"][1] | tonumber) > 0)' >/dev/null ||
   fail "the query of the panel 'Streams with errors' returns no data"
 echo "PASS: both panels hold queries that return the outpost errors"

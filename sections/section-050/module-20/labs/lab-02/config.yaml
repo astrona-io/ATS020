@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-050-02-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - node:22-alpine
+bootstrap:
+  manifests:
+  - name: lab-start
+    description: Starting resources for renew an expired webhook certificate
+    type: file
+    source: manifests/lab-start.yaml
+  waitFor:
+  - resource: deploy/outpost-policy
+    namespace: webhook-system
+testing:
+  init:
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: outpost-creates
+    description: A Deployment can be created in outpost, and the outpost-policy webhook answered the request
+    type: file
+    source: validation/validate-outpost-webhook.sh
+  - name: design-intact
+    description: Both webhook configurations keep failurePolicy Fail, and the workloads, ServiceMonitor and PrometheusRule
+      are still in place
+    type: file
+    source: validation/validate-design-intact.sh
+teardown:
+  keepCluster: false

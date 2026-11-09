@@ -1,6 +1,6 @@
 # The Alert Lifecycle
 
-An alert does not jump from "fine" to "paging". It moves through states, and each state answers a different question: is the condition true right now, has it been true long enough, and is it over? Reading those states is how you tell a slow alert from a broken one. This part causes real errors in `scout`, follows `ScoutHighErrorRatio` through every state, and then follows the firing alert out of Prometheus into Alertmanager.
+Follow one alert from an inactive condition through pending and firing, then back to inactive. The expression determines whether the condition is true; `for` determines how long it must remain true before firing. Verify these states in Prometheus before investigating notification routing.
 
 ## The states
 
@@ -115,8 +115,6 @@ Alertmanager has the alert, in its own state `active`, with every label from the
 
 Alertmanager has three states of its own, and none of them is "firing". `unprocessed` means the alert arrived and has not passed through the routing tree yet, a state that lasts a moment. `active` means it is routed and eligible for notification. `suppressed` means a silence or an inhibition holds it back. Prometheus and Alertmanager keep separate state, so a delay or a loss has to be located in one of three places: evaluation in Prometheus (the rules and alerts endpoints), transport (`prometheus_notifications_sent_total` and the Alertmanager alerts endpoint), or notification (the receiver). A receiver assignment alone does not prove that a notification left Alertmanager; only the receiver's own log proves that.
 
-You can now read an alert's state in Prometheus, explain the delay between the first error and `firing`, prove that Prometheus delivered it, and check where Alertmanager would send it. The alert is firing and reaching nobody. The open question is how to route it to a receiver that someone actually reads.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -127,3 +125,29 @@ You can now read an alert's state in Prometheus, explain the delay between the f
 > - **Looking only at the alerts endpoint.** An inactive loaded rule is visible only in the rules endpoint.
 > - **Changing a label during `for`.** A different label set starts a new instance and waiting period.
 > - **Using a `bool` comparison for a fault alert.** A returned zero still creates an alert instance.
+
+## Your mission: Create And Verify An Alerting Rule
+
+Traffic to `scout` includes status `500` responses. Its alerting rule is missing; the receiver route already works.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-010-03
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-30/labs/lab-01
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-010/module-30/labs/lab-01
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-010-03
+astrona start ats-020-playground-010-03
+```

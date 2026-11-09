@@ -131,11 +131,39 @@ Strict guidelines:
   starting state, reference solution, and focused graders. A learner must
   be able to start any lab without completing another one first. Keep
   broader integration work in the section capstone.
-- **Section 030 is the pilot for this format.** Its module-20 labs cover
-  injection setup, slow-trace analysis, propagation repair, and missing
-  injection. The user will test the full section before authorizing this
-  restructuring elsewhere. Do not extend the rewrite or lab split to other
-  sections until that review is complete and the user asks to continue.
+- **The focused-lab format is approved for every section.** The section-030
+  pilot was reviewed and the user authorized the remaining sections. Rewrite
+  the teaching alongside each lab split; do not leave a combined lesson
+  describing several faults after its lab has been separated. Keep capstones
+  as integration exercises unless the user asks to split them too.
+- **Audit practical coverage before finishing.** Map each assessable learning
+  outcome to its teaching page, independent lab, observable evidence and
+  grader. Add missing exercises when the reading teaches a practical skill
+  that no lab assesses. Supporting concepts can prepare a later lab; do not
+  create filler tasks just to give every page a lab.
+- **A lab must prove its starting state and its repair.** In `testing.init`,
+  run `testing/verify-start.sh` before the reference solution. Assert the
+  intended fault and require an explicit grading failure from unfinished
+  work. Then apply the solution, wait for reconciliation or telemetry with
+  a timeout, and run the behavioral graders. Keep unrelated resources in a
+  working state. Check constraints that prevent bypassing the task.
+- **Test every lab automatically.** The `labs` GitHub Actions workflow
+  discovers module labs and capstones, runs grader regression tests and
+  `astrona validate`, then runs `astrona test` in a fresh cluster. New labs
+  must be registered in `astrona.yaml` and discovered by CI. Keep the required
+  `all environments pass` result dependent on discovery and every selected
+  environment. Save diagnostics on failure. Report static checks, local
+  lifecycle results and remote CI results separately.
+- **Keep split readings runnable.** Restore helper functions, port-forwards,
+  variables and input files when extracting a new page. Identify differences
+  between playground and lab fixtures. Put the lab directly after its
+  preparation lesson and update landing pages, summaries, outline metadata
+  and references together. Use measured output or describe expected fields;
+  never invent successful command output.
+- **Reuse the general workflow.** `skills/focused-course-labs/SKILL.md`
+  contains the portable authoring and validation workflow. Keep ATS020 paths,
+  runtime names, markup and version rules here; do not copy them into the
+  generic skill. The skill also lives in the user's Codex skill directory.
 - **Renew the playground before hands-on work.** Every reading part that
   runs commands has `<!-- astrona:playground:renew -->` exactly once, on its
   own line, right before the first hands-on step (the first "Save this as"
@@ -542,10 +570,10 @@ this order:
 - Metrics: `prometheus`, `servicemonitor`, `podmonitor`, `scrape-target`,
   `label-selector`, `promql`, `rate`, `histogram-quantile`, `recording-rule`
 - Alerting: `prometheusrule`, `alerting-rule`, `alertmanager`,
-  `alertmanager-route`, `silence`
+  `alertmanager-route`, `silence`, `inhibition`, `grouping`
 - Dashboards and logs: `grafana`, `grafana-dashboard`, `data-source`,
   `otel-collector`, `filelog-receiver`, `k8sattributes`, `count-connector`,
-  `kubectl-logs`, `loki`, `logql`
+  `kubectl-logs`, `loki`, `logql`, `secrets`, `volumes`, `resource-limits`
 - Tracing: `opentelemetry`, `otlp`, `collector-pipeline`,
   `instrumentation`, `auto-instrumentation`, `jaeger`, `context-propagation`,
   `span-status`, `exception-event`, `trace-search`

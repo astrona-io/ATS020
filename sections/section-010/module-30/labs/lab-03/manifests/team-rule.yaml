@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: scout-errors
+  namespace: starfleet
+  labels:
+    release: kps
+spec:
+  groups:
+  - name: scout-errors
+    interval: 15s
+    rules:
+    - alert: ScoutErrorRate
+      expr: sum by (namespace) (rate(http_requests_total{job="scout",namespace="starfleet",status="500"}[1m])) >
+        0.1
+      for: 1m
+      labels:
+        team: scout
+        severity: warning

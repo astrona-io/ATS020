@@ -1,6 +1,6 @@
 # Recording And Alerting Rules
 
-An alert is a PromQL query that Prometheus keeps running on its own. Before it can page anyone, the query must live somewhere Prometheus reads, under a name and with labels that later decide where it goes. This part writes a PrometheusRule for `scout`: a recording rule that stores its error ratio as a new series, and an alerting rule that fires when that ratio stays too high.
+Prometheus evaluates recording and alerting rules on a schedule. A recording rule stores a calculated series; an alerting rule tracks a condition and attaches labels. Inspect both forms before checking which rules the server has loaded.
 
 ## Two kinds of rule
 
@@ -126,8 +126,6 @@ promql 'namespace:http_requests_error_ratio:rate1m'
 ```
 
 It prints nothing, and that is correct. `scout` has never answered with a `5xx`, so the selector `status=~"5.."` finds no series, the top half of the division is empty, and an empty side makes the whole result empty. The ratio is not `0`; it does not exist. That is also why the alert is `inactive`: its expression returns nothing, which counts as "condition false".
-
-You can now write recording and alerting rules in a PrometheusRule, get them picked up by the right label, and check that Prometheus loaded them. The list above proves the end of the path, not the path itself. The open question is what happened between `kubectl apply` and that list, and where a rule can get lost on the way.
 
 ## Common pitfalls
 

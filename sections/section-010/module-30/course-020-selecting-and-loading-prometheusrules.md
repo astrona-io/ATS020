@@ -1,6 +1,6 @@
 # Selecting And Loading PrometheusRules
 
-A PrometheusRule can exist in Kubernetes and never reach Prometheus. `kubectl apply` only proves that the API server stored the object. Between that object and a rule Prometheus evaluates sit two selectors, a validation step, a generated ConfigMap and a reload, and a rule can drop out at each of them without any error in Prometheus. This part follows that path step by step, breaks it on purpose with a wrong label, and shows which command proves each step.
+A PrometheusRule stored in Kubernetes can still be absent from Prometheus. Check the namespace and object selectors, then inspect the live rule API. The API server accepting YAML does not prove that Prometheus loaded it.
 
 ## The path from object to loaded rule
 
@@ -111,8 +111,6 @@ Selection is not the last gate. The operator also validates each selected object
 `kubectl apply` fails. The error names the webhook and says the expression could not be parsed, and the object in the cluster stays as it was. If a cluster runs the operator without that webhook, the object is stored and the operator rejects it when it selects it: `kubectl -n starfleet describe prometheusrule scout-selector` then shows a `Warning` event with the reason `InvalidConfiguration` and a message that starts with `PrometheusRule scout-selector was rejected due to invalid configuration`, the operator log (`kubectl -n monitoring logs deploy/kps-operator`) has a line `skipping prometheusrule`, and the whole object disappears from the rules API, not only the broken rule. Put the full expression back and apply the file again.
 
 A third kind of failure happens after loading. A rule that parses but fails at evaluation time, for example because a function gets the wrong argument type, is loaded and shows `health: err` in the rules API, with the message in `lastError`. The three failure modes leave their evidence in three different places: no evidence at all for a selector mismatch, an event or a refused `apply` for invalid configuration, and `health` and `lastError` for an evaluation error.
-
-You can now follow a PrometheusRule from `kubectl apply` through both selectors, validation, the generated ConfigMap and the reload, and you know which command proves each step. The scout rules are loaded and healthy, and the alert has never fired. The open question is what happens between "the condition is true" and "someone is told".
 
 ## Common pitfalls
 

@@ -1,18 +1,20 @@
 # Query Logs With Loki And LogQL
 
-Logs on a node disappear with their Pods, and searching many Pods one at a time with `kubectl logs` is slow during an incident. **Loki** is a log store that keeps lines from many Pods in one place and indexes only their labels. **LogQL** is its query language. A **label** is a name and value attached to log lines, such as `namespace="outpost"`. You will read logs from Grafana and from the API, and use one query result to stop the workloads that fail.
+Work through one practical outcome at a time. Each graded lab follows the lesson that prepares it and starts from its own cluster state. The 2 labs each have 3–5 tasks, with 10–15 minutes of task work plus startup and telemetry delays.
 
-The module has three parts. **Connect Grafana To Loki** adds a Loki data source in the web interface and through the API and changes its **Maximum lines** setting. **Query Logs With LogQL** selects streams, filters lines and turns lines into numbers. **Edit A Panel And Act On The Result** saves a corrected panel query, shows how long that edit lasts, and scales down the controllers behind the failing Pods. The summary closes the module.
+## Learning sequence
 
-## Learning objectives
+| Lesson | Practice after reading |
+| --- | --- |
+| Connect Grafana To Loki | Explore in the playground; apply this preparation in the following labs |
+| Query Logs With LogQL | Explore in the playground; apply this preparation in the following labs |
+| Repair And Save A Loki Dashboard | Repair A Loki Error Dashboard |
+| Use Log Evidence To Stop Failing Workloads | Find And Stop Error-Logging Workloads |
 
-After this module you can:
+## What you will prove
 
-- Add and inspect a Loki data source in Grafana, and change `jsonData.maxLines` in the web interface and through the API.
-- Write LogQL stream selectors and line filters such as `|= "ERROR"`.
-- Write metric queries such as `count(rate({namespace="outpost"} |= "ERROR" [5m]))` and say what they count.
-- Edit a dashboard panel's query, save it, and explain why that edit differs from a dashboard kept as code.
-- Use a query result to find the Pods that write errors and scale their controllers to `0`.
+- Repair A Loki Error Dashboard.
+- Find And Stop Error-Logging Workloads.
 
 ## Before you start
 

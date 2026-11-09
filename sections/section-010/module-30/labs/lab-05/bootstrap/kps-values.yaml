@@ -1,0 +1,49 @@
+# Trimmed kube-prometheus-stack 92.3.0 for the alerting playground: the
+# Prometheus Operator, one Prometheus and one Alertmanager. Grafana,
+# node-exporter, kube-state-metrics, the default rules and the scrape jobs for
+# Kubernetes components are off to save memory. Alertmanager keeps the chart's
+# default configuration (root route to the `null` receiver); routes for the
+# Starfleet app come from AlertmanagerConfig resources.
+fullnameOverride: kps
+defaultRules:
+  create: false
+grafana:
+  enabled: false
+kubeStateMetrics:
+  enabled: false
+nodeExporter:
+  enabled: false
+kubeApiServer:
+  enabled: false
+kubelet:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+coreDns:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+prometheusOperator:
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    replicas: 1
+    retention: 6h
+    resources:
+      requests: {cpu: 20m, memory: 32Mi}
+      limits: {memory: 128Mi}
+prometheus:
+  prometheusSpec:
+    replicas: 1
+    retention: 6h
+    scrapeInterval: 15s
+    evaluationInterval: 15s
+    resources:
+      requests: {cpu: 100m, memory: 256Mi}
+      limits: {memory: 768Mi}

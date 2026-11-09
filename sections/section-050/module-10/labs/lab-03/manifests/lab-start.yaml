@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+      - name: shuttle
+        image: curlimages/curl:8.22.0
+        command:
+        - sleep
+        - infinity
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cargo
+  namespace: starfleet
+spec:
+  selector:
+    app: cargo
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http

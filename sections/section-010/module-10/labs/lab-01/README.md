@@ -1,5 +1,5 @@
 ---
-estimated_duration: 20m
+estimated_duration: 15m
 ---
 
 # Get A Workload Scraped With A ServiceMonitor Lab

@@ -82,7 +82,7 @@ questions:
   difficulty: intermediate
   learning_objective: Aggregate series with `sum by` and `without` to get one value per namespace or per status code
   source_readings:
-  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregate-requests-and-record-an-error-ratio.md
   prompt: You need the request rate of `scout` for each HTTP status code across all pods. Which query is correct?
   options:
   - id: a
@@ -104,7 +104,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
   source_readings:
-  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregate-requests-and-record-an-error-ratio.md
   prompt: A teammate writes `sum by (namespace) (rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))` and gets an empty result. Why?
   options:
   - id: a
@@ -566,7 +566,7 @@ questions:
   difficulty: intermediate
   learning_objective: Name one change to the delivery process that improves each metric
   source_readings:
-  - sections/section-040/module-10/course-040-lead-time-and-time-to-restore-from-timestamps.md
+  - sections/section-040/module-10/course-040-calculate-lead-time-from-git-revisions.md
   prompt: A team has a change failure rate of 30 percent. Most failures are image tags that do not exist, and every one is found only after the deployment. Which change to the delivery process lowers the change failure rate the most?
   options:
   - id: a
@@ -698,7 +698,7 @@ questions:
   difficulty: intermediate
   learning_objective: Fix a CrashLoopBackOff caused by a bad command, a missing ConfigMap key or a failing liveness probe
   source_readings:
-  - sections/section-050/module-10/course-020-crashloopbackoff-and-failing-probes.md
+  - sections/section-050/module-10/course-020-diagnose-a-crashing-process.md
   prompt: A pod went from `Error` to `CrashLoopBackOff`. You want the log of the run that crashed, and the current container has just started again. Which command do you run?
   options:
   - id: a
@@ -720,7 +720,7 @@ questions:
   difficulty: advanced
   learning_objective: Fix an OOMKilled container by reading its usage and setting a fitting memory limit
   source_readings:
-  - sections/section-050/module-10/course-030-oomkilled-and-memory-limits.md
+  - sections/section-050/module-10/course-040-oomkilled-and-memory-limits.md
   prompt: Why does the cause of an `OOMKilled` container not appear in the events of the pod?
   options:
   - id: a
@@ -742,7 +742,7 @@ questions:
   difficulty: intermediate
   learning_objective: Fix an ImagePullBackOff caused by a wrong tag or a missing pull secret
   source_readings:
-  - sections/section-050/module-10/course-040-imagepullbackoff-and-image-references.md
+  - sections/section-050/module-10/course-050-imagepullbackoff-and-image-references.md
   prompt: 'A pull event reads `failed to authorize: ... 403 Forbidden`. Which statement is correct?'
   options:
   - id: a

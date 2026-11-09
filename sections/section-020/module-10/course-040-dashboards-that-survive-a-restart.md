@@ -1,6 +1,6 @@
 # Dashboards That Survive A Restart
 
-A dashboard saved in Grafana lives in its database. In this playground, the database uses temporary pod storage, so replacing the pod deletes dashboards saved only there. A Kubernetes ConfigMap stores configuration outside the pod. Exporting a dashboard into a labelled ConfigMap lets Grafana load it again when a new pod starts.
+Grafana can restore a dashboard from a labelled ConfigMap after its database is replaced. Follow the dashboard JSON through the sidecar and provisioning configuration, then verify that a new Grafana pod loads it.
 
 ## Save and export a dashboard
 
@@ -174,8 +174,6 @@ The new Grafana pod returns:
 
 The provisioned dashboard returned with its panel, and Grafana can still query Prometheus. The copy left only in the database is gone. If a provisioned dashboard is missing, first check the ConfigMap's `grafana_dashboard: "1"` label, then read `grafana-sc-dashboard` logs. The sidecar copies the file; Grafana parses and loads the JSON, so invalid JSON can leave a file present without a usable dashboard.
 
-You can now export a dashboard model, store it in a labelled ConfigMap, and prove that a new Grafana pod restores it. Storage decides whether database-only dashboards survive; provisioning gives you a file you can review, version and restore.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -185,14 +183,28 @@ You can now export a dashboard model, store it in a labelled ConfigMap, and prov
 > - **Keeping the old port-forward.** It points at the deleted pod. Start it again before checking the new instance.
 > - **Editing only Grafana's database.** Provisioning loads the file again; put lasting changes in the ConfigMap.
 
-## Your mission: Bring Grafana Back After A Namespace Move Lab
+## Your mission: Restore Dashboard Provisioning
 
-You can now say what a Grafana pod needs to start: a writable data directory, the Secret its environment variables read, and enough memory. The lab gives you a Grafana Deployment that was moved to a new namespace and no longer starts. You read the Pod's status, events and logs, and fix every fault by changing only resource limits, Secrets and volumes.
+The team stores `Scout Overview` (UID `scout-overview`) in `monitoring/dashboard-scout-overview`. Grafana uses the provisioned Prometheus data source (UID `prometheus`).
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
 
 ```sh
 astrona stop ats-020-playground-020-01
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-10/labs/lab-02
-astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-10/labs/lab-02
-astrona destroy ats-020-lab-020-01-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-10/labs/lab-01
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-020/module-10/labs/lab-01
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-020-01
 astrona start ats-020-playground-020-01
 ```
