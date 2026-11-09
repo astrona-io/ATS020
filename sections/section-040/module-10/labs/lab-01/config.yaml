@@ -16,7 +16,7 @@ runtime:
       - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
       - quay.io/prometheus/prometheus:v3.15.0-distroless
       - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
-      - gitea/gitea:28.1.0-rootless
+      - gitea/gitea:28.3.0-rootless
       - quay.io/argoproj/argocd:v3.6.1
       - public.ecr.aws/docker/library/redis:8.2.3-alpine
       - ghcr.io/stefanprodan/podinfo:6.17.0
@@ -25,7 +25,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install a trimmed kube-prometheus-stack 92.22.0, Gitea 28.1.0 and Argo CD 3.6.1, then make the delivery history of the Application scout"
+      description: "Install a trimmed kube-prometheus-stack 92.22.0, Gitea 28.3.0 and Argo CD 3.6.1, then make the delivery history of the Application scout"
       type: file
       source: bootstrap/01-prepare.sh
   manifests:
