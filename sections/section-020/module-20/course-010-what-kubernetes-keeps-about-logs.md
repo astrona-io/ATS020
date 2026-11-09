@@ -17,9 +17,9 @@ kubectl -n outpost logs deploy/probe --tail=3
 You should see lines like these. The timestamps will differ:
 
 ```text
-time=2026-11-02T19:35:58.194Z level=INFO msg="200 GET /get 0.2ms" status=200 method=GET uri=/get route="GET /get" size_bytes=254 duration_ms=0.16725099999999998 user_agent=curl/8.22.0 client_ip=10.244.0.14 request_size_bytes=0
-time=2026-11-02T19:35:58.200Z level=ERROR msg="500 GET /status/500 0.1ms" status=500 method=GET uri=/status/500 route=/status/{code} size_bytes=0 duration_ms=0.056042 user_agent=curl/8.22.0 client_ip=10.244.0.14 request_size_bytes=0
-time=2026-11-02T19:35:59.213Z level=INFO msg="200 GET /get 0.1ms" status=200 method=GET uri=/get route="GET /get" size_bytes=254 duration_ms=0.065084 user_agent=curl/8.22.0 client_ip=10.244.0.14 request_size_bytes=0
+time=2026-11-02T19:35:58.194Z level=INFO msg="200 GET /get 0.2ms" status=200 method=GET uri=/get route="GET /get" size_bytes=254 duration_ms=0.16725099999999998 user_agent=curl/8.23.0 client_ip=10.244.0.14 request_size_bytes=0
+time=2026-11-02T19:35:58.200Z level=ERROR msg="500 GET /status/500 0.1ms" status=500 method=GET uri=/status/500 route=/status/{code} size_bytes=0 duration_ms=0.056042 user_agent=curl/8.23.0 client_ip=10.244.0.14 request_size_bytes=0
+time=2026-11-02T19:35:59.213Z level=INFO msg="200 GET /get 0.1ms" status=200 method=GET uri=/get route="GET /get" size_bytes=254 duration_ms=0.065084 user_agent=curl/8.23.0 client_ip=10.244.0.14 request_size_bytes=0
 ```
 
 Each line is in logfmt, a list of `key=value` pairs. The pair `level=ERROR` marks the second line as a failed request. The `shuttle` pod in `starfleet` sends this traffic: one request to `probe` every second and a request for `/status/500` every fourth second.
@@ -31,7 +31,7 @@ A crashing container is the case where logs matter most. The kubelet restarts a 
 Start a pod that writes two lines, waits 20 seconds and then exits with code 1. Its `restartPolicy` is `Always`, so the kubelet restarts it:
 
 ```sh
-kubectl -n outpost run crasher --image=curlimages/curl:8.22.0 --restart=Always \
+kubectl -n outpost run crasher --image=curlimages/curl:8.23.0 --restart=Always \
   --command -- sh -c 'echo "booting"; echo "fatal: cannot open /etc/app.conf" >&2; sleep 20; exit 1'
 ```
 
@@ -89,7 +89,7 @@ You should see:
 ```text
 LAST SEEN          TYPE     REASON      OBJECT        MESSAGE
 25s                Normal   Scheduled   Pod/crasher   Successfully assigned outpost/crasher to astro-ats-020-playground-020-02-control-plane
-3s (x2 over 24s)   Normal   Pulled      Pod/crasher   Container image "curlimages/curl:8.22.0" already present on machine and can be accessed by the pod
+3s (x2 over 24s)   Normal   Pulled      Pod/crasher   Container image "curlimages/curl:8.23.0" already present on machine and can be accessed by the pod
 3s (x2 over 24s)   Normal   Created     Pod/crasher   Container created
 3s (x2 over 24s)   Normal   Started     Pod/crasher   Container started
 ```

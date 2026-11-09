@@ -12,7 +12,7 @@ runtime:
     image: kindest/node:v1.35.8
     preloadImages:
     - mccutchen/go-httpbin:2.25.0
-    - curlimages/curl:8.22.0
+    - curlimages/curl:8.23.0
 bootstrap:
   manifests:
   - name: lab-start

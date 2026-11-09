@@ -20,7 +20,7 @@ runtime:
       - ghcr.io/stefanprodan/podinfo:6.17.0
       - mccutchen/go-httpbin:2.25.0
       - node:22-alpine
-      - curlimages/curl:8.22.0
+      - curlimages/curl:8.23.0
 
 bootstrap:
   init:

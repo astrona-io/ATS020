@@ -6,7 +6,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 
 SHUTTLE_IMAGE="$(kubectl -n starfleet get deployment shuttle -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)" \
   || fail "Deployment shuttle is missing in namespace starfleet"
-[ "$SHUTTLE_IMAGE" = "curlimages/curl:8.22.0" ] || fail "shuttle image changed to '$SHUTTLE_IMAGE'"
+[ "$SHUTTLE_IMAGE" = "curlimages/curl:8.23.0" ] || fail "shuttle image changed to '$SHUTTLE_IMAGE'"
 
 for name in beacon; do
   REPLICAS="$(kubectl -n starfleet get deployment "$name" -o jsonpath='{.spec.replicas}' 2>/dev/null)" \

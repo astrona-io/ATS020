@@ -21,7 +21,7 @@ runtime:
       - grafana/loki:3.7.9
       - otel/opentelemetry-collector-contrib:0.165.0
       - python:3.13.18-alpine3.24
-      - curlimages/curl:8.22.0
+      - curlimages/curl:8.23.0
 
 bootstrap:
   init:
