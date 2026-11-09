@@ -277,6 +277,16 @@ section is only true for this one.
   | Python metric fixture (section 010 module 01 lab 02 image) | 3.13.18-alpine3.24 |
 
   Do not teach fields, flags or output from other versions without saying so.
+- **Versions live in `versions.env`.** For the sections listed on its
+  "Synced so far:" line (now `sections/section-030`), `versions.env` is the
+  single source of truth. Renovate changes only that file. Pages, manifests,
+  lab configs and bootstrap scripts keep the literal version, and
+  `scripts/sync-versions.py` writes the new value into them (CI runs it with
+  `--check`). Merge a version bump only after the affected labs pass
+  `astrona test` and the command output on the pages is checked. A version in
+  a sentence about history ("Jaeger 2.21.0 removed both routes") is skipped
+  when a word such as `removed` or `added` follows it. A new way of writing a
+  version needs a new rule in the script.
 - **The main sources:** the Prometheus and Prometheus Operator documentation,
   the OpenTelemetry Collector and Operator documentation, the Jaeger and
   Grafana documentation, and the Kubernetes debugging pages. Check every page against
@@ -341,6 +351,7 @@ them in technical terms and use them as they are.
 | `scout` (Deployment and Service) | `ghcr.io/stefanprodan/podinfo:6.15.0` | HTTP API on port `9898`; serves Prometheus metrics on `/metrics` (`http_requests_total{status}` counter and `http_request_duration_seconds{method,path,status}` histogram). `/status/<code>` returns that code and `/delay/<seconds>` waits, so error ratio and latency come from `scout`. Tracing: `--otel-service-name` switches on OpenTelemetry tracing and log export (verified on 6.15.0; endpoint through the standard `OTEL_EXPORTER_OTLP_*` variables, verify at build) |
 | `probe` (Deployment and Service) | `mccutchen/go-httpbin:2.25.0` (Docker Hub tag has no `v`; `v2.25.0` does not exist) | HTTP echo server on port `8080` with `/delay/N` and `/status/<code>`. It serves **no** Prometheus metrics (`/metrics` is `404`), so metric modules never scrape it. It logs one line per request, with `level=ERROR` for a `5xx`, which makes it the log source for the logging module |
 | `shuttle` | `curlimages/curl` | Client pod; test requests are sent from here with `kubectl exec deploy/shuttle -- curl ...` |
+| Python trace emitter (section 030 module 10: playground `probe`, lab-02 and lab-03 `scout`, `probe`, `shuttle`) | `python:3.13.18-alpine3.24` with `emitter.py` from the ConfigMap `trace-emitter` | Sends one span every 2 seconds straight to Jaeger over OTLP/HTTP (`jaeger.observability:4318`). `TRACE_SERVICE` sets `service.name`. With `TARGET_URL` it calls that address inside the span; a failed call gives the span status `ERROR` (`2`) and an `exception` span event. `SERVE_PORT` makes it answer HTTP. Lab-02's variant adds `incident.code` and `RESPONSE_DELAY_MS` |
 | `relay` (planned, section 030) | `node:22-alpine` with a small HTTP server script from a ConfigMap | A front service that calls `scout`, used for auto-instrumentation because the OpenTelemetry Operator's Node.js injection works without eBPF; decide and verify at build |
 
 The workloads use the `default` service account. Do not add other example
@@ -522,7 +533,8 @@ this order:
   `otel-collector`, `filelog-receiver`, `k8sattributes`, `count-connector`,
   `kubectl-logs`, `loki`, `logql`
 - Tracing: `opentelemetry`, `otlp`, `collector-pipeline`,
-  `instrumentation`, `auto-instrumentation`, `jaeger`, `context-propagation`
+  `instrumentation`, `auto-instrumentation`, `jaeger`, `context-propagation`,
+  `span-status`, `exception-event`, `trace-search`
 - Delivery and efficiency: `dora-metrics`, `deployment-frequency`,
   `lead-time`, `change-failure-rate`, `time-to-restore`, `sli`, `slo`,
   `error-budget`, `resource-efficiency`, `metrics-server`
@@ -556,6 +568,16 @@ takes `ats-020-lab-<section>-<module>-<lab>`, for example
 scripts do not pin a kube context: astrona sets `KUBECONFIG` for the lab, and
 `astrona test` runs on a cluster with a different name. Every lab must pass
 `astrona validate` and `astrona test`.
+
+The `labs` workflow (`.github/workflows/labs.yml`) proves this on GitHub.
+It runs every lab with `astrona test` and starts every playground with
+`scripts/ci/test-playground.sh`, each on its own runner. A pull request tests
+the sections it changes. A change to `versions.env`, `scripts/` or the
+workflow tests every section, and so does the Monday run. A playground can
+have `testing/smoke.sh`: it runs the commands the pages teach, with the YAML
+taken from the pages, and checks the results the pages show. Give every new
+playground one. Read telemetry with retries, because spans and metrics
+arrive in batches.
 
 Graders check **behaviour**, not just that an object exists: query
 Prometheus for the target or the alert, read the trace from the Jaeger API,

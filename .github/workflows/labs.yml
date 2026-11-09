@@ -1,0 +1,158 @@
+# Proves that the labs and playgrounds still work:
+#   - each lab: `astrona validate`, then `astrona test` (bootstrap, reference
+#     solution, graders, teardown) must pass;
+#   - each playground: `astrona run` must finish with every readiness check,
+#     and its testing/smoke.sh (if any) must pass.
+# Each environment runs on its own runner with its own kind cluster.
+#
+# Which environments (scripts/ci/list-environments.sh):
+#   - pull request: the sections with a changed file; every section when
+#     versions.env, scripts/ or this file changes (so every Renovate pull
+#     request after the sync-versions commit tests everything);
+#   - every Monday: every section (a floating image tag or a removed download
+#     can break a lab without a commit);
+#   - by hand: every section, or the paths given in the "paths" input.
+#
+# Make the job "all environments pass" a required status check on main, so a
+# change cannot merge while a lab or playground fails.
+name: labs
+
+on:
+  pull_request:
+    paths:
+      - "versions.env"
+      - "sections/**"
+      - "scripts/**"
+      - ".github/workflows/labs.yml"
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      paths:
+        description: "Space-separated paths to test, for example sections/section-030"
+        required: false
+        default: "sections"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: labs-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  ASTRONA_VERSION: "0.4.14"
+  ASTRONA_SHA256: "9e0e5d9b67d6a8b6ff62cf47276163933d072585f498671a5a4e0477ebab82ee"
+  KIND_VERSION: "0.33.0"
+  ASTRONA_NO_UPDATE_CHECK: "1"
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.list.outputs.environments }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Check that the course files match versions.env
+        run: python3 scripts/sync-versions.py --check
+      - id: list
+        name: List the environments to test
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PATHS: ${{ inputs.paths }}
+        run: |
+          case "$EVENT" in
+            pull_request) environments=$(scripts/ci/list-environments.sh --changed-since "$BASE_SHA") ;;
+            # shellcheck disable=SC2086  # PATHS is a space-separated list
+            workflow_dispatch) environments=$(scripts/ci/list-environments.sh ${PATHS:-sections}) ;;
+            *) environments=$(scripts/ci/list-environments.sh) ;;
+          esac
+          echo "$environments" | jq -r '.[] | "\(.kind)\t\(.path)"'
+          echo "environments=$environments" >>"$GITHUB_OUTPUT"
+
+  test:
+    needs: list
+    if: needs.list.outputs.environments != '[]'
+    name: ${{ matrix.env.kind }} ${{ matrix.env.path }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        env: ${{ fromJSON(needs.list.outputs.environments) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install kind and astrona
+        run: |
+          mkdir -p "$HOME/bin"
+          curl -fsSLo "$HOME/bin/kind" "https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-linux-amd64"
+          echo "$(curl -fsSL "https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-linux-amd64.sha256sum" | cut -d' ' -f1)  $HOME/bin/kind" | sha256sum -c -
+          curl -fsSLo "$HOME/bin/astrona" "https://github.com/astrona-io/astrona-cli/releases/download/v${ASTRONA_VERSION}/astrona-linux-amd64"
+          echo "${ASTRONA_SHA256}  $HOME/bin/astrona" | sha256sum -c -
+          chmod +x "$HOME/bin/kind" "$HOME/bin/astrona"
+          echo "$HOME/bin" >>"$GITHUB_PATH"
+
+      # Docker on a hosted runner sometimes answers slowly right after the job
+      # starts, and `astrona check` then fails with "context deadline exceeded".
+      - name: Wait for Docker
+        run: |
+          timeout 180 bash -c 'until docker info >/dev/null 2>&1; do echo "waiting for Docker..."; sleep 5; done'
+          docker version --format 'Docker {{.Server.Version}}'
+
+      # GitHub runners are cloud VMs, so the cloud metadata address
+      # 169.254.169.254 answers there. The cloud resource detectors of the
+      # Node.js auto-instrumentation agent probe it (the relay pod then logs a
+      # MetadataLookupWarning). Reject it for containers, as on a laptop where
+      # the address does not answer.
+      - name: Block the cloud metadata address for containers
+        run: sudo iptables -I DOCKER-USER -d 169.254.169.254 -j REJECT
+
+      - name: Check the runner
+        run: |
+          astrona --help | grep -m1 Version
+          astrona check --accept-terms --headless -c "${{ matrix.env.path }}"
+
+      - name: Validate the lab
+        if: matrix.env.kind == 'lab'
+        run: astrona validate --accept-terms --headless -c "${{ matrix.env.path }}"
+
+      - name: Test the lab with its reference solution
+        if: matrix.env.kind == 'lab'
+        run: |
+          astrona test --accept-terms --headless --install-version \
+            -c "${{ matrix.env.path }}" \
+            --junit-xml "$RUNNER_TEMP/junit.xml" \
+            --diagnostics-dir "$RUNNER_TEMP/diagnostics"
+
+      - name: Start the playground and run its smoke test
+        if: matrix.env.kind == 'playground'
+        env:
+          DIAGNOSTICS_DIR: ${{ runner.temp }}/diagnostics
+        run: scripts/ci/test-playground.sh "${{ matrix.env.path }}"
+
+      - name: Upload diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostics-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/diagnostics
+            ${{ runner.temp }}/junit.xml
+          if-no-files-found: ignore
+
+  result:
+    name: all environments pass
+    needs: [list, test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      # "skipped" means the pull request changed no section, so nothing to test.
+      - run: |
+          echo "list result: ${{ needs.list.result }}, test result: ${{ needs.test.result }}"
+          [ "${{ needs.list.result }}" = "success" ]
+          [ "${{ needs.test.result }}" = "success" ] || [ "${{ needs.test.result }}" = "skipped" ]

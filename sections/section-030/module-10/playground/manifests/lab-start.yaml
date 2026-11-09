@@ -3,7 +3,10 @@
 # with tracing switched on, and a `shuttle` pod that sends steady traffic to
 # `scout`. `scout` sends its spans over OTLP to `otel-collector.observability`,
 # a Service that only exists once the reader creates an OpenTelemetryCollector
-# named `otel` in `observability`.
+# named `otel` in `observability`. `probe` is a small Python trace emitter: every
+# 2 seconds it calls TARGET_URL and sends one span straight to Jaeger over
+# OTLP/HTTP. A failed call gives the span the status ERROR and an `exception`
+# event, which the reader uses to practise finding failed spans.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -175,3 +178,142 @@ spec:
         - name: traffic
           configMap:
             name: shuttle-traffic
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trace-emitter
+  namespace: starfleet
+data:
+  emitter.py: |
+    """Send one synthetic trace per iteration using OpenTelemetry Protocol JSON.
+
+    A workload with TARGET_URL sends one HTTP request to that address inside
+    its span. When the request fails, the span gets the status code ERROR (2)
+    and one span event named "exception" with the attributes that the
+    OpenTelemetry semantic conventions define for a recorded exception.
+    A workload with SERVE_PORT also answers HTTP requests on that port.
+    """
+    import http.server
+    import json
+    import os
+    import secrets
+    import threading
+    import time
+    import traceback
+    import urllib.request
+
+    service = os.environ["TRACE_SERVICE"]
+    target_url = os.environ.get("TARGET_URL", "")
+    serve_port = os.environ.get("SERVE_PORT", "")
+
+
+    def string_attributes(pairs):
+        return [{"key": key, "value": {"stringValue": value}} for key, value in pairs.items()]
+
+
+    if serve_port:
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain")
+                self.end_headers()
+                self.wfile.write(b"ok\n")
+
+            def log_message(self, *args):
+                pass
+
+        server = http.server.ThreadingHTTPServer(("", int(serve_port)), Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+
+    while True:
+        started = time.time_ns()
+        span = {
+            "traceId": secrets.token_hex(16),
+            "spanId": secrets.token_hex(8),
+            "name": "call-target" if target_url else "process-probe",
+            "kind": 3 if target_url else 2,
+            "startTimeUnixNano": str(started),
+            "attributes": string_attributes({
+                "workload.name": service,
+                "target.url": target_url or "none",
+            }),
+            "events": [],
+            "status": {"code": 1},
+        }
+        if target_url:
+            try:
+                with urllib.request.urlopen(target_url, timeout=3) as response:
+                    response.read()
+            except Exception as error:  # noqa: BLE001 - every failure must land in the span
+                span["status"] = {"code": 2, "message": f"{type(error).__name__}: {error}"}
+                span["events"].append({
+                    "timeUnixNano": str(time.time_ns()),
+                    "name": "exception",
+                    "attributes": string_attributes({
+                        "exception.type": type(error).__name__,
+                        "exception.message": str(error),
+                        "exception.stacktrace": traceback.format_exc(),
+                    }),
+                })
+        else:
+            time.sleep(0.02)
+        span["endTimeUnixNano"] = str(time.time_ns())
+        payload = {"resourceSpans": [{
+            "resource": {"attributes": string_attributes({"service.name": service})},
+            "scopeSpans": [{"scope": {"name": "astrona-trace-fixture"}, "spans": [span]}],
+        }]}
+        request = urllib.request.Request(
+            "http://jaeger.observability:4318/v1/traces",
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=5) as response:
+                response.read()
+        except OSError as error:
+            print(f"Span export failed: {error}", flush=True)
+        time.sleep(2)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+  labels:
+    app: probe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      # Python runs as PID 1 and ignores SIGTERM, so without this the old pod
+      # keeps sending failed spans for 30 seconds after a rollout.
+      terminationGracePeriodSeconds: 2
+      containers:
+        - name: probe
+          image: python:3.13.18-alpine3.24
+          command: ["python3", "/emitter/emitter.py"]
+          env:
+            - name: TRACE_SERVICE
+              value: probe
+            # A working address. The reader changes it to a Service that
+            # does not exist, to see spans that end with an error.
+            - name: TARGET_URL
+              value: http://scout.starfleet:9898/
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 48Mi}
+          volumeMounts:
+            - name: emitter
+              mountPath: /emitter
+              readOnly: true
+      volumes:
+        - name: emitter
+          configMap:
+            name: trace-emitter

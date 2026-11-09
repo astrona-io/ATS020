@@ -86,20 +86,22 @@ curl -fsSG http://127.0.0.1:16686/api/v3/traces \
 ```
 
 Check what you saved. The first command prints the number of events, at least
-`1`. The second prints the exception type and message of each event, and the
-message names the host that did not resolve:
+`1`. The second prints the exception type and message of each event. It
+turns the attributes of each event into one object first, because Jaeger does
+not keep them in a fixed order:
 
 ```sh
 jq length /tmp/ats-020-exceptions.json
-jq -r '.[] | [.attributes[] | select(.key == "exception.type" or .key == "exception.message") | .value.stringValue] | join(": ")' /tmp/ats-020-exceptions.json
+jq -r '.[] | (.attributes | map({(.key): .value.stringValue}) | add) | "\(.["exception.type"]): \(.["exception.message"])"' /tmp/ats-020-exceptions.json
 ```
 
 **Run the check:** the watch terminal shows `exceptions-exported` passing.
 
 ## Step 3: Fix the address probe calls
 
-The exception message says that the host `relay.starfleet` does not resolve.
-Read the variable and the Services in the namespace:
+The exception message says `Name does not resolve`: the DNS (Domain Name
+System) lookup of the host name failed. Read the variable to see which host
+`probe` calls, and list the Services in the namespace:
 
 ```sh
 kubectl -n starfleet set env deployment/probe --list | grep TARGET_URL

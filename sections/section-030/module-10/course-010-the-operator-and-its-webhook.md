@@ -8,7 +8,7 @@ reviewed: "2026-11-08"
 
 The OpenTelemetry Collector receives, processes, and exports telemetry data. On Kubernetes, the OpenTelemetry Operator manages the Collector's Deployment, configuration, and Services from an `OpenTelemetryCollector` custom resource.
 
-In this section, you will install the Operator and verify that its admission webhook is ready before creating a Collector.
+The playground already runs the Operator. This part checks that the Operator runs and that its admission webhook is ready, because a Collector can only be created when both are true.
 
 ## What the Operator Needs
 
@@ -21,11 +21,11 @@ The Operator also provides **admission webhooks**: HTTPS endpoints that the Kube
 
 These endpoints require TLS certificates trusted by the Kubernetes API server.
 
-**cert-manager** provisions and renews the webhook certificate using `Issuer` and `Certificate` resources included in the Operator installation manifest. It must be running before you install the Operator. In this playground, cert-manager is already installed.
+**cert-manager** provisions and renews the webhook certificate using `Issuer` and `Certificate` resources included in the Operator installation manifest. It must be running before the Operator is installed. The playground installed cert-manager 1.21.2 first, then the Operator 0.160.0 from its release manifest (`opentelemetry-operator.yaml`) with `kubectl apply --server-side`.
 
 <!-- astrona:playground:renew -->
 
-## Install the Operator
+## Check the Operator
 
 Check that the three cert-manager components are running:
 
@@ -36,45 +36,44 @@ kubectl -n cert-manager get pods
 Expected output:
 
 ```text
-NAME                                      READY   STATUS    RESTARTS   AGE
-cert-manager-7dd5fd898d-cql8p               1/1     Running   0          2m1s
-cert-manager-cainjector-f555478d-4g8td       1/1     Running   0          2m1s
-cert-manager-webhook-69d4696bcf-gwxsv       1/1     Running   0          2m1s
+NAME                                     READY   STATUS    RESTARTS   AGE
+cert-manager-7dd5fd898d-6q8jh            1/1     Running   0          10m
+cert-manager-cainjector-f555478d-fl5d8   1/1     Running   0          10m
+cert-manager-webhook-69d4696bcf-wgc9d    1/1     Running   0          10m
 ```
 
 Pod names and ages will vary.
 
-Install OpenTelemetry Operator **0.160.0** using its release manifest:
+The release manifest puts the Operator in the namespace `opentelemetry-operator-system`. It runs as one Deployment, `opentelemetry-operator-controller-manager`. Check the Deployment and its pod:
 
 ```sh
-kubectl apply --server-side -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.160.0/opentelemetry-operator.yaml
-```
-
-The `--server-side` flag delegates apply operations to the API server and avoids the large annotation that client-side apply adds to CustomResourceDefinitions.
-
-The manifest creates the Operator, custom resource definitions, certificates, and webhook configurations. The final lines should resemble:
-
-```text
-deployment.apps/opentelemetry-operator-controller-manager serverside-applied
-certificate.cert-manager.io/opentelemetry-operator-serving-cert serverside-applied
-issuer.cert-manager.io/opentelemetry-operator-selfsigned-issuer serverside-applied
-mutatingwebhookconfiguration.admissionregistration.k8s.io/opentelemetry-operator-mutating-webhook-configuration serverside-applied
-validatingwebhookconfiguration.admissionregistration.k8s.io/opentelemetry-operator-validating-webhook-configuration serverside-applied
-```
-
-Wait for the Operator Deployment to become available:
-
-```sh
-kubectl -n opentelemetry-operator-system rollout status \
-  deployment/opentelemetry-operator-controller-manager \
-  --timeout=180s
+kubectl -n opentelemetry-operator-system get deployment,pods
 ```
 
 Expected output:
 
 ```text
-deployment "opentelemetry-operator-controller-manager" successfully rolled out
+NAME                                                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/opentelemetry-operator-controller-manager   1/1     1            1           10m
+
+NAME                                                            READY   STATUS    RESTARTS   AGE
+pod/opentelemetry-operator-controller-manager-d6b7699d5-lhn69   1/1     Running   0          10m
 ```
+
+The manifest also created the custom resource definitions, the certificate, the issuer and the two webhook configurations. The webhook configurations are cluster-wide objects, so they have no namespace. List them:
+
+```sh
+kubectl get validatingwebhookconfiguration,mutatingwebhookconfiguration | grep opentelemetry
+```
+
+Expected output:
+
+```text
+validatingwebhookconfiguration.admissionregistration.k8s.io/opentelemetry-operator-validating-webhook-configuration   8          10m
+mutatingwebhookconfiguration.admissionregistration.k8s.io/opentelemetry-operator-mutating-webhook-configuration   5          10m
+```
+
+The number is the count of webhooks in each configuration. Each one is a rule that sends a kind of resource, such as an `OpenTelemetryCollector` or a pod, to the Operator before the API server stores it.
 
 ## Check the Webhook Certificate
 
@@ -90,10 +89,10 @@ Expected output:
 
 ```text
 NAME                                                              READY   SECRET                                                   AGE
-certificate.cert-manager.io/opentelemetry-operator-serving-cert     True    opentelemetry-operator-controller-manager-service-cert   22s
+certificate.cert-manager.io/opentelemetry-operator-serving-cert   True    opentelemetry-operator-controller-manager-service-cert   10m
 
 NAME                                                              READY   AGE
-issuer.cert-manager.io/opentelemetry-operator-selfsigned-issuer     True    22s
+issuer.cert-manager.io/opentelemetry-operator-selfsigned-issuer   True    10m
 ```
 
 Both resources should report `READY True`.
@@ -137,6 +136,7 @@ The request should fail with an error similar to:
 ```text
 The OpenTelemetryCollector "otel" is invalid:
 * spec.mode: Unsupported value: "foo": supported values: "daemonset", "deployment", "sidecar", "statefulset"
+* <nil>: Invalid value: null: some validation rules were not checked because the object was invalid; correct the existing errors to complete validation
 ```
 
 This confirms that unsupported modes are rejected. However, the CRD schema can reject this value before the validating webhook runs, so this error alone does not prove that the webhook answered.
@@ -147,7 +147,7 @@ Change `mode: foo` to `mode: deployment` and repeat the dry run:
 kubectl apply --dry-run=server -f collector-invalid.yaml
 ```
 
-A successful dry run confirms that the corrected resource passes admission without being stored. Errors mentioning a failed webhook call, an untrusted certificate, or missing endpoints indicate that webhook readiness needs further investigation.
+The output is `opentelemetrycollector.opentelemetry.io/otel created (server dry run)`. A successful dry run confirms that the corrected resource passes admission without being stored. Errors mentioning a failed webhook call, an untrusted certificate, or missing endpoints indicate that webhook readiness needs further investigation.
 
 ## Inspect the Available Resources
 
@@ -160,11 +160,11 @@ kubectl api-resources --api-group=opentelemetry.io
 Expected output:
 
 ```text
-NAME                     SHORTNAMES          APIVERSION                  NAMESPACED   KIND
-instrumentations         otelinst,otelinsts   opentelemetry.io/v1alpha1   true         Instrumentation
-opampbridges                                 opentelemetry.io/v1alpha1   true         OpAMPBridge
-opentelemetrycollectors   otelcol,otelcols    opentelemetry.io/v1beta1    true         OpenTelemetryCollector
-targetallocators                             opentelemetry.io/v1alpha1   true         TargetAllocator
+NAME                      SHORTNAMES           APIVERSION                  NAMESPACED   KIND
+instrumentations          otelinst,otelinsts   opentelemetry.io/v1alpha1   true         Instrumentation
+opampbridges                                   opentelemetry.io/v1alpha1   true         OpAMPBridge
+opentelemetrycollectors   otelcol,otelcols     opentelemetry.io/v1beta1    true         OpenTelemetryCollector
+targetallocators                               opentelemetry.io/v1alpha1   true         TargetAllocator
 ```
 
 The next section uses `OpenTelemetryCollector`, also available through the short name `otelcol`, to configure the pipeline that forwards spans from `scout` to Jaeger.
@@ -172,6 +172,7 @@ The next section uses `OpenTelemetryCollector`, also available through the short
 ## Common Pitfalls
 
 > [!WARNING]
-> - **Installing the Operator before cert-manager is ready.** The Operator manifest includes `Certificate` and `Issuer` resources. Install cert-manager and wait for its components to become ready before applying the Operator manifest.
-> - **Creating a Collector immediately after installation.** The webhook may need additional time to become available after the Operator pod starts. If `kubectl apply` reports a webhook connection error, wait briefly and retry. If the error persists, inspect the webhook Service, endpoints, and certificate.
+> - **Looking for the Operator in the wrong namespace.** The release manifest installs it in `opentelemetry-operator-system`, not in the namespace of your Collector. Its logs and its certificate are there too.
+> - **Missing that cert-manager is down.** The Operator manifest includes `Certificate` and `Issuer` resources. If cert-manager does not run, the certificate is not issued or renewed, and the webhook fails even though the Operator pod is `Running`.
+> - **Creating a Collector right after the Operator pod restarts.** The webhook may need a few seconds to become available again. If `kubectl apply` reports a webhook connection error, wait briefly and retry. If the error persists, inspect the webhook Service, endpoints, and certificate.
 > - **Assuming a running pod means the webhook is ready.** Check that the webhook certificate reports `READY True`, then submit a valid Collector manifest using `kubectl apply --dry-run=server` to check admission without creating the resource.

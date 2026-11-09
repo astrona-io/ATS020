@@ -146,10 +146,13 @@ kubectl -n starfleet get pods
 deployment.apps/scout patched
 deployment "scout" successfully rolled out
 NAME                       READY   STATUS        RESTARTS   AGE
-scout-6b57d6d96f-pfkhg     2/2     Running       0          12s
-scout-787bdfdc65-q9z8p     1/1     Terminating   0          3m9s
-shuttle-65f695c8c6-jr5xb   1/1     Running       0          12m
+probe-c74b7b9f9-jw5sn      1/1     Running       0          2m6s
+scout-6b57d6d96f-6d7fl     2/2     Running       0          4s
+scout-787bdfdc65-z2vhl     1/1     Terminating   0          15m
+shuttle-65f695c8c6-c5857   1/1     Running       0          15m
 ```
+
+The output leaves out the `Waiting for deployment` lines of the rollout.
 
 The new `scout` pod shows `2/2`: the application and the Collector. The Collector is not in the container list. Kubernetes 1.35 runs it as a native sidecar, an init container with `restartPolicy: Always`. Check:
 

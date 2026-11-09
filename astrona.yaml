@@ -441,8 +441,18 @@ modules:
         path: sections/section-030/module-10/labs/lab-01
         difficulty: intermediate
         estimated_duration: 20m
-        topic: distributed-tracing
+        topic: tracing
         task_kind: troubleshooting
+        tags: [otel-collector, collector-pipeline, otlp, jaeger, opentelemetry]
+        learning_goals:
+          - Find the faults in the exporter of a running Collector from its Service ports and logs
+          - Fix the OpenTelemetryCollector without changing its mode, its Service or the address scout sends to
+          - Prove the fix with rising Collector counters and scout spans in Jaeger
+        resources:
+          - name: "OpenTelemetry Collector configuration"
+            url: https://opentelemetry.io/docs/collector/configuration/
+          - name: "OpenTelemetry Operator for Kubernetes"
+            url: https://opentelemetry.io/docs/platforms/kubernetes/operator/
       - type: reading
         title: "Finding A Service By Tag And Acting On It"
         path: sections/section-030/module-10/course-060-finding-a-service-by-tag-and-acting-on-it.md
@@ -456,7 +466,7 @@ modules:
         estimated_duration: 20m
         topic: tracing
         task_kind: troubleshooting
-        tags: [jaeger, opentelemetry, otlp, instrumentation]
+        tags: [jaeger, opentelemetry, otlp, trace-search]
         learning_goals:
           - Find a service by a span tag in the Jaeger web interface and through the /api/v3 query API
           - Change an environment variable on one Deployment and scale another from the search result
@@ -470,6 +480,9 @@ modules:
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
           - name: "Kubernetes: kubectl scale"
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
+      - type: reading
+        title: "Finding Failed Spans And Their Exceptions"
+        path: sections/section-030/module-10/course-070-finding-failed-spans-and-their-exceptions.md
       - type: reading
         title: Question
         path: sections/section-030/module-10/labs/lab-03/question.md
@@ -516,7 +529,7 @@ modules:
         path: sections/section-030/module-20/labs/lab-01
         difficulty: intermediate
         estimated_duration: 30m
-        topic: distributed-tracing
+        topic: tracing
         task_kind: troubleshooting
       - type: reading
         title: Summary
@@ -530,7 +543,7 @@ modules:
         path: sections/section-030/capstone/labs/lab-01
         difficulty: advanced
         estimated_duration: 60m
-        topic: distributed-tracing
+        topic: tracing
         task_kind: build
       - type: quiz
         title: "Knowledge Check: Distributed Tracing With OpenTelemetry And Jaeger"

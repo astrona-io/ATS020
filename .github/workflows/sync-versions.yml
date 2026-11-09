@@ -1,0 +1,57 @@
+# Renovate changes only versions.env. When it pushes a branch, this workflow
+# runs scripts/sync-versions.py and commits the synced course files back to
+# the same branch, so the Renovate pull request holds the whole change.
+#
+# Token: a push made with the default GITHUB_TOKEN does not start other
+# workflows, so the checks would not run again on the synced commit. The
+# workflow therefore pushes with a token of the organisation's GitHub App
+# "astrona-version-sync" (permission "Contents: read and write", installed on
+# the course repositories only). It needs, at organisation or repository level:
+#   - the variable SYNC_APP_ID: the App ID;
+#   - the secret SYNC_APP_PRIVATE_KEY: the App's private key (.pem contents).
+# The token is created for this repository only and expires after one hour.
+#
+# Renovate ignores the commit because renovate.json lists the bot email below
+# in gitIgnoredAuthors. Keep the two in step.
+name: sync-versions
+
+on:
+  push:
+    branches: ["renovate/**"]
+
+# The push uses the App token, so the default token only needs to read.
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-versions-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a token for the astrona-version-sync App
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Sync the course files and push them to the Renovate branch
+        run: |
+          python3 scripts/sync-versions.py
+          if git diff --quiet; then
+            echo "The course files already match versions.env."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --all --message "chore(versions): sync course files with versions.env"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
