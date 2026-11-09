@@ -19,13 +19,13 @@ SERVICE="$(kubectl get validatingwebhookconfiguration starfleet-policy -o jsonpa
 BEFORE="$(count_answers)"
 CREATED=""
 for attempt in $(seq 1 18); do
-  if kubectl -n starfleet create deployment grader-check --image=ghcr.io/stefanprodan/podinfo:6.15.0 >/dev/null 2>&1; then
+  if kubectl -n starfleet create deployment grader-check --image=ghcr.io/stefanprodan/podinfo:6.17.0 >/dev/null 2>&1; then
     CREATED=yes
     break
   fi
   sleep 5
 done
-[ -n "$CREATED" ] || fail "creating a Deployment in starfleet still fails: $(kubectl -n starfleet create deployment grader-check --image=ghcr.io/stefanprodan/podinfo:6.15.0 2>&1 | tail -1)"
+[ -n "$CREATED" ] || fail "creating a Deployment in starfleet still fails: $(kubectl -n starfleet create deployment grader-check --image=ghcr.io/stefanprodan/podinfo:6.17.0 2>&1 | tail -1)"
 kubectl -n starfleet delete deployment grader-check --wait=false >/dev/null 2>&1
 
 AFTER="$(count_answers)"

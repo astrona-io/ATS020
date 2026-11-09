@@ -9,7 +9,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 
 IMAGE="$(kubectl -n starfleet get deployment scout -o jsonpath='{.spec.template.spec.containers[?(@.name=="scout")].image}' 2>/dev/null)" \
   || fail "Deployment scout is missing in namespace starfleet (fix it, do not delete it)"
-[ "$IMAGE" = "ghcr.io/stefanprodan/podinfo:6.15.0" ] || fail "scout image is '$IMAGE', expected ghcr.io/stefanprodan/podinfo:6.15.0"
+[ "$IMAGE" = "ghcr.io/stefanprodan/podinfo:6.17.0" ] || fail "scout image is '$IMAGE', expected ghcr.io/stefanprodan/podinfo:6.17.0"
 
 for attempt in $(seq 1 36); do
   READY="$(kubectl -n starfleet get deployment scout -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"

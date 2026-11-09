@@ -19,13 +19,13 @@ SERVICE="$(kubectl get validatingwebhookconfiguration outpost-policy -o jsonpath
 BEFORE="$(count_answers)"
 CREATED=""
 for attempt in $(seq 1 18); do
-  if kubectl -n outpost create deployment grader-check --image=ghcr.io/stefanprodan/podinfo:6.15.0 >/dev/null 2>&1; then
+  if kubectl -n outpost create deployment grader-check --image=ghcr.io/stefanprodan/podinfo:6.17.0 >/dev/null 2>&1; then
     CREATED=yes
     break
   fi
   sleep 5
 done
-[ -n "$CREATED" ] || fail "creating a Deployment in outpost still fails: $(kubectl -n outpost create deployment grader-check --image=ghcr.io/stefanprodan/podinfo:6.15.0 2>&1 | tail -1)"
+[ -n "$CREATED" ] || fail "creating a Deployment in outpost still fails: $(kubectl -n outpost create deployment grader-check --image=ghcr.io/stefanprodan/podinfo:6.17.0 2>&1 | tail -1)"
 kubectl -n outpost delete deployment grader-check --wait=false >/dev/null 2>&1
 
 AFTER="$(count_answers)"

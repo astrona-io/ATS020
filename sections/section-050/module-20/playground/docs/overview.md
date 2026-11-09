@@ -9,7 +9,7 @@ The cluster runs Kubernetes 1.35.8 on one node. A trimmed kube-prometheus-stack 
 | Object | Namespace | What it is |
 | --- | --- | --- |
 | `shuttle` | `starfleet` | A healthy client pod with `curl`. You send requests with `kubectl exec deploy/shuttle -- curl ...` |
-| `scout` | `starfleet` | `podinfo` 6.15.0 on port `9898`, with a Service, a ServiceMonitor and a PrometheusRule named `scout-alerts` |
+| `scout` | `starfleet` | `podinfo` 6.17.0 on port `9898`, with a Service, a ServiceMonitor and a PrometheusRule named `scout-alerts` |
 | `drifter` | `outpost` | A healthy client pod with `curl` |
 | `starfleet-policy` | `webhook-system` | A webhook server (Deployment and Service). A ValidatingWebhookConfiguration of the same name sends every create of a Deployment in `starfleet` to it |
 | `outpost-policy` | `webhook-system` | The same for the namespace `outpost` |
@@ -32,7 +32,7 @@ This helper creates a Deployment in a namespace and prints the answer of the API
 
 ```sh
 try_create() {
-  kubectl -n "$1" create deployment try-create --image=ghcr.io/stefanprodan/podinfo:6.15.0 \
+  kubectl -n "$1" create deployment try-create --image=ghcr.io/stefanprodan/podinfo:6.17.0 \
     && kubectl -n "$1" delete deployment try-create
 }
 ```

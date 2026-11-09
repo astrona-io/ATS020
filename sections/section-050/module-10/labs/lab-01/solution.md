@@ -37,7 +37,7 @@ The output is long. These are the decisive lines, shortened:
 
 ```text
 Warning   FailedScheduling   pod/scout-...   0/1 nodes are available: 1 node(s) didn't match Pod's node affinity/selector. ...
-Warning   Failed             pod/beacon-...  Failed to pull image "ghcr.io/stefanprodan/podinfo:v6.15.0": rpc error: code = NotFound ...
+Warning   Failed             pod/beacon-...  Failed to pull image "ghcr.io/stefanprodan/podinfo:v6.17.0": rpc error: code = NotFound ...
 Warning   Unhealthy          pod/probe-...   Liveness probe failed: Get "http://10.244.0.18:8081/status/200": dial tcp 10.244.0.18:8081: connect: connection refused
 Warning   BackOff            pod/cargo-...   Back-off restarting failed container cargo in pod ...
 ```
@@ -106,10 +106,10 @@ The grader accepts any limit from `256Mi` up to `1Gi`.
 
 ## Step 4: Fix beacon
 
-The event says the image `ghcr.io/stefanprodan/podinfo:v6.15.0` was not found. The tag is `6.15.0`, without the `v`. Set the right image:
+The event says the image `ghcr.io/stefanprodan/podinfo:v6.17.0` was not found. The tag is `6.17.0`, without the `v`. Set the right image:
 
 ```sh
-kubectl -n starfleet set image deploy/beacon '*=ghcr.io/stefanprodan/podinfo:6.15.0'
+kubectl -n starfleet set image deploy/beacon '*=ghcr.io/stefanprodan/podinfo:6.17.0'
 ```
 
 Do not use `latest`. The grader checks for the exact tag.
@@ -160,5 +160,5 @@ Score: 5/5 points (100%)
 
 - Deleting the liveness probe of `probe`: the pod stays up, but the check for the probe fails.
 - Removing the memory limit of `cargo`, or changing its command: the limit check or the design check fails.
-- Using `latest` for `beacon`: the check needs the exact tag `6.15.0`.
+- Using `latest` for `beacon`: the check needs the exact tag `6.17.0`.
 - Deleting a Deployment or scaling it to zero: the design check fails.

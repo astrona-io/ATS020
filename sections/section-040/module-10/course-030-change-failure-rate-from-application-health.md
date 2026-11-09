@@ -21,10 +21,10 @@ curl -s "http://127.0.0.1:3000/api/v1/repos/starfleet/starfleet-deploy/raw/scout
 ```
 
 ```text
-21:          image: ghcr.io/stefanprodan/podinfo:6.15.0-missing
+21:          image: ghcr.io/stefanprodan/podinfo:6.17.0-missing
 ```
 
-The tag `6.15.0-missing` does not exist in the image registry. When this commit is deployed, the kubelet cannot pull the image, and the new pods stay in `ImagePullBackOff`. Argo CD does not care: it applied the manifest exactly as Git describes it, so the sync operation ends with the phase `Succeeded`. Ask Prometheus for syncs that ended in `Failed` or `Error`. Define the `promql` helper first, if your shell is new:
+The tag `6.17.0-missing` does not exist in the image registry. When this commit is deployed, the kubelet cannot pull the image, and the new pods stay in `ImagePullBackOff`. Argo CD does not care: it applied the manifest exactly as Git describes it, so the sync operation ends with the phase `Succeeded`. Ask Prometheus for syncs that ended in `Failed` or `Error`. Define the `promql` helper first, if your shell is new:
 
 ```sh
 promql() {

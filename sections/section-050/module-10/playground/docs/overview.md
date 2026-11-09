@@ -9,8 +9,8 @@ The cluster runs Kubernetes 1.35.8 on one node. The metrics-server add-on is ins
 | Workload | Image | What is wrong |
 | --- | --- | --- |
 | `shuttle` | `curlimages/curl:8.22.0` | Nothing. It is a healthy client pod that you use to send requests with `kubectl exec deploy/shuttle -- curl ...` |
-| `scout` | `ghcr.io/stefanprodan/podinfo:6.15.0` | Its pod stays `Pending`. The container asks for more CPU than the node has |
-| `bridge` | `ghcr.io/stefanprodan/podinfo:6.15.0` | Its pod stays `Pending`. It mounts a PersistentVolumeClaim that does not exist |
+| `scout` | `ghcr.io/stefanprodan/podinfo:6.17.0` | Its pod stays `Pending`. The container asks for more CPU than the node has |
+| `bridge` | `ghcr.io/stefanprodan/podinfo:6.17.0` | Its pod stays `Pending`. It mounts a PersistentVolumeClaim that does not exist |
 | `probe` | `mccutchen/go-httpbin:2.25.0` | The container restarts again and again. The liveness probe asks for a path the server does not have |
 | `engine` | `curlimages/curl:8.22.0` | The container exits at once and the pod goes into `CrashLoopBackOff` |
 | `cargo` | `node:22-alpine` | The container is stopped with `OOMKilled`. The memory limit is below what the process holds |

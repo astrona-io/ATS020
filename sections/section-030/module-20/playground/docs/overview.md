@@ -19,7 +19,7 @@ to save memory.
 | `observability` | Jaeger 2.22.0 in one pod with in-memory storage, and the Collector `otel` (contrib 0.162.0, `deployment` mode). The Service `otel-collector` takes OTLP on `4317` (gRPC) and `4318` (HTTP) |
 | `starfleet` | `scout`, `relay` and `shuttle` |
 
-`scout` is `podinfo` 6.15.0 with its own OpenTelemetry tracing on. It sends its
+`scout` is `podinfo` 6.17.0 with its own OpenTelemetry tracing on. It sends its
 spans to `otel-collector.observability:4317`. `relay` is `node:22-alpine`
 running a small HTTP server from the ConfigMap `relay-app`. Each request to
 `relay` makes one request to `scout`. A request to `relay` at `/slow` asks

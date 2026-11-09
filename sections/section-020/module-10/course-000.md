@@ -25,9 +25,9 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35, with a 
 
 | Namespace | Workload | What it is |
 | --- | --- | --- |
-| `starfleet` | `scout` | Two pods of `podinfo` 6.15.0, scraped by a ServiceMonitor |
+| `starfleet` | `scout` | Two pods of `podinfo` 6.17.0, scraped by a ServiceMonitor |
 | `starfleet` | `shuttle` | A client pod that sends normal requests to each `scout`, plus a `/status/500` every fifth loop and a `/delay/1` every tenth loop to the `starfleet` `scout` |
-| `outpost` | `scout` | One pod of `podinfo` 6.15.0, scraped by a ServiceMonitor. It only gets normal requests |
+| `outpost` | `scout` | One pod of `podinfo` 6.17.0, scraped by a ServiceMonitor. It only gets normal requests |
 
 A namespace groups Kubernetes resources. A ServiceMonitor tells the Prometheus Operator which Service endpoints to scrape; both monitors carry the selected label `release: kps`. The Grafana user is `admin` with the password `starfleet`. Every command in the parts runs against the playground cluster, and `kubectl` already points at it.
 

@@ -15,7 +15,7 @@ runtime:
       - quay.io/prometheus-operator/prometheus-operator:v0.94.1
       - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
       - quay.io/prometheus/prometheus:v3.15.0-distroless
-      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - ghcr.io/stefanprodan/podinfo:6.17.0
       - node:22-alpine
       - curlimages/curl:8.22.0
 

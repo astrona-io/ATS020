@@ -30,7 +30,7 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. A trimm
 | `outpost-policy` | The same webhook for the namespace `outpost` | Its serving certificate expired, so every create in `outpost` fails |
 | `kps-operator` | The Prometheus Operator in `monitoring` | It is scaled to zero, so the ServiceMonitor and PrometheusRule for `scout` never reach Prometheus |
 | `shuttle`, `drifter` | Client pods with `curl` in `starfleet` and `outpost` | Nothing. You send test requests from them |
-| `scout` | `podinfo` 6.15.0, port `9898` | Nothing. It is the workload that Prometheus should scrape |
+| `scout` | `podinfo` 6.17.0, port `9898` | Nothing. It is the workload that Prometheus should scrape |
 
 Launch your playground now, and keep it running next to you while you read the parts:
 

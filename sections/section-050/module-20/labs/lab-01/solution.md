@@ -15,7 +15,7 @@ Use `--watch` until the end, because a plain `astrona submit` finishes the attem
 Create a Deployment in `starfleet` and read the error:
 
 ```sh
-kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.15.0
+kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.17.0
 ```
 
 ```text
@@ -69,7 +69,7 @@ starfleet-policy-sbl4r   IPv4          8443    10.244.0.9    5m26s
 Prove the fix with a create and with the log of the webhook server:
 
 ```sh
-kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.15.0
+kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.17.0
 kubectl -n webhook-system logs deploy/starfleet-policy
 kubectl -n starfleet delete deployment test
 ```
@@ -88,7 +88,7 @@ The watch terminal now shows the check `starfleet-creates` passing. The checks f
 Create a Deployment in `outpost`. The error is a different one:
 
 ```sh
-kubectl -n outpost create deployment test --image=ghcr.io/stefanprodan/podinfo:6.15.0
+kubectl -n outpost create deployment test --image=ghcr.io/stefanprodan/podinfo:6.17.0
 ```
 
 ```text
@@ -145,7 +145,7 @@ deployment "outpost-policy" successfully rolled out
 The old pod can still answer for a few seconds after the rollout, and a create in that moment fails with the same `x509` error. Wait about ten seconds, then prove the fix:
 
 ```sh
-kubectl -n outpost create deployment test --image=ghcr.io/stefanprodan/podinfo:6.15.0
+kubectl -n outpost create deployment test --image=ghcr.io/stefanprodan/podinfo:6.17.0
 kubectl -n outpost delete deployment test
 ```
 

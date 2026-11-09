@@ -20,7 +20,7 @@ runtime:
       - quay.io/prometheus/prometheus:v3.15.0-distroless
       - quay.io/prometheus/alertmanager:v0.34.1
       - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
-      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - ghcr.io/stefanprodan/podinfo:6.17.0
       - curlimages/curl:8.22.0
       - python:3.13-alpine
 

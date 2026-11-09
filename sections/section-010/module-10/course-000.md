@@ -29,7 +29,7 @@ The Starfleet workloads run in two namespaces:
 
 | Namespace | Workload | What it is |
 | --- | --- | --- |
-| `starfleet` | `scout` | Two pods of `podinfo` 6.15.0, a small web application that serves its own metrics on `/metrics`. The Service `scout` has the label `app: scout` and the named port `http` (`9898`) |
+| `starfleet` | `scout` | Two pods of `podinfo` 6.17.0, a small web application that serves its own metrics on `/metrics`. The Service `scout` has the label `app: scout` and the named port `http` (`9898`) |
 | `starfleet` | `shuttle` | A client pod with `curl` |
 | `outpost` | `scout` | One more `podinfo` pod with the label `app: scout`, and **no Service** |
 

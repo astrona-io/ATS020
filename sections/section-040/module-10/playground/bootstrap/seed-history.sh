@@ -112,8 +112,8 @@ wait_for_sync() {
   return 1
 }
 
-GOOD="6.15.0"
-BAD="6.15.0-missing"
+GOOD="6.17.0"
+BAD="6.17.0-missing"
 
 # prometheus_has <PromQL>: true when the instant query returns a series.
 prometheus_has() {
@@ -151,7 +151,7 @@ step() {
   wait_for_scrape "$SYNCS" "$6"
 }
 
-step "Start scout 6.15.0"                      45 "$GOOD" "Welcome aboard" 1 Healthy
+step "Start scout 6.17.0"                      45 "$GOOD" "Welcome aboard" 1 Healthy
 step "Change the welcome message"              30 "$GOOD" "Welcome to the fleet" 1 Healthy
 step "Try a new image build"                   12 "$BAD"  "Welcome to the fleet" 1 Degraded
 step "Revert the new image build"               4 "$GOOD" "Welcome to the fleet" 1 Healthy
