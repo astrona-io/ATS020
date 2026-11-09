@@ -13,17 +13,16 @@
 #     can break a lab without a commit);
 #   - by hand: every section, or the paths given in the "paths" input.
 #
-# Make the job "all environments pass" a required status check on main, so a
+# The ruleset "protect main" requires the job "all environments pass", so a
 # change cannot merge while a lab or playground fails.
 name: labs
 
 on:
+  # Every pull request, with no path filter: "all environments pass" is a
+  # required check on main, so it must report on every pull request. When no
+  # section changed, the list is empty, the tests are skipped and the check
+  # passes within a minute.
   pull_request:
-    paths:
-      - "versions.env"
-      - "sections/**"
-      - "scripts/**"
-      - ".github/workflows/labs.yml"
   schedule:
     - cron: "17 4 * * 1"
   workflow_dispatch:

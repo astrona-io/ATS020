@@ -5,8 +5,8 @@
 # Token: a push made with the default GITHUB_TOKEN does not start other
 # workflows, so the checks would not run again on the synced commit. The
 # workflow therefore pushes with a token of the organisation's GitHub App
-# "astrona-version-sync" (permission "Contents: read and write", installed on
-# the course repositories only). It needs, at organisation or repository level:
+# "ats-version-sync" (permission "Contents: read and write", installed on
+# every repository of astrona-io). It needs, at organisation or repository level:
 #   - the variable SYNC_APP_ID: the App ID;
 #   - the secret SYNC_APP_PRIVATE_KEY: the App's private key (.pem contents).
 # The token is created for this repository only and expires after one hour.
@@ -31,7 +31,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Create a token for the astrona-version-sync App
+      - name: Create a token for the ats-version-sync App
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
