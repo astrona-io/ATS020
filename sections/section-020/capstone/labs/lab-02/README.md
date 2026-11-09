@@ -25,7 +25,7 @@ astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/sect
 astrona destroy ats-020-capstone-020-02
 ```
 
-Bootstrap installs Helm 4.3.0 only if Helm is missing. The terminal needs
+Bootstrap installs Helm 4.3.1 only if Helm is missing. The terminal needs
 kubectl, curl and jq.
 
 Author status: built without booting on 2026-11-04. Runtime behaviour remains untested.

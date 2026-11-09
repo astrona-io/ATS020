@@ -8,7 +8,7 @@
 A single-node kind cluster (`kindest/node:v1.35.8`) with a trimmed
 kube-prometheus-stack 92.3.0 (Prometheus Operator v0.94.1 and one Prometheus
 v3.15.0, 15-second scrape interval) in `monitoring`, installed by
-`bootstrap/prepare.sh` with Helm 4.3.0. `scout` (podinfo 6.15.0) runs in
+`bootstrap/prepare.sh` with Helm 4.3.1. `scout` (podinfo 6.15.0) runs in
 `starfleet` (two replicas) and `outpost` (one replica), each with a Service and
 a ServiceMonitor. `shuttle` runs a traffic loop from a ConfigMap: one request
 per second to each `scout`, one `/status/500` every 5 seconds and one
