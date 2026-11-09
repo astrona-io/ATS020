@@ -270,8 +270,12 @@ section is only true for this one.
   `astrona.yaml`). Renovate changes only that file. Pages, manifests, lab
   configs and bootstrap scripts keep the literal version, and
   `scripts/sync-versions.py` writes the new value into them (CI runs it with
-  `--check`). Merge a version bump only after the affected labs pass
-  `astrona test` and the command output on the pages is checked. Three kinds
+  `--check`). Renovate merges a minor or patch bump on its own once every
+  check is green: the `sync` commit, the `versions` check and the `labs`
+  workflow, which runs `astrona test` on every lab and playground. A person
+  merges a major bump and a kube-prometheus-stack or Argo CD bump, after
+  setting the hand-pinned images and checking the command output on the
+  pages. Three kinds
   of version are left alone:
   - A version in a sentence about history ("Jaeger 2.21.0 removed both
     routes"), when a word such as `removed` or `added` follows it.

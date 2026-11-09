@@ -14,7 +14,10 @@
     "versions",
     "needs-verification"
   ],
-  "automerge": false,
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": false,
+  "automergeStrategy": "squash",
   "gitIgnoredAuthors": [
     "41898282+github-actions[bot]@users.noreply.github.com"
   ],
@@ -52,12 +55,26 @@
         "python"
       ],
       "allowedVersions": "/^3\\.13\\.\\d+-alpine\\d+\\.\\d+$/"
+    },
+    {
+      "description": "A major release can change commands and output on the pages: a person reviews it",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "These releases bring images that versions.env pins by hand (no renovate comment): a person sets them before merging",
+      "matchDepNames": [
+        "kube-prometheus-stack",
+        "argoproj/argo-cd"
+      ],
+      "automerge": false
     }
   ],
   "prBodyNotes": [
-    "This pull request changes `versions.env`. The `sync-versions` workflow then commits the matching course files to this branch. Before merging:",
-    "- [ ] Check that the `sync-versions` commit is on this branch and the `versions` check is green.",
-    "- [ ] Run `astrona test` on every lab that uses this tool (the `labs` workflow tests every section for a `versions.env` change).",
+    "This pull request changes `versions.env`. The `sync-versions` workflow then commits the matching course files to this branch, and the `labs` workflow tests every lab and playground.",
+    "Minor and patch updates merge on their own when every check is green, including `sync` and `all environments pass`. Major updates, kube-prometheus-stack and Argo CD wait for a person:",
     "- [ ] For kube-prometheus-stack or Argo CD: set the values without a `# renovate:` comment in `versions.env` to the images the new release runs.",
     "- [ ] Run the playground commands on the pages and replace any command output that changed."
   ]
