@@ -19,7 +19,7 @@ The four workloads fail in four different ways. The status column of `kubectl ge
 ## Constraints
 
 - Keep the four Deployments, their Services and their names. Do not delete a Deployment and do not scale one to zero. Each keeps one replica.
-- `scout` and `beacon` run the image `ghcr.io/stefanprodan/podinfo:6.15.0`. `beacon` must use this exact existing tag, not `latest`.
+- `scout` and `beacon` run the image `ghcr.io/stefanprodan/podinfo:6.17.0`. `beacon` must use this exact existing tag, not `latest`.
 - Do not remove the liveness probe of `probe`. Make it check something the server really serves.
 - Do not remove the memory limit of `cargo`. Size it to what the process really uses, and keep it below `1Gi`. Do not change the command of `cargo`.
 - Do not change `shuttle`.

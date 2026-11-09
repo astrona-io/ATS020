@@ -2,25 +2,21 @@
 
 Solve this question on: `terminal`
 
-The `scout` service in the `starfleet` namespace creates its own spans and sends them through the Collector `otel` to Jaeger. The `relay` service in front of it is a plain Node.js program with no tracing code. Every request to `relay` makes one request to `scout`. The `shuttle` pod sends such requests all the time.
+After a deployment change, `relay` in `starfleet` still serves requests but no longer has an injected Node.js agent. An Instrumentation named `nodejs` exists in `observability`, with working exporter, propagator, and sampler settings. The injection annotation is misplaced and selects the wrong namespace.
 
-The team wants `relay` traced without any code change, using the OpenTelemetry Operator. Someone set it up, but Jaeger shows no span from `relay`, and the spans of `scout` still start new traces. The `relay` pod is `Running` and serves requests.
+Repair injection without changing the application. Allow about 15 minutes for the four tasks, plus cluster startup and span export time.
 
-## Task
+## Tasks
 
-1. Find out why the Operator does not instrument `relay`, and why a trace would not contain both services even if it did.
-2. Fix the setup so that the Operator injects the Node.js agent into a new `relay` pod and the agent sends the trace context to `scout`.
-3. Prove the fix. Jaeger must hold a trace with a span from `relay` and a span from `scout`, and the span of `scout` must have a span of `relay` as its parent.
+1. Compare the injection annotation on the Deployment, its pod template, and the running pod. Locate the existing Instrumentation.
+2. Put the annotation on the pod template and select a usable Instrumentation. You may reference `observability/nodejs` or create equivalent settings in `starfleet`.
+3. Ensure the Deployment creates a replacement pod. Verify its injected init container, agent environment, and Collector endpoint.
+4. Confirm that a new trace links a `scout` span to a `relay` parent span.
 
 ## Constraints
 
-- Keep the Deployment `relay` in `starfleet`, with its image `node:22-alpine`, its command and the ConfigMap `relay-app`. Do not add tracing code to the script.
-- Do not change `scout`. It must keep sending to `http://otel-collector.observability:4317`.
-- Keep the Collector `otel` as it is. The agent of `relay` must send its spans to the Collector, not straight to Jaeger.
-- Do not use the `debug` exporter and do not delete the Deployment `relay`.
+Keep `relay`'s image `node:22-alpine`, command, and application code unchanged. Do not modify `scout`, `shuttle`, the Collector, or Jaeger. Send spans through the Collector, and keep the `relay` Deployment.
 
 ## How the answer is checked
 
-The grader runs three checks. The first checks that the running `relay` pod has the inject annotation, the init container that the Operator adds, the `tracecontext` propagator and an exporter endpoint at the Collector. The second checks that `relay`, `scout` and the Collector are unchanged in design. The third reads the Jaeger API and needs a recent trace in which a span of `scout` is a child of a span of `relay`. Telemetry arrives late, so the grader retries for a few minutes.
-
-Hint: the Operator changes a pod only when the pod is created. After you fix the resources, make the Deployment create a new pod, and give the traffic about a minute to arrive in Jaeger.
+Three checks verify agent injection, unchanged application design, and a recent linked trace. Propagation is configured correctly at the start; this exercise focuses on getting the agent into a new pod. The trace check retries while exported batches arrive.

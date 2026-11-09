@@ -425,7 +425,7 @@ modules:
         title: "A Collector With An OTLP Receiver And A Jaeger Exporter"
         path: sections/section-030/module-10/course-020-a-collector-with-an-otlp-receiver-and-a-jaeger-exporter.md
       - type: reading
-        title: "Reading A Trace In Jaeger"
+        title: "Reading And Analyzing Traces In Jaeger"
         path: sections/section-030/module-10/course-030-reading-a-trace-in-jaeger.md
       - type: reading
         title: "Choosing A Collector Mode"
@@ -454,8 +454,11 @@ modules:
           - name: "OpenTelemetry Operator for Kubernetes"
             url: https://opentelemetry.io/docs/platforms/kubernetes/operator/
       - type: reading
-        title: "Finding A Service By Tag And Acting On It"
-        path: sections/section-030/module-10/course-060-finding-a-service-by-tag-and-acting-on-it.md
+        title: "Finding A Service By Tag"
+        path: sections/section-030/module-10/course-060-finding-a-service-by-tag.md
+      - type: reading
+        title: "Acting On Trace Findings And Exporting Evidence"
+        path: sections/section-030/module-10/course-070-acting-on-trace-findings-and-exporting-evidence.md
       - type: reading
         title: Question
         path: sections/section-030/module-10/labs/lab-02/question.md
@@ -474,15 +477,15 @@ modules:
         resources:
           - name: "Jaeger 2.22: APIs"
             url: https://www.jaegertracing.io/docs/2.22/architecture/apis/
-          - name: "Jaeger 2.22.0: api_v3 query parameters"
-            url: https://github.com/jaegertracing/jaeger/blob/v2.22.0/cmd/jaeger/internal/extension/jaegerquery/internal/apiv3/query_parser.go
+          - name: "Jaeger 2.23.0: api_v3 query parameters"
+            url: https://github.com/jaegertracing/jaeger/blob/v2.23.0/cmd/jaeger/internal/extension/jaegerquery/internal/apiv3/query_parser.go
           - name: "Kubernetes: kubectl set env"
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
           - name: "Kubernetes: kubectl scale"
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
       - type: reading
         title: "Finding Failed Spans And Their Exceptions"
-        path: sections/section-030/module-10/course-070-finding-failed-spans-and-their-exceptions.md
+        path: sections/section-030/module-10/course-080-finding-failed-spans-and-their-exceptions.md
       - type: reading
         title: Question
         path: sections/section-030/module-10/labs/lab-03/question.md
@@ -516,21 +519,87 @@ modules:
         title: "What The Operator Injects Into A Pod"
         path: sections/section-030/module-20/course-010-what-the-operator-injects-into-a-pod.md
       - type: reading
+        title: Question
+        path: sections/section-030/module-20/labs/lab-03/question.md
+      - type: lab
+        title: "Enable Node.js Agent Injection Lab"
+        path: sections/section-030/module-20/labs/lab-03
+        difficulty: intermediate
+        estimated_duration: 10m
+        topic: tracing
+        task_kind: build
+        tags: [opentelemetry, auto-instrumentation, instrumentation, jaeger]
+        learning_goals:
+          - Configure agent settings and request injection through the pod template
+          - Verify injected settings and recent relay spans in Jaeger
+        resources:
+          - name: "OpenTelemetry Operator: automatic instrumentation"
+            url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
+      - type: reading
         title: "Reading One Trace Across Two Services"
         path: sections/section-030/module-20/course-020-reading-one-trace-across-two-services.md
       - type: reading
+        title: Question
+        path: sections/section-030/module-20/labs/lab-02/question.md
+      - type: lab
+        title: "Identify The Slow Operation In A Trace Lab"
+        path: sections/section-030/module-20/labs/lab-02
+        difficulty: intermediate
+        estimated_duration: 15m
+        topic: tracing
+        task_kind: troubleshooting
+        tags: [opentelemetry, jaeger, trace-search, context-propagation]
+        learning_goals:
+          - Export a complete slow trace linking relay and scout through parent spans
+          - Identify the downstream operation that explains the delay
+          - Record the operation's identifiers and measured duration as evidence
+        resources:
+          - name: "Jaeger 2.22: APIs"
+            url: https://www.jaegertracing.io/docs/2.22/architecture/apis/
+          - name: "OpenTelemetry: traces"
+            url: https://opentelemetry.io/docs/concepts/signals/traces/
+      - type: reading
+        title: "Breaking And Restoring Context Propagation"
+        path: sections/section-030/module-20/course-030-breaking-and-restoring-context-propagation.md
+      - type: reading
+        title: Question
+        path: sections/section-030/module-20/labs/lab-04/question.md
+      - type: lab
+        title: "Restore Trace Context Propagation Lab"
+        path: sections/section-030/module-20/labs/lab-04
+        difficulty: intermediate
+        estimated_duration: 10m
+        topic: tracing
+        task_kind: troubleshooting
+        tags: [opentelemetry, auto-instrumentation, context-propagation, jaeger]
+        learning_goals:
+          - Identify missing trace context propagation in an injected agent
+          - Restore the propagators and replace the pod to use them
+          - Verify a new trace linking relay and scout through a parent span
+        resources:
+          - name: "OpenTelemetry Operator: automatic instrumentation"
+            url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
+      - type: reading
         title: "Finding Why A Pod Is Not Instrumented"
-        path: sections/section-030/module-20/course-030-finding-why-a-pod-is-not-instrumented.md
+        path: sections/section-030/module-20/course-040-finding-why-a-pod-is-not-instrumented.md
       - type: reading
         title: Question
         path: sections/section-030/module-20/labs/lab-01/question.md
       - type: lab
-        title: "Get Two Services Into One Trace Lab"
+        title: "Repair Missing Agent Injection Lab"
         path: sections/section-030/module-20/labs/lab-01
         difficulty: intermediate
-        estimated_duration: 30m
+        estimated_duration: 15m
         topic: tracing
         task_kind: troubleshooting
+        tags: [opentelemetry, auto-instrumentation, instrumentation, jaeger]
+        learning_goals:
+          - Find a misplaced injection annotation and incorrect resource selection
+          - Repair the pod template and verify injection in its replacement pod
+          - Confirm a new linked trace without changing application code
+        resources:
+          - name: "OpenTelemetry Operator: automatic instrumentation"
+            url: https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/
       - type: reading
         title: Summary
         path: sections/section-030/module-20/course-100-summary.md

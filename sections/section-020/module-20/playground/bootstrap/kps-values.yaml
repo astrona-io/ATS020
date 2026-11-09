@@ -1,4 +1,4 @@
-# Trimmed kube-prometheus-stack 92.3.0 for the logging playground: the
+# Trimmed kube-prometheus-stack 92.22.0 for the logging playground: the
 # Prometheus Operator and one Prometheus, nothing else. Prometheus scrapes the
 # Collector's metric endpoint once the reader adds a ServiceMonitor or
 # PodMonitor with the label `release: kps`. Grafana, Alertmanager,

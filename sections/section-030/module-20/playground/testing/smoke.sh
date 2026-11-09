@@ -125,7 +125,8 @@ slow_trace() {
 for _ in $(seq 1 20); do slow_trace 2>/dev/null | grep -q delayHandler && break; sleep 3; done
 check "slow trace: delayHandler in scout about 1000 ms" "slow_trace | jq -se 'any(.[]; .service==\"scout\" and .name==\"delayHandler\" and .ms >= 900 and .ms <= 1300)' >/dev/null"
 
-from_page course-020-reading-one-trace-across-two-services.md instrumentation-nodejs-baggage.yaml
+# Part 030: break and restore context propagation
+from_page course-030-breaking-and-restoring-context-propagation.md instrumentation-nodejs-baggage.yaml
 check "baggage-only Instrumentation applied" "kubectl apply -f $work/instrumentation-nodejs-baggage.yaml >/dev/null"
 check "running pod keeps tracecontext,baggage" "[ \"\$(relay_env OTEL_PROPAGATORS)\" = tracecontext,baggage ]"
 kubectl -n starfleet rollout restart deployment/relay >/dev/null
@@ -145,15 +146,15 @@ kubectl -n starfleet rollout restart deployment/relay >/dev/null
 check "relay restarted" "relay_rolled_out"
 check "restored pod has OTEL_PROPAGATORS=tracecontext,baggage" "[ \"\$(relay_env OTEL_PROPAGATORS)\" = tracecontext,baggage ]"
 
-# Part 030: the annotation on the wrong object
-from_page course-030-finding-why-a-pod-is-not-instrumented.md relay-misplaced-annotation.yaml
+# Part 040: the annotation on the wrong object
+from_page course-040-finding-why-a-pod-is-not-instrumented.md relay-misplaced-annotation.yaml
 check "misplaced annotation patched" "kubectl -n starfleet patch deployment relay --patch-file $work/relay-misplaced-annotation.yaml >/dev/null"
 check "relay rolled out" "relay_rolled_out"
 check "no init container" "[ -z \"\$(relay_init)\" ]"
 check "annotation on Deployment, null on template" "[ \"\$(kubectl -n starfleet get deployment relay -o json | jq -c '{deployment: .metadata.annotations[\"instrumentation.opentelemetry.io/inject-nodejs\"], pod_template: .spec.template.metadata.annotations[\"instrumentation.opentelemetry.io/inject-nodejs\"]}')\" = '{\"deployment\":\"true\",\"pod_template\":null}' ]"
 
-# Part 030: the Instrumentation that is not found
-from_page course-030-finding-why-a-pod-is-not-instrumented.md relay-annotate-template.yaml
+# Part 040: the Instrumentation that is not found
+from_page course-040-finding-why-a-pod-is-not-instrumented.md relay-annotate-template.yaml
 check "Instrumentation deleted" "kubectl -n starfleet delete instrumentation nodejs >/dev/null"
 check "template annotation patched" "kubectl -n starfleet patch deployment relay --patch-file $work/relay-annotate-template.yaml >/dev/null"
 check "relay rolled out" "relay_rolled_out"

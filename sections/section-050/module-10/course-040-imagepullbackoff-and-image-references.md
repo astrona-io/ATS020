@@ -6,7 +6,7 @@ The commands need the playground as it starts: the Deployment `beacon` in `starf
 
 ## Two statuses for one problem
 
-An image reference has a registry, a repository and a tag, for example `ghcr.io/stefanprodan/podinfo:6.15.0`. The kubelet on the node asks the container runtime to pull it. If the pull fails, the pod shows `ErrImagePull` for the failed try and `ImagePullBackOff` while the kubelet waits before the next try. Like `CrashLoopBackOff`, the wait grows with each failure, up to 5 minutes. Both statuses mean the same thing, so read the events for the cause:
+An image reference has a registry, a repository and a tag, for example `ghcr.io/stefanprodan/podinfo:6.17.0`. The kubelet on the node asks the container runtime to pull it. If the pull fails, the pod shows `ErrImagePull` for the failed try and `ImagePullBackOff` while the kubelet waits before the next try. Like `CrashLoopBackOff`, the wait grows with each failure, up to 5 minutes. Both statuses mean the same thing, so read the events for the cause:
 
 <!-- astrona:playground:renew -->
 
@@ -36,7 +36,7 @@ The pod was scheduled, so the scheduler did its work. The kubelet tried to pull 
 The image belongs to the pod template of the Deployment, so you change it there with `kubectl set image`. The container is named `beacon`, and the format is `<container>=<image>`:
 
 ```sh
-kubectl -n starfleet set image deployment/beacon beacon=ghcr.io/stefanprodan/podinfo:6.15.0
+kubectl -n starfleet set image deployment/beacon beacon=ghcr.io/stefanprodan/podinfo:6.17.0
 kubectl -n starfleet rollout status deployment/beacon --timeout=90s
 kubectl -n starfleet get pods -l app=beacon
 kubectl -n starfleet exec deploy/shuttle -- curl -s -o /dev/null -w '%{http_code}\n' http://beacon:9898/

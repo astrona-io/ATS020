@@ -1,6 +1,6 @@
 # Solution
 
-The four faults are independent. `cargo` has a memory limit of `48Mi` and the process holds about `150Mi`, so the kernel stops it. `beacon` names the image tag `v6.15.0`, which does not exist. `probe` has a liveness probe on port `8081`, and the server listens on `8080`. The Service `starfleet-policy` selects pods with the label `app=starfleet-policy-v2`, and the webhook pod has the label `app=starfleet-policy`, so the Service has no endpoints. Fix them in any order.
+The four faults are independent. `cargo` has a memory limit of `48Mi` and the process holds about `150Mi`, so the kernel stops it. `beacon` names the image tag `v6.17.0`, which does not exist. `probe` has a liveness probe on port `8081`, and the server listens on `8080`. The Service `starfleet-policy` selects pods with the label `app=starfleet-policy-v2`, and the webhook pod has the label `app=starfleet-policy`, so the Service has no endpoints. Fix them in any order.
 
 Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
@@ -54,10 +54,10 @@ Read the pull error:
 kubectl -n starfleet describe pod -l app=beacon | sed -n '/^Events/,$p'
 ```
 
-The event says `Failed to pull image "ghcr.io/stefanprodan/podinfo:v6.15.0"` and `not found`. The repository exists, but the tag does not. Use the tag `6.15.0`:
+The event says `Failed to pull image "ghcr.io/stefanprodan/podinfo:v6.17.0"` and `not found`. The repository exists, but the tag does not. Use the tag `6.17.0`:
 
 ```sh
-kubectl -n starfleet set image deployment/beacon beacon=ghcr.io/stefanprodan/podinfo:6.15.0
+kubectl -n starfleet set image deployment/beacon beacon=ghcr.io/stefanprodan/podinfo:6.17.0
 kubectl -n starfleet rollout status deployment/beacon --timeout=120s
 ```
 
@@ -95,7 +95,7 @@ kubectl -n starfleet rollout status deployment/probe --timeout=120s
 Create a Deployment in `starfleet` and read the error:
 
 ```sh
-kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.15.0
+kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.17.0
 ```
 
 The error says `failed calling webhook "starfleet-policy.astrona.io"` and names the Service `starfleet-policy.webhook-system.svc` on port `443`, with `connection refused`. Compare the selector of the Service with the labels of the pods behind it:
@@ -110,7 +110,7 @@ The pod has `app=starfleet-policy`, the EndpointSlice of the Service has no endp
 
 ```sh
 kubectl -n webhook-system patch service starfleet-policy --type merge -p '{"spec":{"selector":{"app":"starfleet-policy"}}}'
-kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.15.0
+kubectl -n starfleet create deployment test --image=ghcr.io/stefanprodan/podinfo:6.17.0
 kubectl -n webhook-system logs deploy/starfleet-policy
 ```
 

@@ -8,8 +8,8 @@ estimated_duration: 60m
 - **Author:** Paris Nakita Kejser
 - **Type:** Astrona lab, graded
 
-A single-node kind cluster running Kubernetes 1.35.8 with cert-manager 1.21.2,
-the OpenTelemetry Operator 0.160.0 and a trimmed kube-prometheus-stack 92.3.0
+A single-node kind cluster running Kubernetes 1.35.8 with cert-manager 1.21.3,
+the OpenTelemetry Operator 0.162.0 and a trimmed kube-prometheus-stack 92.22.0
 (the Prometheus Operator, one Prometheus and Grafana 13.2.3). The namespace
 `outpost` runs `scout` (with metrics) and `probe` (logs only), and a `shuttle`
 pod sends traffic with errors to both. The Grafana data source is provisioned

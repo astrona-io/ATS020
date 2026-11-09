@@ -31,7 +31,7 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35, with a 
 
 | Namespace | Workload | What it is |
 | --- | --- | --- |
-| `starfleet` | `scout` | Two pods of `podinfo` 6.15.0, already scraped by a ServiceMonitor. A request to `/status/500` makes it answer `500` |
+| `starfleet` | `scout` | Two pods of `podinfo` 6.17.0, already scraped by a ServiceMonitor. A request to `/status/500` makes it answer `500` |
 | `starfleet` | `shuttle` | A client pod that sends one normal request per second to `scout`, so there are no errors until you cause them |
 | `monitoring` | `alert-receiver` | A small HTTP server on port `8080` that prints one line for every alert in every notification it receives. It stands in for a chat or paging service |
 

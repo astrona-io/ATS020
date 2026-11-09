@@ -49,7 +49,13 @@ count_error_spans() {
 is_count() { [[ "$1" =~ ^[0-9]+$ ]]; }
 
 # Failed spans and exception events
-start_count=$(count_error_spans probe 3)
+# probe starts together with scout, so its first calls can fail before the
+# scout endpoint is ready. Wait until the newest 3 probe traces are clean.
+for _ in $(seq 1 20); do
+  start_count=$(count_error_spans probe 3)
+  is_count "$start_count" && [ "$start_count" -eq 0 ] && break
+  sleep 3
+done
 check "probe healthy at start (count: $start_count)" "is_count '$start_count' && [ '$start_count' -eq 0 ]"
 
 kubectl -n starfleet set env deployment/probe TARGET_URL=http://relay.starfleet:8080 >/dev/null

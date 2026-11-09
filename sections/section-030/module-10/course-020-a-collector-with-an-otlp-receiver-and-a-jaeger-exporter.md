@@ -1,45 +1,53 @@
-# A Collector With An OTLP Receiver And A Jaeger Exporter
+---
+title: "A Collector with an OTLP Receiver and a Jaeger Exporter"
+maturity: published
+reviewed: "2026-11-09"
+---
 
-Applications should not know where traces are stored. They send spans to a Collector, and the Collector decides what happens next: batching, filtering and the choice of backend. This part writes the OpenTelemetryCollector resource that sits between `scout` and Jaeger, and shows what the Operator builds from it.
+# A Collector with an OTLP Receiver and a Jaeger Exporter
 
-## The problem: spans with nowhere to go
+The `scout` application already records requests as spans, but it cannot send them anywhere yet. A **span** records the timing and details of one operation. `scout` sends its spans to `otel-collector.observability:4317`, and that Service does not exist until you create a Collector.
 
-The `scout` pod in `starfleet` already creates spans. The OpenTelemetry software development kit (SDK) inside the application records each request as a span and sends the spans over the OpenTelemetry Protocol (OTLP). OTLP is the wire format for telemetry. It uses port `4317` for gRPC and port `4318` for HTTP. `scout` sends them to `http://otel-collector.observability:4317`, but no Service with that name exists yet. Its logs show it:
+The **OpenTelemetry Collector** receives telemetry, processes it, and exports it to a backend. Here it will receive spans from `scout`, group them into batches, and forward them to Jaeger for storage and searching.
+
+## Check the application error
+
+The application's OpenTelemetry software development kit (SDK) creates and exports spans. It uses the **OpenTelemetry Protocol (OTLP)**, which supports gRPC, a remote procedure call transport, and Hypertext Transfer Protocol (HTTP). Their default ports are `4317` and `4318` respectively.
 
 <!-- astrona:playground:renew -->
+
+Read the last two log lines from `scout`:
 
 ```sh
 kubectl -n starfleet logs deploy/scout --tail=2
 ```
+
+Before the Collector exists, the logs can show this error:
 
 ```text
 {"level":"info","ts":"2026-11-02T18:58:52.904Z","caller":"errorhandler/errorhandler.go:36","msg":"exporter export timeout: rpc error: code = Unavailable desc = name resolver error: produced zero addresses"}
 {"level":"info","ts":"2026-11-02T18:59:01.933Z","caller":"errorhandler/errorhandler.go:36","msg":"traces export: exporter export timeout: rpc error: code = Unavailable desc = name resolver error: produced zero addresses"}
 ```
 
-"Produced zero addresses" means the Service name did not resolve. The spans are lost.
+`name resolver error: produced zero addresses` means that the exporter could not resolve its destination to a usable address. Spans can be lost when the SDK exhausts its buffering or retry limits. Creating the Collector gives new spans a destination; it does not recover spans already dropped.
 
-## The parts of a Collector
+## Define the trace pipeline
 
-A Collector is built from four kinds of part. A **receiver** is where data comes in. A **processor** changes data on its way through, for example by grouping spans into batches. An **exporter** sends data out. A **pipeline** connects them for one signal: it lists the receivers, the processors in order, and the exporters.
-
-Defining a part is not enough. The Collector only starts a part that a pipeline lists. This rule explains most broken Collector configurations, and the last part of this module returns to it.
+A **pipeline** connects the Collector components used for one type of telemetry. A **receiver** accepts incoming data, a **processor** changes or batches it, and an **exporter** sends it to a destination. The `traces` pipeline below connects one of each:
 
 ```mermaid
 flowchart LR
-  A["scout"] -->|"OTLP 4317"| R["receiver: otlp"]
-  R --> B["processor: batch"]
-  B --> E["exporter: otlp_grpc/jaeger"]
-  E -->|"OTLP 4317"| J["Jaeger"]
+    A["scout"] -->|"OTLP 4317"| R["Receiver: otlp"]
+    R --> B["Processor: batch"]
+    B --> E["Exporter: otlp_grpc/jaeger"]
+    E -->|"OTLP 4317"| J["Jaeger"]
 ```
 
-The diagram shows one `traces` pipeline: spans enter at the receiver, pass through the processor and leave through the exporter to Jaeger.
+`scout` sends spans to the OTLP receiver, the batch processor groups them, and the exporter sends them to Jaeger.
 
-The names have the form `type` or `type/name`. `otlp` is a receiver of type `otlp`. `otlp_grpc/jaeger` is an exporter of type `otlp_grpc` that this configuration calls `jaeger`. The second form lets you define two parts of the same type.
+The component name `otlp_grpc/jaeger` has two parts: `otlp_grpc` is the exporter type, and `jaeger` names this instance. It sends OTLP to Jaeger; the suffix does not select a separate Jaeger-specific protocol. Named instances let you configure several exporters of the same type.
 
-## Write the OpenTelemetryCollector
-
-Save this as `opentelemetrycollector-otel.yaml`:
+An **OpenTelemetryCollector** is the custom resource that tells the OpenTelemetry Operator how to deploy and configure a Collector. Save this as `opentelemetrycollector-otel.yaml`:
 
 ```yaml
 apiVersion: opentelemetry.io/v1beta1
@@ -49,7 +57,7 @@ metadata:
   namespace: observability
 spec:
   mode: deployment
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   config:
     receivers:
       otlp:
@@ -73,33 +81,31 @@ spec:
           exporters: [otlp_grpc/jaeger]
 ```
 
-The fields under `spec` have these jobs:
-
-- `mode` chooses what the Operator creates to run the Collector. `deployment` creates a Deployment.
-- `image` is the Collector image. The `contrib` image holds many receivers and exporters. Without this field the Operator uses its own default image.
-- `config` is the Collector configuration itself. In the `v1beta1` version of the resource it is written as YAML, not as a string.
-- The `otlp` receiver listens on both OTLP ports on all addresses.
-- The `batch` processor groups spans and sends them together.
-- The exporter sends spans over gRPC to the Service `jaeger` on port `4317`. `tls.insecure: true` switches off TLS, because Jaeger in the playground has none.
-- The `traces` pipeline connects the three parts.
-
 Apply it:
 
 ```sh
 kubectl apply -f opentelemetrycollector-otel.yaml
 ```
 
-## What the Operator creates
+`mode: deployment` asks the Operator to create a Kubernetes Deployment. The `image` field pins the Collector to the contrib distribution at version `0.162.0`. The contrib image contains the receiver, processor, and exporter used here.
 
-The Collector name is `otel`, so the Operator names everything it creates `otel-collector`. That is the Service name `scout` already uses. Wait a few seconds, then list the objects:
+The receiver binds to `0.0.0.0` so that other pods can connect through the Service. Its gRPC listener uses port `4317`, and its HTTP listener uses `4318`. The exporter sends to `jaeger.observability:4317` with Transport Layer Security (TLS) disabled because the playground's Jaeger receiver accepts an unencrypted connection.
+
+The empty object in `batch: {}` selects the processor's defaults. Defining a receiver, processor, or exporter makes it available to the configuration; listing it under `service.pipelines.traces` activates it. Only traces have a pipeline in this configuration.
+
+## Inspect the resources the Operator creates
+
+The Operator reads the custom resource and creates the Collector's workload, configuration, and Services. Allow a few seconds for reconciliation, then check the result:
 
 ```sh
 kubectl -n observability get opentelemetrycollector,deployment,service
 ```
 
+The output should include these resources. Addresses and ages will differ:
+
 ```text
 NAME                                           MODE         VERSION   READY   AGE   IMAGE                                          MANAGEMENT
-opentelemetrycollector.opentelemetry.io/otel   deployment   0.160.0   1/1     27s   otel/opentelemetry-collector-contrib:0.162.0   managed
+opentelemetrycollector.opentelemetry.io/otel   deployment   0.162.0   1/1     27s   otel/opentelemetry-collector-contrib:0.165.0   managed
 
 NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/jaeger           1/1     1            1           2m26s
@@ -112,15 +118,27 @@ service/otel-collector-headless     ClusterIP   None            <none>        43
 service/otel-collector-monitoring   ClusterIP   10.96.137.118   <none>        8888/TCP                      27s
 ```
 
-In the `VERSION` column, `0.160.0` is the version of the Operator, not of the Collector. The image column shows the Collector, `0.162.0`.
+The resource name `otel` produces the Service name `otel-collector`, which matches the destination configured in `scout`. The ready Deployment shows that a Collector pod is available. The `IMAGE` column identifies the Collector version; the `VERSION` column shown here reports the Operator version, so the two values need not match.
 
-The Service `otel-collector` has the ports `4317` and `4318`. The Operator took these ports from the receivers in the pipeline. The Service `otel-collector-monitoring` exposes port `8888`, where the Collector reports metrics about itself. The Operator also stored your configuration, with a metrics setting added, in a ConfigMap, and the Deployment mounts it:
+Each generated Service has a different purpose:
+
+| Service | Ports | Purpose |
+| --- | --- | --- |
+| `otel-collector` | `4317`, `4318` | Accepts application telemetry over OTLP |
+| `otel-collector-headless` | `4317`, `4318` | Provides discovery of individual Collector pod addresses |
+| `otel-collector-monitoring` | `8888` | Exposes the Collector's own metrics |
+
+The Operator derives the receiver ports from the configuration. You do not need to create these Services yourself.
+
+The Collector reads its runtime configuration from a **ConfigMap**, a Kubernetes object that stores configuration data. Inspect the ConfigMap mounted by the Deployment:
 
 ```sh
 kubectl -n observability get cm $(kubectl -n observability get deploy otel-collector -o jsonpath='{.spec.template.spec.volumes[0].configMap.name}') -o jsonpath='{.data.collector\.yaml}'
 ```
 
-```text
+The inner command finds the ConfigMap name in the Deployment's volume. The outer command prints its `collector.yaml` key:
+
+```yaml
 receivers:
   otlp:
     protocols:
@@ -128,13 +146,16 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+
 exporters:
   otlp_grpc/jaeger:
     endpoint: jaeger.observability:4317
     tls:
       insecure: true
+
 processors:
   batch: {}
+
 service:
   telemetry:
     metrics:
@@ -144,6 +165,7 @@ service:
               prometheus:
                 host: 0.0.0.0
                 port: 8888
+
   pipelines:
     traces:
       exporters:
@@ -154,41 +176,52 @@ service:
         - otlp
 ```
 
-The ConfigMap name ends in a hash of the content, so it changes when you change the configuration. Your hash differs from the one in this book. The Operator keeps the older ConfigMaps for a while.
+The generated configuration keeps the trace pipeline and adds `service.telemetry.metrics.readers`. That section exposes the Collector's internal metrics in Prometheus format on port `8888`. These metrics describe the Collector's work, including how many spans it receives and exports.
 
-## Check that spans flow
+The ConfigMap name includes a hash of its contents. When the configuration changes, the Operator can generate a new ConfigMap and update the Deployment to use it. Edit the `OpenTelemetryCollector` resource to make lasting changes; the Operator manages the generated objects.
 
-Read the Collector log. Each part that starts writes a line. The command below keeps three fields of each log line: the level, the source file and the message:
+## Check reception and export
+
+Startup logs show whether the configured receivers started. Filter the Collector log for its startup messages:
 
 ```sh
 kubectl -n observability logs deploy/otel-collector | awk -F'\t' '/Starting|Everything/{print $2, $3, $4}'
 ```
 
+The relevant lines are:
+
 ```text
-info service@v0.162.0/service.go:233 Starting otelcol-contrib...
+info service@v0.165.0/service.go:233 Starting otelcol-contrib...
 info extensions/extensions.go:43 Starting extensions...
-info otlpreceiver@v0.162.0/otlp.go:120 Starting GRPC server
-info otlpreceiver@v0.162.0/otlp.go:175 Starting HTTP server
-info service@v0.162.0/service.go:256 Everything is ready. Begin running and processing data.
+info otlpreceiver@v0.165.0/otlp.go:120 Starting GRPC server
+info otlpreceiver@v0.165.0/otlp.go:175 Starting HTTP server
+info service@v0.165.0/service.go:256 Everything is ready. Begin running and processing data.
 ```
 
-The receiver started a gRPC server and an HTTP server, one for each protocol you listed. Now read the Collector's own metrics from `shuttle`, through the `otel-collector-monitoring` Service. Two counters show the flow. `otelcol_receiver_accepted_spans` counts spans the receiver took in, and `otelcol_exporter_sent_spans` counts spans the exporter delivered. The counters grow over time, so your numbers differ:
+The gRPC and HTTP server messages confirm that both receiver protocols started. They do not show whether any spans have arrived. For that, read the Collector's counters through its monitoring Service:
 
 ```sh
 kubectl exec -n starfleet deploy/shuttle -- curl -s otel-collector-monitoring.observability:8888/metrics | grep -E "^otelcol_(receiver_accepted_spans|exporter_sent_spans)"
 ```
+
+This command runs `curl` inside the `shuttle` pod, which can reach the cluster Service. It selects the accepted-span and sent-span counters:
 
 ```text
 otelcol_exporter_sent_spans{exporter="otlp_grpc/jaeger",server_address="jaeger.observability",server_port="4317"} 232
 otelcol_receiver_accepted_spans{receiver="otlp",transport="grpc"} 232
 ```
 
-Both counters are equal and rising, so every span that `scout` sends passes through the Collector to Jaeger. You now have a working pipeline and know which Kubernetes objects the Operator made for it. The open question is how to find one of these traces in Jaeger and read it.
+In this sample, the receiver accepted 232 spans and the exporter successfully sent 232 spans. Repeat the command after a few seconds while `shuttle` continues making requests to `scout`. Both counters should increase.
+
+The values need not match at every instant: the batch processor and exporter can hold spans briefly. The counters also reset when the Collector process restarts. Increasing sent-span counts show successful exports, while finding a recent trace in Jaeger confirms that the backend can return the data.
+
+The Collector now has a receiving endpoint, an active trace pipeline, and counters that expose its work. To inspect what an application request did, use Jaeger to retrieve the spans that belong to that request.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Defining a part without listing it in a pipeline.** The Collector ignores it. A receiver that no pipeline lists never opens its port, and the Operator leaves its port out of the Service.
-> - **Mixing up the two ports.** `4317` is OTLP over gRPC and `4318` is OTLP over HTTP. An exporter that expects one and talks to the other fails to connect or to decode.
-> - **Forgetting `tls.insecure: true` for a backend without TLS.** The exporter then tries a TLS handshake and fails.
-> - **Reading the `VERSION` column as the Collector version.** It shows the Operator version. The `IMAGE` column shows the Collector.
+> - **Defining an unused component.** A receiver, processor, or exporter must appear in a pipeline to run.
+> - **Mixing OTLP transports.** Match the application's transport to the receiver: gRPC on `4317`, HTTP on `4318`.
+> - **Using the wrong TLS setting.** This playground's Jaeger endpoint is unencrypted and needs `tls.insecure: true`.
+> - **Editing generated resources.** Change the custom resource; the Operator can overwrite edits to its Deployment or ConfigMap.
+> - **Treating startup as proof of delivery.** Check increasing counters and recent traces in Jaeger.

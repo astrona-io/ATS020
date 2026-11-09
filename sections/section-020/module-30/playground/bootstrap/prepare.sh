@@ -6,8 +6,8 @@
 # Collector and the workloads come from manifests/lab-start.yaml.
 set -euo pipefail
 
-HELM_VERSION="v4.3.0"
-CHART_VERSION="92.3.0"
+HELM_VERSION="v4.3.1"
+CHART_VERSION="92.22.0"
 
 BIN_DIR="$HOME/.astrona/tools/ats020"
 mkdir -p "$BIN_DIR"

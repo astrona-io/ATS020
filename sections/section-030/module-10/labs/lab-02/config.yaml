@@ -14,7 +14,7 @@ runtime:
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
-      - jaegertracing/jaeger:2.22.0
+      - jaegertracing/jaeger:2.23.0
       - python:3.13.18-alpine3.24
 bootstrap:
   init:
@@ -24,7 +24,7 @@ bootstrap:
       source: bootstrap/01-prepare.sh
   manifests:
     - name: lab-start
-      description: Jaeger 2.22.0 with in-memory storage and three workloads that send spans with distinct incident.code tags
+      description: Jaeger 2.23.0 with in-memory storage and three workloads that send spans with distinct incident.code tags
       type: file
       source: manifests/lab-start.yaml
   waitFor:

@@ -9,7 +9,7 @@ estimated_duration: 20m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8. The bootstrap installs a
-trimmed kube-prometheus-stack 92.3.0 with kube-state-metrics and starts the
+trimmed kube-prometheus-stack 92.22.0 with kube-state-metrics and starts the
 Starfleet workloads. A traffic loop makes 1 of every 20 requests to `scout`
 fail. Then it applies a PrometheusRule `scout-slo` whose recording rules use the
 status selector `5xx`, which matches no status. Both recording rules return no

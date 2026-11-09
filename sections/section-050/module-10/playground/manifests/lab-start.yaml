@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
         - name: scout
-          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          image: ghcr.io/stefanprodan/podinfo:6.17.0
           ports:
             - name: http
               containerPort: 9898
@@ -91,7 +91,7 @@ spec:
     spec:
       containers:
         - name: bridge
-          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          image: ghcr.io/stefanprodan/podinfo:6.17.0
           ports:
             - name: http
               containerPort: 9898

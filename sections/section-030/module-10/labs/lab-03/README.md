@@ -9,7 +9,7 @@ estimated_duration: 20m
 - **Type:** Astrona lab, graded
 
 Three small Python workloads in `starfleet` send synthetic spans to Jaeger
-2.22.0 in `observability`. One workload, `probe`, calls an address whose
+2.23.0 in `observability`. One workload, `probe`, calls an address whose
 Service does not exist, so every one of its spans ends with the status `ERROR`
 and carries a span event named `exception`. The learner finds that service in
 Jaeger, writes its name to `/tmp/ats-020-error-service.txt`, exports the

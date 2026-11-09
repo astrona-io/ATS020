@@ -26,7 +26,7 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35, with a 
 
 | Namespace | Workload | What it is |
 | --- | --- | --- |
-| `starfleet` | `scout` | Two pods of `podinfo` 6.15.0, a small web application that serves its own metrics. A ServiceMonitor collects them |
+| `starfleet` | `scout` | Two pods of `podinfo` 6.17.0, a small web application that serves its own metrics. A ServiceMonitor collects them |
 | `outpost` | `scout` | One more `podinfo` pod, also collected by a ServiceMonitor |
 | `starfleet` | `shuttle` | A client pod that runs a traffic loop: every second one request to each `scout`, every fifth second one request to `/status/500` on the `starfleet` `scout` (which answers `500`), and every tenth second one request to `/delay/1` (which waits one second) |
 

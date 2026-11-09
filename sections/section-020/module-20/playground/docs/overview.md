@@ -4,11 +4,11 @@ This playground gives you pods that write log lines and no log pipeline. A log p
 
 ## What's in the box
 
-The cluster runs Kubernetes 1.35.8. The `monitoring` namespace holds Prometheus 3.15.0 and the Prometheus Operator 0.94.1. Alertmanager, Grafana and the exporters for nodes and Kubernetes objects are disabled to save memory. The `cert-manager` namespace holds cert-manager 1.21.2, which the OpenTelemetry Operator 0.160.0 needs for its webhook certificate. The operator turns an `OpenTelemetryCollector` resource into a running Collector. The image `otel/opentelemetry-collector-contrib:0.162.0` is already on the node.
+The cluster runs Kubernetes 1.35.8. The `monitoring` namespace holds Prometheus 3.15.0 and the Prometheus Operator 0.94.1. Alertmanager, Grafana and the exporters for nodes and Kubernetes objects are disabled to save memory. The `cert-manager` namespace holds cert-manager 1.21.3, which the OpenTelemetry Operator 0.162.0 needs for its webhook certificate. The operator turns an `OpenTelemetryCollector` resource into a running Collector. The image `otel/opentelemetry-collector-contrib:0.165.0` is already on the node.
 
 | Namespace | Contents |
 | --- | --- |
-| `starfleet` | `scout` (one pod of `podinfo` 6.15.0) and the `shuttle` traffic client |
+| `starfleet` | `scout` (one pod of `podinfo` 6.17.0) and the `shuttle` traffic client |
 | `outpost` | `probe` (one pod of `go-httpbin` 2.25.0), which logs one line per request |
 
 Every second `shuttle` sends one request to `scout` and one to `probe`. Every fourth second it also asks `probe` for `/status/500`, so `probe` logs both normal lines and lines with `level=ERROR`. Prometheus selects a ServiceMonitor or PodMonitor only when it carries the label `release: kps`.

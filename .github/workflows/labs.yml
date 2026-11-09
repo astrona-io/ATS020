@@ -1,4 +1,5 @@
 # Proves that the labs and playgrounds still work:
+#   - lab grader tests in testing/test-*.py must pass;
 #   - each lab: `astrona validate`, then `astrona test` (bootstrap, reference
 #     solution, graders, teardown) must pass;
 #   - each playground: `astrona run` must finish with every readiness check,
@@ -13,17 +14,16 @@
 #     can break a lab without a commit);
 #   - by hand: every section, or the paths given in the "paths" input.
 #
-# Make the job "all environments pass" a required status check on main, so a
+# The ruleset "protect main" requires the job "all environments pass", so a
 # change cannot merge while a lab or playground fails.
 name: labs
 
 on:
+  # Every pull request, with no path filter: "all environments pass" is a
+  # required check on main, so it must report on every pull request. When no
+  # section changed, the list is empty, the tests are skipped and the check
+  # passes within a minute.
   pull_request:
-    paths:
-      - "versions.env"
-      - "sections/**"
-      - "scripts/**"
-      - ".github/workflows/labs.yml"
   schedule:
     - cron: "17 4 * * 1"
   workflow_dispatch:
@@ -52,7 +52,7 @@ jobs:
     outputs:
       environments: ${{ steps.list.outputs.environments }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Check that the course files match versions.env
@@ -85,7 +85,18 @@ jobs:
       matrix:
         env: ${{ fromJSON(needs.list.outputs.environments) }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
+
+      - name: Test lab grader failure cases
+        if: matrix.env.kind == 'lab'
+        env:
+          LAB_DIR: ${{ matrix.env.path }}
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for test_script in "$LAB_DIR"/testing/test-*.py; do
+            python3 "$test_script"
+          done
 
       - name: Install kind and astrona
         run: |

@@ -12,24 +12,24 @@ runtime:
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
-      - quay.io/jetstack/cert-manager-controller:v1.21.2
-      - quay.io/jetstack/cert-manager-webhook:v1.21.2
-      - quay.io/jetstack/cert-manager-cainjector:v1.21.2
-      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.160.0
-      - otel/opentelemetry-collector-contrib:0.162.0
-      - jaegertracing/jaeger:2.22.0
-      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - quay.io/jetstack/cert-manager-controller:v1.21.3
+      - quay.io/jetstack/cert-manager-webhook:v1.21.3
+      - quay.io/jetstack/cert-manager-cainjector:v1.21.3
+      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.162.0
+      - otel/opentelemetry-collector-contrib:0.165.0
+      - jaegertracing/jaeger:2.23.0
+      - ghcr.io/stefanprodan/podinfo:6.17.0
       - curlimages/curl:8.23.0
 
 bootstrap:
   init:
     - name: install-operator
-      description: "Install cert-manager 1.21.2 and the OpenTelemetry Operator 0.160.0, and wait for its webhook"
+      description: "Install cert-manager 1.21.3 and the OpenTelemetry Operator 0.162.0, and wait for its webhook"
       type: file
       source: bootstrap/01-install-operator.sh
   manifests:
     - name: lab-start
-      description: "Jaeger 2.22.0 in observability, scout with tracing on in starfleet, and the shuttle traffic loop"
+      description: "Jaeger 2.23.0 in observability, scout with tracing on in starfleet, and the shuttle traffic loop"
       type: file
       source: manifests/lab-start.yaml
     - name: collector-start

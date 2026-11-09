@@ -1,4 +1,4 @@
-# Starting workloads for the distributed tracing capstone: Jaeger 2.22.0 (one
+# Starting workloads for the distributed tracing capstone: Jaeger 2.23.0 (one
 # pod, in-memory storage); `scout` (podinfo) in `starfleet` with its own
 # tracing on, but with a wrong exporter port (4318 is OTLP over HTTP and
 # podinfo speaks gRPC); the ConfigMap, Service and Deployment of `relay`,
@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: jaeger
-          image: jaegertracing/jaeger:2.22.0
+          image: jaegertracing/jaeger:2.23.0
           ports:
             - name: otlp-grpc
               containerPort: 4317
@@ -89,7 +89,7 @@ spec:
     spec:
       containers:
         - name: scout
-          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          image: ghcr.io/stefanprodan/podinfo:6.17.0
           command:
             - ./podinfo
             - --port=9898

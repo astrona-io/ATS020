@@ -1,4 +1,4 @@
-# Trimmed kube-prometheus-stack 92.3.0 for the alerting playground: the
+# Trimmed kube-prometheus-stack 92.22.0 for the alerting playground: the
 # Prometheus Operator, one Prometheus and one Alertmanager. Grafana,
 # node-exporter, kube-state-metrics, the default rules and the scrape jobs for
 # Kubernetes components are off to save memory. Alertmanager keeps the chart's

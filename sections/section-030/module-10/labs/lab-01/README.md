@@ -9,8 +9,8 @@ estimated_duration: 20m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8. The bootstrap installs
-cert-manager 1.21.2 and the OpenTelemetry Operator 0.160.0, then applies
-Jaeger 2.22.0, the `scout` workload with tracing on, a `shuttle` traffic
+cert-manager 1.21.3 and the OpenTelemetry Operator 0.162.0, then applies
+Jaeger 2.23.0, the `scout` workload with tracing on, a `shuttle` traffic
 client and a Collector named `otel` that is `Running` but broken. The learner
 finds the two faults in its exporter and proves the fix with the Collector
 counters and the Jaeger API.

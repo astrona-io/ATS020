@@ -3,7 +3,7 @@
 #
 # Fault 1: cargo is OOMKilled, because the memory limit is 48Mi and the process
 #          holds 150Mi.
-# Fault 2: beacon is in ImagePullBackOff, because the image tag v6.15.0 does not exist.
+# Fault 2: beacon is in ImagePullBackOff, because the image tag v6.17.0 does not exist.
 # Fault 3: probe is restarted again and again, because the liveness probe uses port 8081.
 # Fault 4: the Service starfleet-policy selects pods with the label
 #          app=starfleet-policy-v2. No pod has it, so the webhook has no endpoints
@@ -169,7 +169,7 @@ spec:
     spec:
       containers:
         - name: beacon
-          image: ghcr.io/stefanprodan/podinfo:v6.15.0
+          image: ghcr.io/stefanprodan/podinfo:v6.17.0
           ports:
             - name: http
               containerPort: 9898

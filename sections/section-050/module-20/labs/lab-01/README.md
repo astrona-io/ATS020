@@ -9,7 +9,7 @@ estimated_duration: 40m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8 with a trimmed
-kube-prometheus-stack 92.3.0 (Prometheus Operator and one Prometheus). The
+kube-prometheus-stack 92.22.0 (Prometheus Operator and one Prometheus). The
 platform starts broken in three independent ways. The Service of the
 `starfleet-policy` webhook sends traffic to a port the server does not open, so
 every create of a Deployment in `starfleet` fails. The serving certificate of the

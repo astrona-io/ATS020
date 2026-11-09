@@ -1,5 +1,5 @@
-# Starting workloads for the "Get Two Services Into One Trace" lab: Jaeger
-# 2.22.0 (one pod, in-memory storage) and a working Collector `otel` in
+# Starting workloads for the "Repair Missing Agent Injection" lab: Jaeger
+# 2.23.0 (one pod, in-memory storage) and a working Collector `otel` in
 # `observability`; `scout` (podinfo) in `starfleet` with its own tracing on;
 # the ConfigMap and Service of `relay`; and a `shuttle` pod that sends steady
 # traffic to `relay`. The `relay` Deployment and the Instrumentation come from
@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: jaeger
-          image: jaegertracing/jaeger:2.22.0
+          image: jaegertracing/jaeger:2.23.0
           ports:
             - name: otlp-grpc
               containerPort: 4317
@@ -89,7 +89,7 @@ spec:
     spec:
       containers:
         - name: scout
-          image: ghcr.io/stefanprodan/podinfo:6.15.0
+          image: ghcr.io/stefanprodan/podinfo:6.17.0
           command:
             - ./podinfo
             - --port=9898
@@ -132,7 +132,7 @@ metadata:
   namespace: observability
 spec:
   mode: deployment
-  image: otel/opentelemetry-collector-contrib:0.162.0
+  image: otel/opentelemetry-collector-contrib:0.165.0
   resources:
     requests: {cpu: 20m, memory: 64Mi}
     limits: {memory: 256Mi}

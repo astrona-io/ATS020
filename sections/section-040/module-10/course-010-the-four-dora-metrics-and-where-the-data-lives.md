@@ -96,7 +96,7 @@ d091bc7	2026-11-02T19:25:51Z	Run two replicas
 8310751	2026-11-02T19:46:26Z	Revert the new image build
 c36bf2a	2026-11-02T19:37:33Z	Try a new image build
 8bede20	2026-11-02T19:19:08Z	Change the welcome message
-febe9c0	2026-11-02T19:02:12Z	Start scout 6.15.0
+febe9c0	2026-11-02T19:02:12Z	Start scout 6.17.0
 ```
 
 The hashes match the `revision` column of the Application history. That match lets you join the two sources: the commit time from Git belongs to the deployment time from Argo CD. The committer dates are earlier than the deployment times by 3 to 45 minutes. The playground seed sets them that way on purpose: in a real team a developer commits first and a deployment follows later, but the seed pushes all ten commits within a few minutes. Without the earlier dates, every lead time would be a few seconds.

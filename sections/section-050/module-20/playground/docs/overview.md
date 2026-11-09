@@ -4,12 +4,12 @@ This playground gives you a cluster in which three parts of the platform are bro
 
 ## What's in the box
 
-The cluster runs Kubernetes 1.35.8 on one node. A trimmed kube-prometheus-stack 92.3.0 is installed in the namespace `monitoring`: the Prometheus Operator and one Prometheus. Alertmanager, Grafana, node-exporter and kube-state-metrics are not installed. The bootstrap changes no fault: every fault is still there when you get the terminal.
+The cluster runs Kubernetes 1.35.8 on one node. A trimmed kube-prometheus-stack 92.22.0 is installed in the namespace `monitoring`: the Prometheus Operator and one Prometheus. Alertmanager, Grafana, node-exporter and kube-state-metrics are not installed. The bootstrap changes no fault: every fault is still there when you get the terminal.
 
 | Object | Namespace | What it is |
 | --- | --- | --- |
 | `shuttle` | `starfleet` | A healthy client pod with `curl`. You send requests with `kubectl exec deploy/shuttle -- curl ...` |
-| `scout` | `starfleet` | `podinfo` 6.15.0 on port `9898`, with a Service, a ServiceMonitor and a PrometheusRule named `scout-alerts` |
+| `scout` | `starfleet` | `podinfo` 6.17.0 on port `9898`, with a Service, a ServiceMonitor and a PrometheusRule named `scout-alerts` |
 | `drifter` | `outpost` | A healthy client pod with `curl` |
 | `starfleet-policy` | `webhook-system` | A webhook server (Deployment and Service). A ValidatingWebhookConfiguration of the same name sends every create of a Deployment in `starfleet` to it |
 | `outpost-policy` | `webhook-system` | The same for the namespace `outpost` |
@@ -32,7 +32,7 @@ This helper creates a Deployment in a namespace and prints the answer of the API
 
 ```sh
 try_create() {
-  kubectl -n "$1" create deployment try-create --image=ghcr.io/stefanprodan/podinfo:6.15.0 \
+  kubectl -n "$1" create deployment try-create --image=ghcr.io/stefanprodan/podinfo:6.17.0 \
     && kubectl -n "$1" delete deployment try-create
 }
 ```

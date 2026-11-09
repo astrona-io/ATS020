@@ -1,7 +1,7 @@
 # Prerequisites
 
-You need these tools on your machine: `astrona`, `kubectl`, `curl` and `jq`.
+You need `astrona`, `kubectl`, `curl`, `jq`, and `python3`. Python is used by the graders.
 
-You need to know what an annotation is, how a Deployment creates pods from its pod template, and how to read pod logs with `kubectl logs`. You need to know what a trace and a span are, and what the OpenTelemetry Operator and its Instrumentation resource do.
+You should know how to inspect Deployment and pod annotations, select an Instrumentation by namespace and name, and read Operator logs.
 
-The lab starts a single-node `kind` cluster with Kubernetes 1.35. It installs cert-manager and the OpenTelemetry Operator, so allow a few minutes for the first start.
+The lab creates its own single-node `kind` cluster. It does not require another lab to be completed or running. Allow a few minutes for cert-manager, the OpenTelemetry Operator, and the workloads to start.

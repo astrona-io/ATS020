@@ -3,16 +3,16 @@
 # (`ats-020-playground-050-02`).
 #
 # Environment preparation only. This script:
-#   1. puts Helm 4.3.0 on the PATH if it is missing,
-#   2. installs a trimmed kube-prometheus-stack 92.3.0 (Prometheus Operator and
+#   1. puts Helm 4.3.1 on the PATH if it is missing,
+#   2. installs a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator and
 #      one Prometheus) into the `monitoring` namespace and waits for Prometheus,
 #   3. scales the Prometheus Operator to zero. This is one of the three faults
 #      and it is never fixed here.
 # The workloads, the webhooks and their faults come from manifests/lab-start.yaml.
 set -euo pipefail
 
-HELM_VERSION="v4.3.0"
-CHART_VERSION="92.3.0"
+HELM_VERSION="v4.3.1"
+CHART_VERSION="92.22.0"
 
 BIN_DIR="/usr/local/bin"
 [ -w "$BIN_DIR" ] || BIN_DIR="$HOME/.local/bin"

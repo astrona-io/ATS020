@@ -9,7 +9,7 @@ estimated_duration: 45m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8 with a trimmed
-kube-prometheus-stack 92.3.0 (the Prometheus Operator, one Prometheus and one
+kube-prometheus-stack 92.22.0 (the Prometheus Operator, one Prometheus and one
 Alertmanager). The namespace `frontier` runs `scout` with two pods, and a
 `shuttle` pod makes about one request in six fail. A small `alert-receiver`
 webhook in `monitoring` prints every notification it gets. The bootstrap then

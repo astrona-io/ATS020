@@ -22,11 +22,11 @@ After this module you can:
 
 You need Kubernetes basics (`kubectl get`, `kubectl logs`, `kubectl apply`), a first look at RBAC (Role-Based Access Control: ClusterRole and ClusterRoleBinding), and PromQL (Prometheus Query Language) at the level of `rate()` and `sum by`.
 
-Your playground is a single-node `kind` cluster running Kubernetes 1.35. The namespace `monitoring` holds one Prometheus server (version 3.15.0, Service `kps-prometheus` on port `9090`) with the Prometheus Operator. Alertmanager, Grafana and the node and object exporters are not installed. The namespace `cert-manager` holds cert-manager, which the OpenTelemetry Operator 0.160.0 needs for its webhook certificate. The operator turns an `OpenTelemetryCollector` resource into a running Collector. No Collector exists yet. The Collector image is `otel/opentelemetry-collector-contrib:0.162.0`.
+Your playground is a single-node `kind` cluster running Kubernetes 1.35. The namespace `monitoring` holds one Prometheus server (version 3.15.0, Service `kps-prometheus` on port `9090`) with the Prometheus Operator. Alertmanager, Grafana and the node and object exporters are not installed. The namespace `cert-manager` holds cert-manager, which the OpenTelemetry Operator 0.162.0 needs for its webhook certificate. The operator turns an `OpenTelemetryCollector` resource into a running Collector. No Collector exists yet. The Collector image is `otel/opentelemetry-collector-contrib:0.165.0`.
 
 | Namespace | Workload | What it is |
 | --- | --- | --- |
-| `starfleet` | `scout` | One pod of `podinfo` 6.15.0. It writes almost no log lines |
+| `starfleet` | `scout` | One pod of `podinfo` 6.17.0. It writes almost no log lines |
 | `starfleet` | `shuttle` | A client pod that sends one request per second to `scout` and to `probe`, and a `/status/500` request to `probe` every fourth second |
 | `outpost` | `probe` | One pod of `go-httpbin` 2.25.0. It logs one line per request, with `level=ERROR` for a `5xx` response |
 

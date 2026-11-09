@@ -9,8 +9,8 @@ estimated_duration: 25m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8. The bootstrap installs a
-trimmed kube-prometheus-stack 92.3.0, Gitea 28.1.0 (plumbing) and Argo CD
-3.5.4, then makes ten real deployments of `scout`, two of them bad on purpose.
+trimmed kube-prometheus-stack 92.22.0, Gitea 28.3.0 (plumbing) and Argo CD
+3.6.1, then makes ten real deployments of `scout`, two of them bad on purpose.
 Then it applies a PrometheusRule `dora-scout` whose failed deployment count
 reads the sync phases `Failed` and `Error` and therefore returns `0`. The
 learner finds the fault, changes the rule to read the `Degraded` health from

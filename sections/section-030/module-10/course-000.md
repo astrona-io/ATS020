@@ -50,11 +50,11 @@ You need these tools on your machine:
 The playground uses a single-node `kind` cluster with:
 
 - Kubernetes **1.35**
-- cert-manager **1.21.2**
-- OpenTelemetry Operator **0.160.0**, with its webhook ready
-- Jaeger **2.22.0**
+- cert-manager **1.21.3**
+- OpenTelemetry Operator **0.162.0**, with its webhook ready
+- Jaeger **2.23.0**
 
-During this module, you will create and configure OpenTelemetry Collectors with the **contrib 0.162.0** image.
+During this module, you will create and configure OpenTelemetry Collectors with the **contrib 0.165.0** image.
 
 A Prometheus stack is omitted to reduce memory usage.
 
@@ -63,7 +63,7 @@ A Prometheus stack is omitted to reduce memory usage.
 | Namespace | Workload | Configuration |
 | --- | --- | --- |
 | `observability` | `jaeger` | A single Jaeger pod with in-memory storage. The `jaeger` Service exposes OTLP on ports `4317` and `4318`, and the web interface and API on port `16686`. |
-| `starfleet` | `scout` | A single `podinfo` 6.15.0 pod with tracing enabled. It sends spans over OTLP to `otel-collector.observability:4317`. You will create this Collector Service during the module. |
+| `starfleet` | `scout` | A single `podinfo` 6.17.0 pod with tracing enabled. It sends spans over OTLP to `otel-collector.observability:4317`. You will create this Collector Service during the module. |
 | `starfleet` | `shuttle` | A client pod that requests `scout` every two seconds and sends a slow request to `/delay/1` every tenth round. |
 | `starfleet` | `probe` | A small Python program that sends an HTTP request to the address in its `TARGET_URL` variable every two seconds and reports each request as one span straight to Jaeger. A failed request gives the span the status `ERROR`. |
 

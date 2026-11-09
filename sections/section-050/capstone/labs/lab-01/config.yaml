@@ -14,7 +14,7 @@ runtime:
     addons:
       metricsServer: true
     preloadImages:
-      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - ghcr.io/stefanprodan/podinfo:6.17.0
       - mccutchen/go-httpbin:2.25.0
       - node:22-alpine
       - curlimages/curl:8.23.0
@@ -54,7 +54,7 @@ validation:
       type: file
       source: validation/validate-cargo.sh
     - name: beacon-image
-      description: beacon runs podinfo 6.15.0 and answers 200
+      description: beacon runs podinfo 6.17.0 and answers 200
       type: file
       source: validation/validate-beacon.sh
     - name: probe-stable

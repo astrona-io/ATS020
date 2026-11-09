@@ -1,0 +1,4 @@
+spec:
+  propagators:
+    - tracecontext
+    - baggage

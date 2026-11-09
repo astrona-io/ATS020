@@ -6,7 +6,7 @@
 - **Type:** Astrona playground — no grading
 
 A single-node kind cluster running Kubernetes 1.35.8 with metrics-server 0.9.0
-(the `metricsServer` addon) and a trimmed kube-prometheus-stack 92.3.0
+(the `metricsServer` addon) and a trimmed kube-prometheus-stack 92.22.0
 (Prometheus Operator, one Prometheus, kube-state-metrics, the kubelet scrape
 job for cAdvisor; no Alertmanager, no Grafana). The workloads `scout`,
 `probe` and `shuttle` run in `starfleet`. The traffic loop in `shuttle` sends
