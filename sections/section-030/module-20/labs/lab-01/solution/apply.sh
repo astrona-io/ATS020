@@ -7,6 +7,6 @@ for candidate in "$SCRIPT_DIR/solution.yaml" "./solution/solution.yaml" "./solut
   [ -f "$candidate" ] && { FILE="$candidate"; break; }
 done
 [ -n "$FILE" ] || { echo "[solution] ERROR: solution.yaml not found" >&2; exit 1; }
-kubectl apply -f "$FILE"
+kubectl -n starfleet patch deployment relay --patch-file "$FILE"
 kubectl -n starfleet rollout status deployment/relay --timeout=180s
 echo "[solution] relay instrumented."

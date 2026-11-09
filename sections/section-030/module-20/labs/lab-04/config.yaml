@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-030-02-04
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/jetstack/cert-manager-controller:v1.21.3
+      - quay.io/jetstack/cert-manager-webhook:v1.21.3
+      - quay.io/jetstack/cert-manager-cainjector:v1.21.3
+      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.160.0
+      - ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.78.0
+      - otel/opentelemetry-collector-contrib:0.162.0
+      - jaegertracing/jaeger:2.22.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - node:22-alpine
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: install-operator
+      description: "Install cert-manager 1.21.3 and the OpenTelemetry Operator 0.160.0, and wait for its webhook"
+      type: file
+      source: bootstrap/01-install-operator.sh
+  manifests:
+    - name: lab-start
+      description: "Jaeger 2.22.0, the Collector otel, scout with tracing on, the relay ConfigMap and Service, and the shuttle traffic loop"
+      type: file
+      source: manifests/lab-start.yaml
+    - name: relay-start
+      description: "An injected relay pod with only baggage propagation enabled"
+      type: file
+      source: manifests/relay-start.yaml
+  waitFor:
+    - resource: deploy/jaeger
+      namespace: observability
+    - resource: deploy/otel-collector
+      namespace: observability
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/relay
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+testing:
+  init:
+    - name: verify-start
+      description: Verify the intended starting fault and rejection before applying the solution
+      type: file
+      source: testing/verify-start.sh
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+    - name: wait-for-traces
+      description: Waits until Jaeger holds spans from the instrumented relay
+      type: file
+      source: testing/wait-for-traces.sh
+
+validation:
+  scripts:
+    - name: relay-injected
+      description: The running relay pod carries the annotation and the Operator's init container, with tracecontext propagation and the Collector as exporter endpoint
+      type: file
+      source: validation/validate-injection.sh
+    - name: design-intact
+      description: relay keeps its image, command and script, scout is unchanged, and the Collector still exports to Jaeger
+      type: file
+      source: validation/validate-design-intact.sh
+    - name: linked-trace
+      description: A recent trace in Jaeger has a scout span whose parent is a relay span
+      type: file
+      source: validation/validate-linked-trace.sh
+
+teardown:
+  keepCluster: false

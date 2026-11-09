@@ -1,4 +1,4 @@
-# Starting workloads for the "Get Two Services Into One Trace" lab: Jaeger
+# Starting workloads for the "Repair Missing Agent Injection" lab: Jaeger
 # 2.22.0 (one pod, in-memory storage) and a working Collector `otel` in
 # `observability`; `scout` (podinfo) in `starfleet` with its own tracing on;
 # the ConfigMap and Service of `relay`; and a `shuttle` pod that sends steady

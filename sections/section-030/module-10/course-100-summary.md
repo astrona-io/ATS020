@@ -1,37 +1,17 @@
 # Summary
 
-An application should send its spans to a Collector, and the Collector should send them on to a backend. This module built that path on Kubernetes with the OpenTelemetry Operator and followed a trace from `scout` to Jaeger.
+The OpenTelemetry Operator manages Collectors from `OpenTelemetryCollector` resources. In the playground, cert-manager supplies the certificates that let the Kubernetes API server trust the Operator's admission webhooks. A ready Operator and a working webhook allow Collector resources to be checked and deployed.
 
-## What you learned
+The Collector receives spans, processes them, and exports them to Jaeger. Its trace pipeline activates the receivers, processors, and exporters it lists. OpenTelemetry Protocol (OTLP) uses port `4317` for gRPC and `4318` for HTTP by default. The application's transport, receiver port, and export destination must agree.
 
-The OpenTelemetry Operator turns an OpenTelemetryCollector resource into a Deployment, a DaemonSet or an injected sidecar, a ConfigMap with the Collector configuration, and Services. It needs cert-manager, because its admission webhooks need a certificate that the API server trusts. The Operator is ready when its `Certificate` is `READY True`, and a request that only the webhook can reject, run with `--dry-run=server`, proves that the webhook answers.
+Collector mode determines placement. A Deployment provides a shared gateway, a DaemonSet places agents on eligible nodes, and sidecar mode injects a Collector into annotated application pods. Injection happens when a pod is created, and the application must use the sidecar's endpoint to send through it. Changing an existing Collector's mode requires replacing the resource.
 
-A Collector is built from receivers, processors and exporters, connected by pipelines. The Collector only starts a part that a pipeline lists. The Operator builds the Service ports from the receivers that pipelines use, and it names the Service `<name>-collector`. OTLP uses port `4317` for gRPC and `4318` for HTTP, and an exporter to a backend without TLS needs `tls.insecure: true`.
+A trace groups spans by a shared trace identifier. Parent identifiers connect operations, while context propagation carries that relationship across service requests. Jaeger's timeline shows where time was spent. A generated test trace checks delivery independently of the application's instrumentation.
 
-A trace is the set of spans of one request. The spans share one trace ID, each span has a parent span ID, and the root span has none. The `traceparent` header carries the trace ID from one service to the next. Jaeger stores the spans, and its API on port `16686` finds them by service name, time range and minimum duration. A test trace from `telemetrygen` separates a fault in the application from a fault in the pipeline.
+Receiver ports and startup logs show what the Collector accepts. Exporter errors identify failed destinations, and increasing counters show spans entering and leaving the process. A recent trace retrieved from Jaeger confirms that the backend can return the delivered data. A running pod or an old service name in a search result cannot establish current delivery.
 
-The `mode` field decides where the Collector runs. A `deployment` is a shared gateway, a `daemonset` is an agent on each node, and a `sidecar` is a container injected into a pod that carries the `sidecar.opentelemetry.io/inject` annotation. The mode of an existing Collector cannot change; delete the resource and create it again.
+Attributes help find relevant spans and services. Jaeger 2.22 uses the version 3 query API with a required time range; older servers may also serve the legacy search routes. After checking the matching span and workload identity, apply the requested change and verify its effect. Export full traces when evidence is needed, and count distinct trace identifiers to check the requested total.
 
-A Collector in `Running` can still be broken. Read the Service ports, the startup lines in the log, the retry lines of the exporter and the counters `otelcol_receiver_accepted_spans` and `otelcol_exporter_sent_spans`. The proof of a fix is that `scout` appears in Jaeger and both counters rise together.
-
-A span can also carry tags, which OpenTelemetry calls attributes, and a tag can lead you to a service you could not name. The web interface of Jaeger 2.22 takes tags in its Attributes field. Its version 3 API takes them as a JSON object in `query.attributes`, together with a required time range, and older guides show a legacy search form that this release no longer serves. The service name is on the resource and not on the span. To save an exact number of traces, limit the search with `query.searchDepth` and write the response to a file. One trace can fill more than one `resourceSpans` entry, so count distinct trace IDs.
-
-Jaeger 1.x and 2.0 through 2.20 also serve the older `/api/services` and
-`/api/traces` search routes. Jaeger 2.21.0 removed them. Probe the service
-routes before choosing the search form: the older search uses `service`,
-JSON `tags` and `limit`, and returns traces in `data`.
-
-A tag tells you which service a request belongs to, and the span status tells you whether a step worked. The status code is `UNSET`, `OK` or `ERROR`, written `0`, `1` and `2` in OTLP JSON. The application sets it, and when it catches an exception it also adds a span event named `exception` with `exception.type`, `exception.message` and `exception.stacktrace`. Jaeger marks such a span with the tag `error=true`. Through the API, a `jq` filter on `status.code` finds the failed spans, and collecting their `exception` events into a JSON array keeps the evidence after Jaeger restarts. The message points at the cause, and the newest traces, read after the new pod runs, prove the fix.
-
-The key facts to remember are these:
-
-- The Operator needs cert-manager first, and its webhook must answer before you create a Collector.
-- A part that no pipeline lists does not run.
-- Port `4317` is OTLP over gRPC and port `4318` is OTLP over HTTP.
-- A Collector mode cannot be changed in place.
-- A fix is proved by a trace in Jaeger, not by a `Running` pod.
-- A trace search through the API needs a time range, and a `404` means that no trace matched.
-- Count traces in an API response by distinct trace IDs, not by `resourceSpans` entries.
-- A failed span has the status code `2` (`ERROR`), and the cause is in its `exception` event.
+Span status records the result reported by instrumentation. `ERROR` marks a failure, while an `exception` event can provide its type, message, and stack trace. Recording an error and recording an exception are separate choices, so inspect the data the application supplies. Save the evidence before restarting in-memory storage, investigate the cause against the workload configuration, and verify recovery with spans created after the repair.
 
 <!-- astrona:playground:destroy -->
