@@ -4,7 +4,7 @@ Solve this question on: `terminal`
 
 ## Scenario
 
-Three workloads in the `starfleet` namespace send spans to Jaeger 2.22.0, which
+Three workloads in the `starfleet` namespace send spans to Jaeger 2.23.0, which
 runs in the `observability` namespace. The Service `jaeger` serves the web
 interface and the query application programming interface (API) on port
 `16686`. A span is one timed step of a request, and a trace is the set of spans

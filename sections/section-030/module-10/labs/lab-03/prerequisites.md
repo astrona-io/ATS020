@@ -11,5 +11,5 @@ can carry span events, which are timestamped records inside the span. Know how
 to filter JSON with `jq`, and how to use `kubectl port-forward`,
 `kubectl set env` and `kubectl rollout status`.
 
-The lab supplies Kubernetes 1.35.8, Jaeger 2.22.0 and three Python trace
+The lab supplies Kubernetes 1.35.8, Jaeger 2.23.0 and three Python trace
 emitters. It installs no packages into the running containers.

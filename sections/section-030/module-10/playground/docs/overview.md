@@ -16,7 +16,7 @@ accepts a Collector. A Prometheus stack is not installed, to save memory.
 | --- | --- |
 | `cert-manager` | cert-manager 1.21.3, which issues the certificate for the Operator's webhook |
 | `opentelemetry-operator-system` | The OpenTelemetry Operator 0.162.0, which turns an OpenTelemetryCollector resource into a running Collector |
-| `observability` | Jaeger 2.22.0 in one pod with in-memory storage. The Service `jaeger` has OTLP on `4317` (gRPC) and `4318` (HTTP), and the web interface on `16686` |
+| `observability` | Jaeger 2.23.0 in one pod with in-memory storage. The Service `jaeger` has OTLP on `4317` (gRPC) and `4318` (HTTP), and the web interface on `16686` |
 | `starfleet` | `scout`, which sends its spans over OTLP to `otel-collector.observability:4317`; `shuttle`, which sends a request to `scout` every 2 seconds; and `probe`, a small Python program that calls the address in its `TARGET_URL` variable every 2 seconds and sends one span for each call straight to Jaeger |
 
 The Service `otel-collector` does not exist yet. The Operator creates it when

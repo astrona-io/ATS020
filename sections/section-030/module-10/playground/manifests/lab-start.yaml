@@ -1,4 +1,4 @@
-# Starting workloads for the Collector playground: Jaeger 2.22.0 (one pod,
+# Starting workloads for the Collector playground: Jaeger 2.23.0 (one pod,
 # in-memory storage) in `observability`, `scout` (podinfo) in `starfleet`
 # with tracing switched on, and a `shuttle` pod that sends steady traffic to
 # `scout`. `scout` sends its spans over OTLP to `otel-collector.observability`,
@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - name: jaeger
-          image: jaegertracing/jaeger:2.22.0
+          image: jaegertracing/jaeger:2.23.0
           ports:
             - name: otlp-grpc
               containerPort: 4317

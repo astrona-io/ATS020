@@ -35,7 +35,7 @@ kubectl -n observability port-forward service/jaeger 16686:16686
 
 To use the web interface, open `http://127.0.0.1:16686`. On the Search page,
 choose **All Services**. Type `incident.code=retry-storm` in the field that
-Jaeger 2.22.0 labels **Attributes**, then select **Find Traces**. Each row names
+Jaeger 2.23.0 labels **Attributes**, then select **Find Traces**. Each row names
 the service of a trace. Repeat with `incident.code=queue-pressure`.
 
 For an older exam server, the reading section **Search through the older Jaeger API** explains the legacy routes and the command that detects the available API.

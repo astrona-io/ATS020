@@ -1,4 +1,4 @@
-# Starting workloads for the auto-instrumentation playground: Jaeger 2.22.0
+# Starting workloads for the auto-instrumentation playground: Jaeger 2.23.0
 # (one pod, in-memory storage) and a working OpenTelemetryCollector `otel` in
 # `observability`; `scout` (podinfo) in `starfleet` that sends its own spans to
 # the Collector; `relay`, a small Node.js service that calls `scout` and has
@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: jaeger
-          image: jaegertracing/jaeger:2.22.0
+          image: jaegertracing/jaeger:2.23.0
           ports:
             - name: otlp-grpc
               containerPort: 4317

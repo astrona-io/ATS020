@@ -477,8 +477,8 @@ modules:
         resources:
           - name: "Jaeger 2.22: APIs"
             url: https://www.jaegertracing.io/docs/2.22/architecture/apis/
-          - name: "Jaeger 2.22.0: api_v3 query parameters"
-            url: https://github.com/jaegertracing/jaeger/blob/v2.22.0/cmd/jaeger/internal/extension/jaegerquery/internal/apiv3/query_parser.go
+          - name: "Jaeger 2.23.0: api_v3 query parameters"
+            url: https://github.com/jaegertracing/jaeger/blob/v2.23.0/cmd/jaeger/internal/extension/jaegerquery/internal/apiv3/query_parser.go
           - name: "Kubernetes: kubectl set env"
             url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
           - name: "Kubernetes: kubectl scale"
