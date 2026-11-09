@@ -4,12 +4,12 @@
 #
 # Installs the tools only; Jaeger, scout, shuttle and the broken Collector
 # come from manifests/. This script:
-#   1. installs cert-manager 1.21.2 (the OpenTelemetry Operator needs it for
+#   1. installs cert-manager 1.21.3 (the OpenTelemetry Operator needs it for
 #      its webhook certificate) and waits for it,
 #   2. installs the OpenTelemetry Operator 0.160.0 and waits for it.
 set -euo pipefail
 
-CERT_MANAGER_VERSION="v1.21.2"
+CERT_MANAGER_VERSION="v1.21.3"
 OTEL_OPERATOR_VERSION="v0.160.0"
 
 echo "[lab] Installing cert-manager ${CERT_MANAGER_VERSION}..."

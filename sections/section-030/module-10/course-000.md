@@ -50,7 +50,7 @@ You need these tools on your machine:
 The playground uses a single-node `kind` cluster with:
 
 - Kubernetes **1.35**
-- cert-manager **1.21.2**
+- cert-manager **1.21.3**
 - OpenTelemetry Operator **0.160.0**, with its webhook ready
 - Jaeger **2.22.0**
 

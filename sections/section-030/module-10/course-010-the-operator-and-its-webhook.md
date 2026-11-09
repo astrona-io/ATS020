@@ -21,7 +21,7 @@ The Operator also provides **admission webhooks**: HTTPS endpoints that the Kube
 
 These endpoints require TLS certificates trusted by the Kubernetes API server.
 
-**cert-manager** provisions and renews the webhook certificate using `Issuer` and `Certificate` resources included in the Operator installation manifest. It must be running before the Operator is installed. The playground installed cert-manager 1.21.2 first, then the Operator 0.160.0 from its release manifest (`opentelemetry-operator.yaml`) with `kubectl apply --server-side`.
+**cert-manager** provisions and renews the webhook certificate using `Issuer` and `Certificate` resources included in the Operator installation manifest. It must be running before the Operator is installed. The playground installed cert-manager 1.21.3 first, then the Operator 0.160.0 from its release manifest (`opentelemetry-operator.yaml`) with `kubectl apply --server-side`.
 
 <!-- astrona:playground:renew -->
 

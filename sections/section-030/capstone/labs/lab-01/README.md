@@ -9,7 +9,7 @@ estimated_duration: 60m
 - **Type:** Astrona lab, graded
 
 A single-node kind cluster running Kubernetes 1.35.8. The bootstrap installs
-cert-manager 1.21.2 and the OpenTelemetry Operator 0.160.0, then applies
+cert-manager 1.21.3 and the OpenTelemetry Operator 0.160.0, then applies
 Jaeger 2.22.0, the `scout` workload with tracing on but a wrong exporter port,
 a `shuttle` traffic client and the `relay` workload with no instrumentation.
 No Collector exists. The learner writes the Collector and the Instrumentation,
