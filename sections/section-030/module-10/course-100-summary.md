@@ -21,6 +21,8 @@ Jaeger 1.x and 2.0 through 2.20 also serve the older `/api/services` and
 routes before choosing the search form: the older search uses `service`,
 JSON `tags` and `limit`, and returns traces in `data`.
 
+A tag tells you which service a request belongs to, and the span status tells you whether a step worked. The status code is `UNSET`, `OK` or `ERROR`, written `0`, `1` and `2` in OTLP JSON. The application sets it, and when it catches an exception it also adds a span event named `exception` with `exception.type`, `exception.message` and `exception.stacktrace`. Jaeger marks such a span with the tag `error=true`. Through the API, a `jq` filter on `status.code` finds the failed spans, and collecting their `exception` events into a JSON array keeps the evidence after Jaeger restarts. The message points at the cause, and the newest traces, read after the new pod runs, prove the fix.
+
 The key facts to remember are these:
 
 - The Operator needs cert-manager first, and its webhook must answer before you create a Collector.
@@ -30,5 +32,6 @@ The key facts to remember are these:
 - A fix is proved by a trace in Jaeger, not by a `Running` pod.
 - A trace search through the API needs a time range, and a `404` means that no trace matched.
 - Count traces in an API response by distinct trace IDs, not by `resourceSpans` entries.
+- A failed span has the status code `2` (`ERROR`), and the cause is in its `exception` event.
 
 <!-- astrona:playground:destroy -->

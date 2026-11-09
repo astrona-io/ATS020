@@ -15,6 +15,11 @@ runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.8
+    # mccutchen/go-httpbin:2.25.0 is not preloaded; the node pulls it. With
+    # the containerd image store of Docker 29, go-httpbin and the cert-manager
+    # images conflict: whichever is pulled second fails
+    # `docker save --platform linux/amd64`, so the preload stops (checked
+    # 2026-11-09).
     preloadImages:
       - quay.io/jetstack/cert-manager-controller:v1.21.2
       - quay.io/jetstack/cert-manager-webhook:v1.21.2
@@ -26,7 +31,6 @@ runtime:
       - quay.io/prometheus/prometheus:v3.15.0-distroless
       - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
       - ghcr.io/stefanprodan/podinfo:6.15.0
-      - mccutchen/go-httpbin:2.25.0
       - curlimages/curl:8.22.0
 
 bootstrap:

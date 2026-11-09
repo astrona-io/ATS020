@@ -39,10 +39,10 @@ curl -fsS http://127.0.0.1:16686/api/v3/services | jq -c .services
 ```
 
 ```text
-["jaeger","scout"]
+["scout","jaeger","probe"]
 ```
 
-`jaeger` is Jaeger tracing its own work. `scout` is your application, which proves that its spans passed through the Collector. The trace search needs a start and an end time. This helper uses a wide window, so you do not compute dates. It prints the name, trace ID, span ID and parent span ID of every span the search finds. The second argument is the number of traces to return:
+The order of the names can differ. `jaeger` is Jaeger tracing its own work. `scout` is your application, which proves that its spans passed through the Collector. `probe` sends its spans straight to Jaeger, so it was in the list before the Collector existed. The trace search needs a start and an end time. This helper uses a wide window, so you do not compute dates. It prints the name, trace ID, span ID and parent span ID of every span the search finds. The second argument is the number of traces to return:
 
 ```sh
 list_spans() {

@@ -128,25 +128,7 @@ jq '[.result.resourceSpans[].scopeSpans[].spans[].traceId] | unique | length' /t
 jq -r '[.result.resourceSpans[].resource.attributes[] | select(.key == "service.name") | .value.stringValue] | unique | .[]' /tmp/scout-traces.json
 ```
 
-A tag search tells you where to look, and the search result is what justifies the change. Find the service first, change only what the search points to, and keep the traces in a file that shows what you found.
-
-## Find the spans that ended with an error
-
-A tag names the request; the span status says whether the step worked. Every span has a **status** with a code `UNSET`, `OK` or `ERROR`, and OTLP JSON writes those codes as `0`, `1` and `2`. When an instrumented application catches an exception, it sets the status to `ERROR` and adds a **span event**, a timestamped record inside the span, named `exception`. Its attributes `exception.type`, `exception.message` and `exception.stacktrace` hold what the application would have written to its log. Jaeger shows such a span with a red marker, and marks it with the tag `error=true`, so `error=true` in the **Attributes** field of the Search page lists only traces that contain a failed step.
-
-Through the API, the same question is a filter on `status.code`. Some servers spell the code `STATUS_CODE_ERROR` instead of `2`, so accept both. This command counts the failed spans in the newest twenty traces of `scout`, and the next one collects the `exception` events of those spans into one JSON array, the shape a report or a ticket needs:
-
-```sh
-curl -fsSG http://127.0.0.1:16686/api/v3/traces \
-  --data-urlencode 'query.serviceName=scout' \
-  --data-urlencode 'query.startTimeMin=2020-01-01T00:00:00Z' \
-  --data-urlencode 'query.startTimeMax=2100-01-01T00:00:00Z' \
-  --data-urlencode 'query.searchDepth=20' > /tmp/scout-recent.json
-jq '[.result.resourceSpans[].scopeSpans[].spans[] | select((.status.code // 0) as $code | $code == 2 or $code == "STATUS_CODE_ERROR")] | length' /tmp/scout-recent.json
-jq '[.result.resourceSpans[].scopeSpans[].spans[] | select((.status.code // 0) as $code | $code == 2 or $code == "STATUS_CODE_ERROR") | .events[]? | select(.name == "exception")]' /tmp/scout-recent.json
-```
-
-In the playground, `scout` answers every request, so the first command prints `0` and the second prints `[]`. A service that fails prints a count above `0`, and the array holds one event for each failed span, with the exception message that tells you what broke. The message is the clue for the fix: a host that does not resolve points at a wrong Service name, a refused connection at a wrong port, a timeout at a slow or absent backend.
+A tag search tells you where to look, and the search result is what justifies the change. Find the service first, change only what the search points to, and keep the traces in a file that shows what you found. A tag still does not tell you whether a step failed. That answer is in the status of each span.
 
 ## Common pitfalls
 
@@ -184,32 +166,5 @@ When the lab is done, remove it and start the playground again:
 
 ```sh
 astrona destroy ats-020-lab-030-01-02
-astrona start ats-020-playground-030-01
-```
-
-## Your mission: Export The Exceptions Of A Failed Trace
-
-You can now find the spans that ended with an error and collect their `exception` events as a JSON array. The mission gives you three workloads, one of which calls a Service that does not exist, and asks you to name that service, save its exception events to a file and repair the address it calls.
-
-Pause the playground, then start the lab:
-
-```sh
-astrona stop ats-020-playground-030-01
-```
-
-```sh
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-10/labs/lab-03
-```
-
-The task is on the next page. When you have written both files and fixed the Deployment, grade your work:
-
-```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-10/labs/lab-03
-```
-
-When the lab is done, remove it and start the playground again:
-
-```sh
-astrona destroy ats-020-lab-030-01-03
 astrona start ats-020-playground-030-01
 ```

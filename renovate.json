@@ -5,5 +5,59 @@
   ],
   "ignorePaths": [
     "sections/**"
+  ],
+  "enabledManagers": [
+    "custom.regex",
+    "github-actions"
+  ],
+  "labels": [
+    "versions",
+    "needs-verification"
+  ],
+  "automerge": false,
+  "gitIgnoredAuthors": [
+    "41898282+github-actions[bot]@users.noreply.github.com"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Pinned course versions in versions.env",
+      "managerFilePatterns": [
+        "/^versions\\.env$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?(?: extractVersion=(?<extractVersion>\\S+))?\\n[A-Z_]+=(?<currentValue>\\S+)"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver-coerced{{/if}}"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "The exam runs Kubernetes 1.35: only patch releases of the kind node image",
+      "matchDepNames": [
+        "kindest/node"
+      ],
+      "allowedVersions": "/^1\\.35\\./"
+    },
+    {
+      "description": "relay follows the Node.js 22 line",
+      "matchDepNames": [
+        "node"
+      ],
+      "allowedVersions": "/^22-alpine$/"
+    },
+    {
+      "description": "The Python emitter stays on 3.13 with Alpine",
+      "matchDepNames": [
+        "python"
+      ],
+      "allowedVersions": "/^3\\.13\\.\\d+-alpine\\d+\\.\\d+$/"
+    }
+  ],
+  "prBodyNotes": [
+    "This pull request changes `versions.env`. The `sync-versions` workflow then commits the matching course files to this branch. Before merging:",
+    "- [ ] Check that the `sync-versions` commit is on this branch and the `versions` check is green.",
+    "- [ ] Run `astrona test` on every lab of the synced sections that uses this tool.",
+    "- [ ] Run the playground commands on the pages and replace any command output that changed."
   ]
 }

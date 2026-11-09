@@ -13,7 +13,13 @@ CERT_MANAGER_VERSION="v1.21.2"
 OTEL_OPERATOR_VERSION="v0.160.0"
 
 echo "[playground] Installing cert-manager ${CERT_MANAGER_VERSION}..."
-kubectl apply --server-side -f "https://github.com/cert-manager/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml"
+# GitHub release downloads sometimes fail for a moment (a 504 answer), so retry for about 4 minutes.
+for attempt in 1 2 3 4 5 6; do
+  kubectl apply --server-side -f "https://github.com/cert-manager/cert-manager/releases/download/${CERT_MANAGER_VERSION}/cert-manager.yaml" && break
+  [ "$attempt" -eq 6 ] && { echo "ERROR: cert-manager install failed" >&2; exit 1; }
+  echo "cert-manager download failed, retrying in $((attempt * 15)) seconds..."
+  sleep $((attempt * 15))
+done
 for d in cert-manager cert-manager-cainjector cert-manager-webhook; do
   kubectl -n cert-manager rollout status "deployment/$d" --timeout=300s
 done
@@ -26,7 +32,7 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
     break
   fi
   [ "$attempt" -eq 10 ] && { echo "[playground] ERROR: operator install failed" >&2; exit 1; }
-  sleep 10
+  sleep 30
 done
 kubectl -n opentelemetry-operator-system rollout status deployment/opentelemetry-operator-controller-manager --timeout=300s
 
