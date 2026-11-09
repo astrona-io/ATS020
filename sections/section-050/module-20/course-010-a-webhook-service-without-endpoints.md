@@ -1,6 +1,6 @@
 # A Webhook Service Without Endpoints
 
-When a workload fails, the pod tells you something. When a platform component fails, the symptom often shows up somewhere else. A `kubectl create` fails, and the error names a webhook that you never touched. This part shows how the API server calls an admission webhook, how to read the error when that call fails, and how to follow the error to the Service behind the webhook. It uses the webhook `starfleet-policy`.
+A Deployment create fails because the API server cannot reach an admission webhook. Trace the webhook reference through its Service, endpoints and server port. Repair the connection while preserving admission enforcement.
 
 The commands need the playground as it starts: the namespace `starfleet`, the namespace `webhook-system` with the webhook server `starfleet-policy`, and the `ValidatingWebhookConfiguration` of the same name.
 
@@ -111,8 +111,6 @@ POST /validate?timeout=5s uid=940a0304-8b9b-445b-b255-468aa3f75fa9 allowed
 
 The create works, and the server logged one `POST /validate` request that it allowed. The log line is the difference between a fix and a bypass. If the create had worked because the webhook was deleted, the server would have logged nothing.
 
-You can now follow a webhook failure from the API server error to the Service and its EndpointSlice, and fix the selector. The same error text also appears for a different cause: the connection works, but the certificate is wrong. That is the next failure.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -120,3 +118,29 @@ You can now follow a webhook failure from the API server error to the Service an
 > - **Deleting the `ValidatingWebhookConfiguration`.** It removes the broken call and also the policy. Fix the cause instead.
 > - **Checking only that the webhook pod is `Running`.** The pod can be healthy while the Service has no endpoints. Read the EndpointSlice.
 > - **Testing with the wrong namespace.** A webhook matches a namespace with its `namespaceSelector`. A create in `outpost` does not reach `starfleet-policy`.
+
+## Your mission: Repair A Webhook Service Port
+
+The `starfleet-policy` admission webhook blocks Deployment creation in `starfleet`. Its server and Service run in `webhook-system`.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-050-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-050/module-20/labs/lab-01
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-050/module-20/labs/lab-01
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-050-02
+astrona start ats-020-playground-050-02
+```

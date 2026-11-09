@@ -1,0 +1,21 @@
+# The recording rules a platform team wrote for the DORA metrics of the
+# Application `scout`. The deployment count is correct. The failed deployment
+# count is the fault: it counts sync operations that ended in the phase
+# Failed or Error, and Argo CD never records one for a bad image tag.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dora-scout
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  groups:
+    - name: dora-scout
+      rules:
+        - record: dora:deployments:increase6h
+          expr: round(sum(increase(argocd_app_sync_total{name="scout",phase="Succeeded"}[6h])))
+        - record: dora:failed_deployments:count6h
+          expr: sum(increase(argocd_app_sync_total{name="scout",phase=~"Failed|Error"}[6h])) or vector(0)
+        - record: dora:change_failure_rate:ratio6h
+          expr: dora:failed_deployments:count6h / dora:deployments:increase6h

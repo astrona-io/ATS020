@@ -1,6 +1,6 @@
 # A Triage Order And Pending Pods
 
-When several workloads are broken, the worst habit is to guess. A pod status such as `Pending` or `CrashLoopBackOff` only tells you where the pod stopped, not why. This part sets a fixed order of commands that finds the cause, and uses it on two pods that the scheduler cannot place. The scheduler is the control plane component that picks a node for each new pod.
+A Pending pod has not reached a running container. Read scheduling events, resource requests and placement constraints before changing it. In the lab, compare the node selector with the labels on the available node.
 
 The commands need the playground as it starts: the namespace `starfleet` with the workloads `scout` and `bridge`, both `Pending`.
 
@@ -159,3 +159,29 @@ You now know the five-step order and how to read a `FailedScheduling` event. A `
 > - **Judging fit by real use.** The scheduler compares requests with the allocatable amount, not with what the node uses. `kubectl top node` can show a free node while the node is full of requests.
 > - **Fixing the pod instead of the Deployment.** A change to a pod is lost when the Deployment replaces it. Change the pod template of the Deployment.
 > - **Stopping at `Running`.** Prove the fix with a request from `shuttle` that returns `200`.
+
+## Your mission: Schedule A Pending Workload
+
+The `scout` Deployment in `starfleet` is unhealthy. The `shuttle` client and the Service `scout` are available for testing.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-050-01
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-050/module-10/labs/lab-01
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-050/module-10/labs/lab-01
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-050-01
+astrona start ats-020-playground-050-01
+```

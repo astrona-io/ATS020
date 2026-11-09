@@ -1,20 +1,23 @@
 # Measure Service Levels And Resource Efficiency
 
-A platform team answers two questions about every service: does it work well enough, and does it cost more than it needs? The first question is about a service level, a promise about how often requests succeed. The second question is about efficiency, the gap between the CPU and memory that a workload reserves and the CPU and memory that it uses. Both answers come from numbers that the cluster already produces.
+Work through one practical outcome at a time. Each graded lab follows the lesson that prepares it and starts from its own cluster state. The 4 labs each have 3–5 tasks, with 10–15 minutes of task work plus startup and telemetry delays.
 
-This module measures the first question with a request counter in Prometheus. It turns the counter into a service level indicator, compares it with a target and alerts when the budget for failures burns too fast. Then it measures the second question with metrics-server, cAdvisor and kube-state-metrics, and it changes the requests of two workloads until the gap closes. The exam asks for both: a PromQL query that returns the right number, and a fix that you prove with a measurement.
+## Learning sequence
 
-The module has four parts. **SLI, SLO And Error Budget From Request Counters** defines the three terms and calculates them for `scout`. **Burn-Rate Alerts With Two Windows** writes an alert on how fast the budget burns and ends with a graded lab. **Requests Versus Usage With kubectl top And Prometheus** reads what each container requested and what it uses. **Find And Fix Over- And Under-Provisioned Workloads** ranks the gap, changes the requests and ends with a second graded lab.
+| Lesson | Practice after reading |
+| --- | --- |
+| SLI, SLO And Error Budget From Request Counters | Record Availability And Error Budget |
+| Burn-Rate Alerts With Two Windows | Repair A Multi-Window Burn-Rate Alert |
+| Requests Versus Usage With kubectl top And Prometheus | Explore in the playground; apply this preparation in the following labs |
+| Reduce Excess Resource Requests | Reduce Excess Resource Requests |
+| Raise An Undersized Memory Request | Raise An Undersized Memory Request |
 
-## Learning objectives
+## What you will prove
 
-After this module you can:
-
-- Write an SLI as a PromQL ratio of good requests to all requests.
-- Calculate the remaining error budget for a 99 percent SLO over a window.
-- Write a burn-rate alert with two windows that fires when the budget would run out early.
-- Compare container CPU and memory requests with real usage from metrics-server and Prometheus.
-- Name the workload with the biggest gap and change its requests to match usage.
+- Record Availability And Error Budget.
+- Repair A Multi-Window Burn-Rate Alert.
+- Reduce Excess Resource Requests.
+- Raise An Undersized Memory Request.
 
 ## Before you start
 
@@ -30,6 +33,6 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. It star
 
 The numbers and pod names in the output of this module come from one run. Your playground makes new ones, so your values differ.
 
-Launch your playground now, and keep it running next to you while you read the parts:
+Launch the playground for the reading exercises:
 
 <!-- astrona:playground -->

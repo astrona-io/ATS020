@@ -40,6 +40,10 @@ bootstrap:
     namespace: monitoring
 testing:
   init:
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: solution
     type: file
     source: solution/apply.sh
@@ -49,22 +53,12 @@ testing:
 validation:
   scripts:
   - name: rule-loaded
-    description: The selected rule uses the requested metric, threshold, duration
-      and labels
+    description: The selected rule uses the requested metric, threshold, duration and labels
     type: file
     source: validation/validate-rule-loaded.sh
   - name: alert-firing
     description: ScoutErrorRate fires for starfleet
     type: file
     source: validation/validate-alert-firing.sh
-  - name: receiver-routed
-    description: Alertmanager assigns the alert to the webhook and the receiver logs
-      it
-    type: file
-    source: validation/validate-receiver-routed.sh
-  - name: maintenance-silenced
-    description: An active scoped 30-minute silence suppresses the maintenance alert
-    type: file
-    source: validation/validate-maintenance-silenced.sh
 teardown:
   keepCluster: false

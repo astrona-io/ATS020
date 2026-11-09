@@ -57,6 +57,12 @@ jobs:
           fetch-depth: 0
       - name: Check that the course files match versions.env
         run: python3 scripts/sync-versions.py --check
+      - name: Install course validation dependencies
+        run: python3 -m pip install -r scripts/ci/requirements.txt
+      - name: Test course validation failure cases
+        run: python3 scripts/ci/test-course-structure.py
+      - name: Check lesson and lab structure
+        run: python3 scripts/ci/check-course-structure.py
       - id: list
         name: List the environments to test
         env:

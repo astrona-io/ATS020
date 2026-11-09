@@ -6,58 +6,57 @@ metadata:
     prerequisites: prerequisites.md
     question: question.md
     solution: solution.md
-
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
-      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
-      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
-      - quay.io/prometheus/prometheus:v3.15.0-distroless
-      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
-      - ghcr.io/stefanprodan/podinfo:6.17.0
-
+    - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+    - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+    - quay.io/prometheus/prometheus:v3.15.0-distroless
+    - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+    - ghcr.io/stefanprodan/podinfo:6.17.0
 bootstrap:
   init:
-    - name: prepare
-      description: "Install a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator and one Prometheus) in monitoring"
-      type: file
-      source: bootstrap/01-prepare.sh
+  - name: prepare
+    description: Install a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator and one Prometheus) in monitoring
+    type: file
+    source: bootstrap/01-prepare.sh
   manifests:
-    - name: lab-start
-      description: "The namespace starfleet with the Deployment and Service scout"
-      type: file
-      source: manifests/lab-start.yaml
-    - name: servicemonitor-start
-      description: "The faulty ServiceMonitor scout in starfleet"
-      type: file
-      source: manifests/servicemonitor-start.yaml
+  - name: lab-start
+    description: Starting resources for repair servicemonitor discovery
+    type: file
+    source: manifests/lab-start.yaml
+  - name: servicemonitor-start
+    description: Starting resources for repair servicemonitor discovery
+    type: file
+    source: manifests/servicemonitor-start.yaml
   waitFor:
-    - resource: deploy/scout
-      namespace: starfleet
-
+  - resource: deploy/scout
+    namespace: starfleet
 testing:
   init:
-    - name: solution
-      description: Reference solution applied by `astrona test`
-      type: file
-      source: solution/apply.sh
-    - name: wait-for-targets
-      description: Waits until Prometheus has two healthy scout targets
-      type: file
-      source: testing/wait-for-targets.sh
-
+  - name: verify-start
+    description: Reject the unfinished lab before applying the reference solution
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+  - name: wait-for-targets
+    description: Waits until Prometheus has two healthy scout targets
+    type: file
+    source: testing/wait-for-targets.sh
 validation:
   scripts:
-    - name: wiring-intact
-      description: The Prometheus resource, the Service scout and the label release kps are unchanged
-      type: file
-      source: validation/validate-wiring-intact.sh
-    - name: targets-up
-      description: Every ready scout endpoint is a healthy Prometheus target with up equal to 1
-      type: file
-      source: validation/validate-targets-up.sh
-
+  - name: wiring-intact
+    description: The Prometheus resource, the Service scout and the label release kps are unchanged
+    type: file
+    source: validation/validate-wiring-intact.sh
+  - name: targets-up
+    description: Every ready scout endpoint is a healthy Prometheus target with up equal to 1
+    type: file
+    source: validation/validate-targets-up.sh
 teardown:
   keepCluster: false

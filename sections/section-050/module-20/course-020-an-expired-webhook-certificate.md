@@ -1,6 +1,6 @@
 # An Expired Webhook Certificate
 
-A webhook can have a Service with endpoints and a healthy pod and still fail. The API server talks to a webhook over HTTPS, so it checks the certificate that the webhook shows. If that certificate is expired or not trusted, the API server refuses the connection. This part reads the `x509` error, inspects the certificate with `openssl`, signs a new one with the certificate authority (CA) of the platform, and proves the fix. It uses the webhook `outpost-policy`.
+The webhook server runs, but the API server rejects its expired serving certificate. Inspect the certificate dates and identity, renew it using the existing trusted CA, and prove that a new admission request succeeds.
 
 The commands need the playground as it starts: the namespace `outpost`, the webhook server `outpost-policy` in `webhook-system` with its Secret `outpost-policy-tls`, and the Secret `webhook-ca`. They also need `openssl` on your machine.
 
@@ -128,8 +128,6 @@ POST /validate?timeout=5s uid=bbe7eb20-cb69-4d7c-8dfb-7f7b3a298fb4 allowed
 
 The create works, and the new server logged the request. The fix has three parts that depend on each other: a certificate signed by the trusted CA, the right name in the SAN, and a restart so the server loads the Secret.
 
-You can now read an `x509` error, check the dates and the issuer of a certificate with `openssl`, and replace a serving certificate without touching the webhook configuration. Webhooks are one kind of platform component. The next failure has no error message at all: a controller that does not run.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -138,3 +136,29 @@ You can now read an `x509` error, check the dates and the issuer of a certificat
 > - **Leaving out the SAN.** The API server compares the Service name with the SAN of the certificate. A certificate with only a common name (CN) fails.
 > - **Testing right after the rollout.** The old pod is still `Terminating` and can still answer. Wait a few seconds and test again.
 > - **Setting `failurePolicy: Ignore`.** The create works, but the policy no longer runs.
+
+## Your mission: Renew An Expired Webhook Certificate
+
+The `outpost-policy` admission webhook blocks Deployment creation in `outpost`. Its server and Service run in `webhook-system`.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-050-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-050/module-20/labs/lab-02
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-050/module-20/labs/lab-02
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-050-02-02
+astrona start ats-020-playground-050-02
+```

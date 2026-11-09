@@ -1,6 +1,6 @@
 # Targets And The up Metric
 
-Before you add anything to Prometheus, you need to see what it collects now and how it reports a success or a failure. This part shows where metrics come from, what Prometheus does with them, and the one metric that tells you whether each collection worked. Every later part of this module proves its result with that metric.
+Prometheus scrapes one endpoint at a time. Inspect its active targets, then compare a successful scrape with a failed one using `up`. This distinguishes a missing discovery result from an endpoint that was discovered but cannot be scraped.
 
 ## What a scrape is
 
@@ -117,8 +117,6 @@ monitoring   servicemonitor.monitoring.coreos.com/kps-prometheus   8m27s
 ```
 
 That is the whole job of the operator for this module. It watches ServiceMonitors and PodMonitors, writes the matching Prometheus configuration into a Secret, and Prometheus reloads it. To collect `scout`, you do not edit Prometheus; you create a monitor.
-
-You can now read what Prometheus collects in two ways: the targets list for the current state of each endpoint, and the `up` metric for the same facts as queryable data. You also know that a missing `up` series means "never tried", not "failed". The open question is what makes Prometheus try: what a ServiceMonitor must contain, and which ServiceMonitors Prometheus reads at all.
 
 ## Common pitfalls
 

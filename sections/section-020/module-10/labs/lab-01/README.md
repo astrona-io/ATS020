@@ -1,10 +1,12 @@
 ---
-estimated_duration: 25m
+estimated_duration: 15m
 ---
 
-# Fix A Grafana Dashboard That Is Provisioned From A ConfigMap
+# Restore Dashboard Provisioning
 
-Graded lab for the dashboards module. The dashboard `scout-overview` is stored in a ConfigMap, but it never appears in Grafana. The learner finds two faults: the ConfigMap lacks the label the Grafana dashboard sidecar watches, and every panel names a data source UID that does not exist. The grader checks that Grafana reports the dashboard as provisioned, that all three panels still exist and return data, and that the fix did not replace the provisioned data source with one made by hand.
+The team stores `Scout Overview` (UID `scout-overview`) in `monitoring/dashboard-scout-overview`. Grafana uses the provisioned Prometheus data source (UID `prometheus`).
+
+This independent lab has four tasks. Allow 10–15 minutes for task work, plus cluster startup and telemetry collection.
 
 ```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-10/labs/lab-01
@@ -12,4 +14,4 @@ astrona submit -c sections/section-020/module-10/labs/lab-01
 astrona destroy ats-020-lab-020-01
 ```
 
-Authors can run the reference solution with `astrona test -c sections/section-020/module-10/labs/lab-01`.
+Authors run `astrona validate` and `astrona test` with the same configuration path. The lifecycle test checks the starting fault before applying the reference solution. GitHub Actions discovers this lab automatically.

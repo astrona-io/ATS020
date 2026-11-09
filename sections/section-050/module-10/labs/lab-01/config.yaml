@@ -6,71 +6,45 @@ metadata:
     prerequisites: prerequisites.md
     question: question.md
     solution: solution.md
-
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.8
-    addons:
-      metricsServer: true
     preloadImages:
-      - ghcr.io/stefanprodan/podinfo:6.17.0
-      - mccutchen/go-httpbin:2.25.0
-      - node:22-alpine
-      - curlimages/curl:8.23.0
-
+    - ghcr.io/stefanprodan/podinfo:6.17.0
+    - curlimages/curl:8.23.0
 bootstrap:
-  init:
-    - name: prepare
-      description: "Wait until metrics-server answers, so kubectl top works"
-      type: file
-      source: bootstrap/01-prepare.sh
   manifests:
-    - name: lab-start
-      description: "The namespace starfleet, the healthy shuttle client and the four Services"
-      type: file
-      source: manifests/lab-start.yaml
-    - name: faults-start
-      description: "The four Deployments scout, probe, cargo and beacon, each broken in a different way"
-      type: file
-      source: manifests/faults-start.yaml
+  - name: lab-start
+    description: Starting resources for schedule a pending workload
+    type: file
+    source: manifests/lab-start.yaml
+  - name: faults-start
+    description: Starting resources for schedule a pending workload
+    type: file
+    source: manifests/faults-start.yaml
   waitFor:
-    - resource: deploy/shuttle
-      namespace: starfleet
-
+  - resource: deploy/shuttle
+    namespace: starfleet
 testing:
   init:
-    - name: solution
-      description: Reference solution applied by `astrona test`
-      type: file
-      source: solution/apply.sh
-    - name: wait-for-pods
-      description: Waits until the four fixed Deployments have a ready pod
-      type: file
-      source: testing/wait-for-pods.sh
-
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
 validation:
   scripts:
-    - name: scout-running
-      description: scout has a Running pod from the original image and answers 200 to shuttle
-      type: file
-      source: validation/validate-scout.sh
-    - name: probe-stable
-      description: probe keeps its liveness probe, stays Ready without new restarts and answers 200
-      type: file
-      source: validation/validate-probe.sh
-    - name: cargo-limit
-      description: cargo keeps a memory limit that fits its use (256Mi to 1Gi), has no OOMKilled restart and answers 200
-      type: file
-      source: validation/validate-cargo.sh
-    - name: beacon-image
-      description: beacon runs podinfo 6.17.0 and answers 200
-      type: file
-      source: validation/validate-beacon.sh
-    - name: design-intact
-      description: The four Deployments and shuttle still exist with their images, one replica and their Services
-      type: file
-      source: validation/validate-design-intact.sh
-
+  - name: scout-running
+    description: scout has a Running pod from the original image and answers 200 to shuttle
+    type: file
+    source: validation/validate-scout.sh
+  - name: design-intact
+    description: The workload keeps one replica and its Service, and shuttle keeps its image
+    type: file
+    source: validation/validate-design-intact.sh
 teardown:
   keepCluster: false

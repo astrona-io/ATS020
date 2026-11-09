@@ -1,6 +1,6 @@
 # Query Logs With LogQL
 
-Reading every line from every Pod does not answer "which Pods are failing?". You need to narrow the search to the right streams, keep the lines that matter, and sometimes turn those lines into a number. LogQL has one piece of syntax for each of these steps.
+A LogQL selector chooses streams by labels, and a line filter selects records within those streams. Start with a namespace, filter actual error lines, then group counts by pod to identify the workloads that produced them.
 
 <!-- astrona:playground:renew -->
 

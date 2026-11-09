@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-050-01-04
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - ghcr.io/stefanprodan/podinfo:6.17.0
+    - curlimages/curl:8.23.0
+bootstrap:
+  manifests:
+  - name: lab-start
+    description: Starting resources for repair an image reference
+    type: file
+    source: manifests/lab-start.yaml
+  - name: faults-start
+    description: Starting resources for repair an image reference
+    type: file
+    source: manifests/faults-start.yaml
+  waitFor:
+  - resource: deploy/shuttle
+    namespace: starfleet
+testing:
+  init:
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: beacon-image
+    description: beacon runs podinfo 6.17.0 and answers 200
+    type: file
+    source: validation/validate-beacon.sh
+  - name: design-intact
+    description: The workload keeps one replica and its Service, and shuttle keeps its image
+    type: file
+    source: validation/validate-design-intact.sh
+teardown:
+  keepCluster: false

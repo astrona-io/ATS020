@@ -6,7 +6,9 @@ The platform team measures the delivery of the workload `scout` with DORA (DevOp
 
 The team stores three recording rules in the PrometheusRule `dora-scout` in the namespace `monitoring`. The rule `dora:deployments:increase6h` counts deployments and is correct. The rule `dora:change_failure_rate:ratio6h` divides the failed deployments by the deployments. Prometheus returns `0` for the change failure rate, although two deployments failed. The team asks you to fix it.
 
-## Task
+Allow 10–15 minutes for task work. Cluster startup and telemetry collection add time.
+
+## Tasks
 
 1. Find out why `dora:change_failure_rate:ratio6h` is `0`. Read the three rules in the PrometheusRule `dora-scout` and query the metrics `argocd_app_sync_total` and `argocd_app_info` in Prometheus.
 2. Change the rule `dora:failed_deployments:count6h` so that it counts the deployments that made the Application `Degraded`.

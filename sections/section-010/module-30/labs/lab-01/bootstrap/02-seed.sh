@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Wait for the existing alert; do not seed a silence or the requested rule.
+# Seed the independent starting state and wait for the maintenance alert.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAB_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"

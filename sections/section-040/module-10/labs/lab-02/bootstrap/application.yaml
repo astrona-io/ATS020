@@ -1,0 +1,23 @@
+# The Argo CD Application `scout`: it syncs the `scout` Deployment and
+# Service from the repository `starfleet-deploy` (held by Gitea) into the
+# namespace `starfleet`. Automated sync applies every new commit.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: scout
+  namespace: argocd
+spec:
+  project: default
+  revisionHistoryLimit: 20
+  source:
+    repoURL: http://gitea.gitea.svc.cluster.local:3000/starfleet/starfleet-deploy.git
+    targetRevision: main
+    path: scout
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: starfleet
+  syncPolicy:
+    automated:
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

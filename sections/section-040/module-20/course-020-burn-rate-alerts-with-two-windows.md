@@ -1,6 +1,6 @@
 # Burn-Rate Alerts With Two Windows
 
-An SLI below its target tells you the service is in trouble, but it does not say how urgent the trouble is. A service at 98.9 percent for a day and a service at 50 percent for five minutes both miss a 99 percent target. The first one slowly drains the error budget. The second one drains it almost at once. This part measures how fast the budget drains and turns that speed into an alert.
+Burn rate compares the observed error ratio with the error ratio the objective allows. Combine a short and a longer window so the alert requires both recent and sustained budget consumption. Verify the source series before checking the alert state.
 
 ## Burn rate is the speed of spending
 
@@ -102,8 +102,6 @@ After the two minutes of `for:`, run the second command again. The state changes
 
 This playground has no Alertmanager, so nothing receives a notification. Prometheus still evaluates the rule and keeps the state, and the endpoint `/api/v1/alerts` shows it. In a real platform, Alertmanager takes the firing alert and sends it to a receiver.
 
-You can now measure the burn rate, estimate how long the budget lasts and alert on both a short and a long window. The alert depends on every selector in the expression being right. If one selector matches nothing, the expression returns no data and the alert never fires, with no error to show for it. The mission below practises exactly that.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -113,27 +111,26 @@ You can now measure the burn rate, estimate how long the budget lasts and alert 
 > - **Missing `for:`.** Without `for:`, the alert fires at the first evaluation where the expression is true. Keep a short wait so that one bad evaluation does not send a notification.
 > - **Waiting too little.** A new rule needs about a minute to reach Prometheus, and the alert needs the `for:` time on top. Check again before you decide that it does not work.
 
-## Your mission: Fix The Burn-Rate Alert
+## Your mission: Repair A Multi-Window Burn-Rate Alert
 
-You can now write a multi-window burn-rate alert for an SLO and read its state in Prometheus. The mission gives you a PrometheusRule whose alert never fires, although `scout` fails 5 percent of its requests. Find out why and fix it without weakening the alert.
+The platform team promises an availability SLO (service level objective) of 99 percent for the workload `scout` in the namespace `starfleet`. A burn-rate alert must tell the team when `scout` spends its 30-day error budget more than twice as fast as the SLO allows. A traffic loop makes about 5 percent of the requests to `scout` fail with status `500`, so the alert must fire. It does not.
 
-Pause the playground, then start the lab:
+This independent lab has 3 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
 
 ```sh
 astrona stop ats-020-playground-040-02
-```
-
-```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-040/module-20/labs/lab-01
 ```
 
-The task is on the next page. When you have fixed the rule, grade your work:
+Submit after verifying the result:
 
 ```sh
 astrona submit -c sections/section-040/module-20/labs/lab-01
 ```
 
-When the lab is done, remove it and start the playground again:
+Remove the lab and resume the playground:
 
 ```sh
 astrona destroy ats-020-lab-040-02

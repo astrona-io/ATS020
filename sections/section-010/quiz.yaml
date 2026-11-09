@@ -170,7 +170,7 @@ questions:
   difficulty: intermediate
   learning_objective: Aggregate series with `sum by` and `without` to get one value per namespace or per status code
   source_readings:
-  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregate-requests-and-record-an-error-ratio.md
   prompt: You need the request rate of `scout` for each HTTP status code across all pods. Which query is correct?
   options:
   - id: a
@@ -192,7 +192,7 @@ questions:
   difficulty: advanced
   learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
   source_readings:
-  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregate-requests-and-record-an-error-ratio.md
   prompt: Which query returns the 95th-percentile request duration of `scout` in `starfleet` from the histogram `http_request_duration_seconds`?
   options:
   - id: a
@@ -214,7 +214,7 @@ questions:
   difficulty: intermediate
   learning_objective: Calculate an error ratio and a 95th-percentile latency with `histogram_quantile`
   source_readings:
-  - sections/section-010/module-20/course-030-aggregation-error-ratio-and-latency.md
+  - sections/section-010/module-20/course-030-aggregate-requests-and-record-an-error-ratio.md
   prompt: A teammate writes `sum by (namespace) (rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))` and gets an empty result. Why?
   options:
   - id: a
@@ -236,7 +236,7 @@ questions:
   difficulty: intermediate
   learning_objective: Run a query from the command line against the Prometheus HTTP API and read the result with jq
   source_readings:
-  - sections/section-010/module-20/course-040-running-queries-from-the-command-line.md
+  - sections/section-010/module-20/course-050-running-queries-from-the-command-line.md
   prompt: You script a check with `curl -s http://127.0.0.1:9090/api/v1/query --data-urlencode 'query=...' | jq '.data.result[0].value[1]'` and want to test that the value is above 0.05. What must the script do?
   options:
   - id: a

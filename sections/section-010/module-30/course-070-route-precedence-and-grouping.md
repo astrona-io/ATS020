@@ -1,6 +1,6 @@
 # Route Precedence And Grouping
 
-An alert can match the right team and still reach an unexpected receiver. Alertmanager walks the routing tree in a fixed order, a child route inherits what it does not set from its parent, and `continue` decides whether one match ends the search. The Prometheus Operator adds its own changes while it merges every team's AlertmanagerConfig into one tree. This part builds a route tree with three receivers, sends a diagnostic alert through it, and reads the loaded configuration to predict and then prove which receivers handle it.
+Route order, `continue` and `groupBy` answer different questions: which routes are visited, which receivers are selected, and which alerts share a notification group. Trace two alerts through the route tree and inspect the resulting groups.
 
 ## A diagnostic alert that is always firing
 
@@ -173,8 +173,6 @@ Both selectors are `{}`, so every AlertmanagerConfig in every namespace is merge
 
 The `continue: true` on every team top route is forced for every strategy, so a top route never hides a later team's route. The namespace matcher is what keeps one team's route from taking another team's alerts, and it is the part an administrator can change: `OnNamespaceExceptForAlertmanagerNamespace` skips the matcher for objects in `monitoring`, and `None` skips it everywhere. Keep the playground's default and keep `namespace` in your alert expressions, because a team route only ever sees alerts from its own namespace. In the loaded configuration the three team routes appear as `starfleet/scout-decisions`, `starfleet/scout-inhibition` and `starfleet/starfleet`, in that order, before the `Watchdog` route.
 
-You can now predict which receivers a route tree selects, why a parent fallback stays unused, when a notification is sent and when it is repeated, and which matchers and names the operator added that your AlertmanagerConfig does not show. Together with rules, the lifecycle, silences and inhibition, that is the whole path from a PromQL condition to a message a person reads.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -184,26 +182,28 @@ You can now predict which receivers a route tree selects, why a parent fallback 
 > - **Confusing team scope with discovery scope.** Selecting objects from all namespaces does not remove their injected namespace matchers.
 > - **A `repeat_interval` that is not a multiple of `group_interval`.** Repeats are only checked at `group_interval` ticks, so the real repeat time rounds up.
 
-## Your mission: Route A Team Alert And Silence Maintenance
+## Your mission: Repair Route Precedence And Grouping
 
-You can now prove loading, routing and suppression at each component. Repair a team's alert path and create a scoped maintenance silence in a separate graded lab.
+Two warning alerts differ by Pod. A route stops after the first matching child and groups each Pod separately, so the archive receiver is skipped and notifications are split.
 
-Pause the playground, then start the lab:
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
 
 ```sh
 astrona stop ats-020-playground-010-03
-astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-30/labs/lab-01
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-30/labs/lab-05
 ```
 
-Use the walkthrough's watch command while working. When ready, finish the attempt:
+Submit after verifying the result:
 
 ```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-30/labs/lab-01
+astrona submit -c sections/section-010/module-30/labs/lab-05
 ```
 
-If you abandoned the attempt before submitting, remove the lab. Then resume the playground:
+Remove the lab and resume the playground:
 
 ```sh
-astrona destroy ats-020-lab-010-03
+astrona destroy ats-020-lab-010-03-05
 astrona start ats-020-playground-010-03
 ```

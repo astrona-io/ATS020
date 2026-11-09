@@ -1,8 +1,3 @@
-# The starting dashboard, with two faults.
-# 1. The ConfigMap has no `grafana_dashboard: "1"` label, so the Grafana
-#    dashboard sidecar never copies it.
-# 2. Every panel and the namespace variable use the data source UID
-#    `prometheus-main`, but the provisioned data source has the UID `prometheus`.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -27,7 +22,7 @@ data:
             "type": "query",
             "datasource": {
               "type": "prometheus",
-              "uid": "prometheus-main"
+              "uid": "prometheus"
             },
             "query": "label_values(http_requests_total, namespace)",
             "refresh": 1,
@@ -51,7 +46,7 @@ data:
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus-main"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -79,7 +74,7 @@ data:
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus-main"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -106,7 +101,7 @@ data:
           },
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus-main"
+            "uid": "prometheus"
           },
           "fieldConfig": {
             "defaults": {

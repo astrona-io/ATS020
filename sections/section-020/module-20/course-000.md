@@ -1,22 +1,21 @@
 # Collect Pod Logs With The OpenTelemetry Collector
 
-Kubernetes keeps the log of every container, and `kubectl logs` reads it. That works for one pod at a time while the pod is alive. It does not work when a team asks how many errors a Deployment logged in the last hour, or when a pod has been deleted. A platform needs a log pipeline that reads the log lines on every node, adds the pod and Deployment name to each one, and turns the lines that matter into a metric.
+Work through one practical outcome at a time. Each graded lab follows the lesson that prepares it and starts from its own cluster state. The 3 labs each have 3–5 tasks, with 10–15 minutes of task work plus startup and telemetry delays.
 
-The OpenTelemetry Collector is a program that receives, processes and exports telemetry: metrics, logs and traces. In this module a Collector runs as a DaemonSet, a workload that runs one pod on every node. It reads the container log files, adds Kubernetes data, drops the lines nobody needs and counts the error lines into a Prometheus metric. There is no Loki and no LogQL here. The Collector and Prometheus do the whole job.
+## Learning sequence
 
-Keep one sentence in mind for this module: **a log pipeline reads the files on each node, and a count connector turns error lines into a metric that Prometheus can alert on.**
+| Lesson | Practice after reading |
+| --- | --- |
+| What Kubernetes Keeps About Logs | Explore in the playground; apply this preparation in the following labs |
+| A DaemonSet Collector Reads The Log Files | Repair Container Log File Collection |
+| Add Kubernetes Metadata And Drop Records | Restore Collector Kubernetes Metadata |
+| Count Error Lines Into A Prometheus Metric | Scrape Collector Error Metrics |
 
-The module has four parts. **What Kubernetes Keeps About Logs** reads the logs, the previous logs and the events of a crashing pod, and shows where these tools stop. **A DaemonSet Collector Reads The Log Files** shows where container logs live on a node and deploys a Collector with the `file_log` receiver. **Add Kubernetes Metadata And Drop Records** adds the Deployment and node name with the `k8s_attributes` processor, fixes the permission error that comes with it and drops `INFO` lines. **Count Error Lines Into A Prometheus Metric** counts the `ERROR` lines, scrapes the count with a ServiceMonitor and queries it. A graded lab follows the last part.
+## What you will prove
 
-## Learning objectives
-
-After this module you can:
-
-- Read a pod's logs, its previous container's logs and its events with `kubectl logs` and `kubectl events`.
-- Deploy an OpenTelemetry Collector as a DaemonSet whose `file_log` receiver reads the container log files on each node.
-- Add Kubernetes metadata to each log record with the `k8s_attributes` processor, and drop unwanted records with the `filter` processor.
-- Check the logs pipeline with the debug exporter and the Collector's own log, and read a permission error.
-- Turn error log lines into a Prometheus metric with the count connector and query it with PromQL.
+- Repair Container Log File Collection.
+- Restore Collector Kubernetes Metadata.
+- Scrape Collector Error Metrics.
 
 ## Before you start
 
@@ -30,9 +29,9 @@ Your playground is a single-node `kind` cluster running Kubernetes 1.35. The nam
 | `starfleet` | `shuttle` | A client pod that sends one request per second to `scout` and to `probe`, and a `/status/500` request to `probe` every fourth second |
 | `outpost` | `probe` | One pod of `go-httpbin` 2.25.0. It logs one line per request, with `level=ERROR` for a `5xx` response |
 
-A ServiceMonitor tells the Prometheus Operator which Service endpoints to scrape. Prometheus selects only ServiceMonitors that carry the label `release: kps`. Every command in the parts runs against the playground cluster, and `kubectl` already points at it.
+A ServiceMonitor tells the Prometheus Operator which Service endpoints to scrape. Prometheus selects only ServiceMonitors that carry the label `release: kps`. Reading commands use this playground unless the page explicitly starts an independent lab.
 
-Launch your playground now, and keep it running next to you while you read the parts:
+Launch the playground for the reading exercises:
 
 <!-- astrona:playground -->
 > [!NOTE]

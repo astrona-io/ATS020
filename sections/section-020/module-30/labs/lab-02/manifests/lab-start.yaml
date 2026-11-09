@@ -1,0 +1,446 @@
+# Plumbing: Loki 3.7.9 in single-binary mode and an OpenTelemetry Collector
+# DaemonSet in `logging`. The Collector ships container logs from `outpost` and
+# `starfleet` to Loki over OTLP, with the labels namespace, pod and container.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-config
+  namespace: logging
+data:
+  loki.yaml: |
+    auth_enabled: false
+    server:
+      http_listen_port: 3100
+    common:
+      instance_addr: 127.0.0.1
+      path_prefix: /tmp/loki
+      storage:
+        filesystem:
+          chunks_directory: /tmp/loki/chunks
+          rules_directory: /tmp/loki/rules
+      replication_factor: 1
+      ring:
+        kvstore:
+          store: inmemory
+    schema_config:
+      configs:
+        - from: 2020-10-24
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
+    limits_config:
+      discover_service_name: []
+      discover_log_levels: false
+      otlp_config:
+        resource_attributes:
+          ignore_defaults: true
+          attributes_config:
+            - action: index_label
+              attributes: [namespace, pod, container]
+            - action: drop
+              regex: .*
+        log_attributes:
+          - action: drop
+            regex: .*
+    analytics:
+      reporting_enabled: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: logging
+  labels:
+    app: loki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: loki
+          image: grafana/loki:3.7.9
+          args:
+            - -config.file=/etc/loki-config/loki.yaml
+            - -target=all
+          ports:
+            - name: http
+              containerPort: 3100
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/loki-config
+            - name: data
+              mountPath: /tmp/loki
+      volumes:
+        - name: config
+          configMap:
+            name: loki-config
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: logging
+  labels:
+    app: loki
+spec:
+  selector:
+    app: loki
+  ports:
+    - name: http
+      port: 3100
+      targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector-config
+  namespace: logging
+data:
+  config.yaml: |
+    receivers:
+      file_log:
+        include:
+          - /var/log/pods/outpost_*/*/*.log
+          - /var/log/pods/starfleet_*/*/*.log
+        start_at: beginning
+        include_file_path: true
+        operators:
+          - type: container
+    processors:
+      resource:
+        attributes:
+          - {key: namespace, from_attribute: k8s.namespace.name, action: upsert}
+          - {key: pod, from_attribute: k8s.pod.name, action: upsert}
+          - {key: container, from_attribute: k8s.container.name, action: upsert}
+      # Loki stores a second timestamp as structured metadata when both are set,
+      # and that metadata would split one stream into one series per line in an
+      # ungrouped metric query. Clearing it keeps count(rate(...)) per stream.
+      transform:
+        log_statements:
+          - set(log.observed_time_unix_nano, 0)
+    exporters:
+      otlp_http:
+        endpoint: http://loki.logging:3100/otlp
+    service:
+      pipelines:
+        logs:
+          receivers: [file_log]
+          processors: [resource, transform]
+          exporters: [otlp_http]
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: collector
+  namespace: logging
+  labels:
+    app: collector
+spec:
+  selector:
+    matchLabels:
+      app: collector
+  template:
+    metadata:
+      labels:
+        app: collector
+    spec:
+      containers:
+        - name: collector
+          image: otel/opentelemetry-collector-contrib:0.165.0
+          args:
+            - --config=/etc/otelcol-config/config.yaml
+          securityContext:
+            runAsUser: 0
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {memory: 256Mi}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otelcol-config
+            - name: pod-logs
+              mountPath: /var/log/pods
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: collector-config
+        - name: pod-logs
+          hostPath:
+            path: /var/log/pods
+            type: Directory
+---
+# Workloads. `shuttle` sends the requests that produce the `probe` log lines.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: outpost
+  labels:
+    app: probe
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+    spec:
+      containers:
+        - name: probe
+          image: mccutchen/go-httpbin:2.25.0
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /status/200
+              port: http
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe
+  namespace: outpost
+  labels:
+    app: probe
+spec:
+  selector:
+    app: probe
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shuttle-loop
+  namespace: starfleet
+data:
+  loop.sh: |
+    #!/bin/sh
+    # Normal requests, and a failing request every fourth loop.
+    i=0
+    while true; do
+      i=$((i+1))
+      curl -s -o /dev/null http://probe.outpost:8080/get
+      if [ $((i % 4)) -eq 0 ]; then
+        curl -s -o /dev/null http://probe.outpost:8080/status/500
+      fi
+      sleep 1
+    done
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+    spec:
+      containers:
+        - name: shuttle
+          image: curlimages/curl:8.23.0
+          command: ["/bin/sh", "/scripts/loop.sh"]
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+          resources:
+            requests: {cpu: 5m, memory: 8Mi}
+            limits: {memory: 32Mi}
+      volumes:
+        - name: scripts
+          configMap:
+            name: shuttle-loop
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cargo
+  namespace: outpost
+spec:
+  clusterIP: None
+  selector:
+    app: cargo
+  ports:
+    - name: unused
+      port: 8080
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cargo
+  namespace: outpost
+  labels:
+    app: cargo
+spec:
+  serviceName: cargo
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cargo
+  template:
+    metadata:
+      labels:
+        app: cargo
+    spec:
+      containers:
+        - name: cargo
+          image: curlimages/curl:8.23.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo 'level=ERROR msg="cargo bay door jammed"'
+                sleep 5
+              done
+          resources:
+            requests: {cpu: 5m, memory: 8Mi}
+            limits: {memory: 32Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beacon
+  namespace: outpost
+  labels:
+    app: beacon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beacon
+  template:
+    metadata:
+      labels:
+        app: beacon
+    spec:
+      containers:
+        - name: beacon
+          image: curlimages/curl:8.23.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo 'level=INFO msg="retrying after error"'
+                sleep 5
+              done
+          resources:
+            requests: {cpu: 5m, memory: 8Mi}
+            limits: {memory: 32Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: outpost
+  labels:
+    app: scout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+        - name: scout
+          image: curlimages/curl:8.23.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo 'level=INFO msg="scout heartbeat"'
+                sleep 5
+              done
+          resources:
+            requests: {cpu: 5m, memory: 8Mi}
+            limits: {memory: 32Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay
+  namespace: starfleet
+  labels:
+    app: relay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay
+  template:
+    metadata:
+      labels:
+        app: relay
+    spec:
+      containers:
+        - name: relay
+          image: curlimages/curl:8.23.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo 'level=ERROR msg="relay lost its uplink"'
+                sleep 5
+              done
+          resources:
+            requests: {cpu: 5m, memory: 8Mi}
+            limits: {memory: 32Mi}

@@ -1,20 +1,12 @@
 # Measuring Platform Efficiency
 
-Makes the reader able to measure how well the platform delivers and how well it uses resources: the four DORA metrics from GitOps history, service level objectives with error budgets, and the gap between requested and used CPU and memory. It comes after the collection sections because every number here is a Prometheus query on data those sections taught to collect.
+This section has 8 independent module labs. Each follows its preparation lesson and contains 3–5 tasks around one outcome. Allow 10–15 minutes of task work per lab; cluster startup, rollouts and telemetry collection add time. The capstone combines the module skills.
 
 **Curriculum item covered:** Measuring and Improving Platform Efficiency Using Deployment Metrics and Performance Indicators
 
----
+| Module | Practical outcomes |
+| --- | --- |
+| Measure Delivery With DORA Metrics | Measure Deployment Frequency; Repair The Change Failure Rate Rule; Calculate Lead Time From Git Revisions; Measure Time To Restore Service |
+| Measure Service Levels And Resource Efficiency | Record Availability And Error Budget; Repair A Multi-Window Burn-Rate Alert; Reduce Excess Resource Requests; Raise An Undersized Memory Request |
 
-## What You Will Master
-
-- Define deployment frequency, lead time for changes, change failure rate and time to restore service
-- Count deployments over a time window from the GitOps controller's sync metrics in Prometheus
-- Calculate lead time from a commit time in Git and the sync time recorded by the controller
-- Calculate change failure rate and time to restore from failed and recovered deployments
-- Name one change to the delivery process that improves each metric
-- Write an SLI as a PromQL ratio of good requests to all requests
-- Calculate the remaining error budget for a 99% SLO over a window
-- Write a burn-rate alert that fires when the budget would run out early
-- Compare container CPU and memory requests with real usage from metrics-server and Prometheus
-- Name the workload with the biggest gap and change its requests to match usage
+Use the playground for the reading examples. Start each graded lab in its own environment, submit after checking the result, then remove it before resuming the playground. A later lab does not depend on an earlier lab's changes.

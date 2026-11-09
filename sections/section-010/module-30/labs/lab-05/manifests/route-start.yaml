@@ -1,0 +1,41 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: scout-decisions
+  namespace: starfleet
+spec:
+  route:
+    receiver: scout-default
+    matchers:
+    - name: team
+      value: scout
+      matchType: '='
+    groupBy:
+    - namespace
+    - alertname
+    - pod
+    groupWait: 10s
+    groupInterval: 1m
+    repeatInterval: 5m
+    routes:
+    - receiver: scout-warning
+      matchers:
+      - name: severity
+        value: warning
+        matchType: '='
+      continue: false
+    - receiver: scout-archive
+      matchers:
+      - name: alertname
+        value: Scout.*
+        matchType: =~
+  receivers:
+  - name: scout-default
+    webhookConfigs:
+    - url: http://alert-receiver.monitoring:8080/
+  - name: scout-warning
+    webhookConfigs:
+    - url: http://alert-receiver.monitoring:8080/
+  - name: scout-archive
+    webhookConfigs:
+    - url: http://alert-receiver.monitoring:8080/

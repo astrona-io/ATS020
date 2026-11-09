@@ -1,6 +1,6 @@
 # Scrape Pods Without A Service With A PodMonitor
 
-Not every workload has a Service. A batch worker, a queue consumer or an agent on every node may serve metrics without taking any traffic, so nobody created a Service for it. A ServiceMonitor cannot reach such pods, because it follows Services. This part collects the `scout` pod in `outpost`, which has no Service, with a PodMonitor.
+A metrics endpoint can belong to a pod that has no Service. A PodMonitor selects those pods directly. Use the pod labels and named container port, then check one target for every ready replica.
 
 ## How a PodMonitor differs
 
@@ -81,8 +81,6 @@ The `outpost` pod is now a target, and its `up` series is `1`. Look at the `job`
 
 The operator wrote a job for the PodMonitor too. It appears in the running configuration as `podMonitor/outpost/scout/0`, next to the `serviceMonitor/...` jobs.
 
-You can now collect metrics from pods with or without a Service, and you know how the two kinds of monitor label their targets. Both monitors worked on the first try here. The open question is what you see when a monitor is wrong in a way that is harder to spot than a missing label.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -90,3 +88,29 @@ You can now collect metrics from pods with or without a Service, and you know ho
 > - **Expecting the same `job` label from both kinds of monitor.** A ServiceMonitor's targets take the Service name; a PodMonitor's targets take `<namespace>/<podmonitor name>`.
 > - **Scraping the same pods with a ServiceMonitor and a PodMonitor.** Every sample is then stored twice under two jobs, and sums over the workload double.
 > - **Forgetting the selector label on a PodMonitor.** It needs the label that `podMonitorSelector` matches, just like a ServiceMonitor.
+
+## Your mission: Scrape Pods With A PodMonitor
+
+The `scout` Pods in `outpost` expose metrics without a Service. Prometheus does not yet scrape them.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-010-01
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-10/labs/lab-04
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-010/module-10/labs/lab-04
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-010-01-04
+astrona start ats-020-playground-010-01
+```

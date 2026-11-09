@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dora-scout
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  groups:
+  - name: dora-scout
+    rules:
+    - record: dora:deployments:increase6h
+      expr: round(sum(increase(argocd_app_sync_total{name="scout",phase="Succeeded"}[6h])))

@@ -1,6 +1,6 @@
 # The Four DORA Metrics And Where The Data Lives
 
-A platform team cannot improve delivery that it does not measure. The DevOps Research and Assessment (DORA) group found that four numbers describe software delivery well. Two of them describe speed and two describe stability. This part defines the four numbers and then finds, in the cluster, the raw data that each one needs.
+The delivery measures in this course use two sources: Argo CD metrics for event counts and health, and Git plus Application history for timestamps. Inspect those sources and identify what each can prove before calculating a result.
 
 ## The four metrics
 

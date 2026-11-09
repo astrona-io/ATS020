@@ -1,6 +1,6 @@
 # Deployment Frequency From The Sync Counter
 
-Deployment frequency is the easiest DORA metric to measure, because Argo CD already counts its own work. Every sync adds one to a counter. This part reads that counter in Prometheus, turns it into a number of deployments in a time window, and stores the result so that a dashboard or an alert can use it.
+Argo CD counts sync operations. Select successful operations for `scout`, calculate their increase over the observation window, and record the count. Successful application of manifests does not guarantee that the resulting workload is healthy.
 
 ## The sync counter
 
@@ -99,8 +99,6 @@ promql 'dora:deployments:increase6h'
 
 The new series `dora:deployments:increase6h` holds `9`. If the query returns nothing, wait another minute and run it again. The name follows the convention `level:metric:operations`: the part before the first colon says what the series aggregates, the middle says which metric it comes from, and the last says the operation.
 
-You can now count deployments from the sync counter and keep the count as a series. The metric says nothing about whether those deployments worked. Two of them did not, and the next part shows that the sync counter cannot find them.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -109,3 +107,29 @@ You can now count deployments from the sync counter and keep the count as a seri
 > - **Leaving out `phase="Succeeded"`.** The count then includes syncs that failed to apply.
 > - **A PrometheusRule without `release: kps`.** Prometheus does not select it, and the recording rule never runs.
 > - **Querying a window longer than the retention.** The playground Prometheus keeps 6 hours of data, so `[7d]` returns the data of the last 6 hours only.
+
+## Your mission: Measure Deployment Frequency
+
+Argo CD has synced ten revisions of `scout`. The recording rule selects failed sync operations, so it does not count the deployments.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-040-01
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-040/module-10/labs/lab-02
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-040/module-10/labs/lab-02
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-040-01-02
+astrona start ats-020-playground-040-01
+```

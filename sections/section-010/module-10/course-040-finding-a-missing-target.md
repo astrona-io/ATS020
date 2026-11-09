@@ -1,6 +1,6 @@
 # Finding A Missing Target
 
-On a real platform, someone reports that a dashboard is empty, and you have to work back from there. Monitor mistakes show up in two very different places: some leave a target that fails, and others leave no target at all. This part breaks the working ServiceMonitor in the two most common ways, reads where each mistake appears, and ends with a fixed order of checks.
+An absent target and a target with `up == 0` have different causes. Follow selection from Prometheus to the ServiceMonitor, then to the Service and its endpoints. Repair the first broken link and verify every expected replica.
 
 ## A wrong path: the target fails
 
@@ -108,8 +108,6 @@ kubectl -n monitoring get secret prometheus-kps-prometheus -o jsonpath='{.data.p
 
 The output lists the same jobs as the running configuration, one `- job_name:` line each (with a `target_label: __tmp_prometheus_job_name` line after each, which you can ignore). If a job is in the Secret but not in the running configuration, Prometheus has not reloaded yet.
 
-You can now tell from the targets list whether a monitor fails to scrape or never selects anything, and you can follow the chain from the Prometheus resource to the endpoints to find which selection is wrong. You prove the fix the same way every time: one `up` series per endpoint, each with the value `1`.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -118,27 +116,26 @@ You can now tell from the targets list whether a monitor fails to scrape or neve
 > - **Changing two things at once.** Every change takes about a minute to reach Prometheus; change one field, wait, and check.
 > - **Fixing the Service to match a wrong monitor.** Other tools may rely on the Service's port names. Fix the monitor unless the Service is really wrong.
 
-## Your mission: Get A Workload Scraped With A ServiceMonitor
+## Your mission: Repair ServiceMonitor Discovery
 
-You can now tell a target that fails from a target that never appears, and follow the chain from the Prometheus resource to the endpoints. The mission gives you a ServiceMonitor for `scout` that Prometheus does not scrape. Find what is wrong and prove the fix with `up == 1` for every `scout` endpoint.
+The `scout` workload in the namespace `starfleet` runs two pods behind the Service `scout`. The Service has the label `app: scout` and one port named `http`. The pods serve Prometheus metrics on the path `/metrics`.
 
-Pause the playground, then start the lab:
+This independent lab has 3 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
 
 ```sh
 astrona stop ats-020-playground-010-01
-```
-
-```sh
 astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-10/labs/lab-01
 ```
 
-The task is on the next page. When you have fixed the monitor, grade your work:
+Submit after verifying the result:
 
 ```sh
 astrona submit -c sections/section-010/module-10/labs/lab-01
 ```
 
-When the lab is done, remove it and start the playground again:
+Remove the lab and resume the playground:
 
 ```sh
 astrona destroy ats-020-lab-010-01

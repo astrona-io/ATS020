@@ -6,7 +6,6 @@ metadata:
     prerequisites: prerequisites.md
     question: question.md
     solution: solution.md
-
 runtime:
   type: kind
   kind:
@@ -14,62 +13,63 @@ runtime:
     addons:
       metricsServer: true
     preloadImages:
-      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
-      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
-      - quay.io/prometheus/prometheus:v3.15.0-distroless
-      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
-      - ghcr.io/stefanprodan/podinfo:6.17.0
-      - mccutchen/go-httpbin:2.25.0
-      - curlimages/curl:8.23.0
-
+    - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+    - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+    - quay.io/prometheus/prometheus:v3.15.0-distroless
+    - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+    - ghcr.io/stefanprodan/podinfo:6.17.0
+    - mccutchen/go-httpbin:2.25.0
+    - curlimages/curl:8.23.0
 bootstrap:
   init:
-    - name: prepare
-      description: "Install a trimmed kube-prometheus-stack 92.22.0 with kube-state-metrics in monitoring"
-      type: file
-      source: bootstrap/01-prepare.sh
+  - name: prepare
+    description: Install a trimmed kube-prometheus-stack 92.22.0 with kube-state-metrics in monitoring
+    type: file
+    source: bootstrap/01-prepare.sh
   manifests:
-    - name: lab-start
-      description: "scout, probe, the shuttle traffic loop (5% errors to scout) and the ServiceMonitor for scout"
-      type: file
-      source: manifests/lab-start.yaml
-    - name: slo-rules-start
-      description: "The PrometheusRule scout-slo, with a status selector that matches no request"
-      type: file
-      source: manifests/slo-rules-start.yaml
+  - name: lab-start
+    description: Starting resources for repair a multi-window burn-rate alert
+    type: file
+    source: manifests/lab-start.yaml
+  - name: slo-rules-start
+    description: Starting resources for repair a multi-window burn-rate alert
+    type: file
+    source: manifests/slo-rules-start.yaml
   waitFor:
-    - resource: deploy/scout
-      namespace: starfleet
-    - resource: deploy/probe
-      namespace: starfleet
-    - resource: deploy/shuttle
-      namespace: starfleet
-
+  - resource: deploy/scout
+    namespace: starfleet
+  - resource: deploy/probe
+    namespace: starfleet
+  - resource: deploy/shuttle
+    namespace: starfleet
 testing:
   init:
-    - name: solution
-      description: Reference solution applied by `astrona test`
-      type: file
-      source: solution/apply.sh
-    - name: wait-for-ratio
-      description: Waits until Prometheus returns the fixed error ratios
-      type: file
-      source: testing/wait-for-ratio.sh
-
+  - name: verify-start
+    description: Reject the unfinished lab before applying the reference solution
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+  - name: wait-for-ratio
+    description: Waits until Prometheus returns the fixed error ratios
+    type: file
+    source: testing/wait-for-ratio.sh
 validation:
   scripts:
-    - name: rules-intact
-      description: The PrometheusRule scout-slo keeps its two recording rules and its multi-window alert with a real threshold and a short for
-      type: file
-      source: validation/validate-rules-intact.sh
-    - name: error-ratio
-      description: Both recording rules return the real error ratio of scout, from the request counter
-      type: file
-      source: validation/validate-error-ratio.sh
-    - name: alert-firing
-      description: Prometheus reports the alert ScoutErrorBudgetBurn in the state firing
-      type: file
-      source: validation/validate-alert-firing.sh
-
+  - name: rules-intact
+    description: The PrometheusRule scout-slo keeps its two recording rules and its multi-window alert with a real
+      threshold and a short for
+    type: file
+    source: validation/validate-rules-intact.sh
+  - name: error-ratio
+    description: Both recording rules return the real error ratio of scout, from the request counter
+    type: file
+    source: validation/validate-error-ratio.sh
+  - name: alert-firing
+    description: Prometheus reports the alert ScoutErrorBudgetBurn in the state firing
+    type: file
+    source: validation/validate-alert-firing.sh
 teardown:
   keepCluster: false

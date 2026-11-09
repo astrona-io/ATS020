@@ -1,13 +1,18 @@
 # Summary
 
-Grafana draws query results from a data source, a connection to a backend such as Prometheus. A fixed unique identifier (UID) lets dashboard panels use the same connection after deployment to a new cluster. The data source address must be reachable from the Grafana server, so a Kubernetes Service address belongs in the provisioning file. A local port-forward gives your browser access to Grafana.
+Use the result of each lab as evidence that the corresponding operation works. A configuration accepted by Kubernetes is only the starting point; inspect the running component and the data or requests it produces.
 
-A dashboard holds panels and their queries. Prometheus Query Language (PromQL) calculates request rates, error ratios and latency estimates from application metrics. Time series panels show changes over time; a stat panel highlights one number. A fractional error ratio needs the `percentunit` unit. Histogram percentiles estimate boundaries from buckets and do not report the longest individual request.
+| Outcome | Evidence checked by the lab |
+| --- | --- |
+| Provision The Prometheus Data Source | The Scout Overview dashboard is loaded from a labelled ConfigMap and Grafana reports it as provisioned; All three panels exist and every panel query returns data through its own data source; The data source the panels use is provisioned from a ConfigMap, not created by hand |
+| Repair Dashboard Data Source References | The Scout Overview dashboard is loaded from a labelled ConfigMap and Grafana reports it as provisioned; All three panels exist and every panel query returns data through its own data source; The data source the panels use is provisioned from a ConfigMap, not created by hand |
+| Restore Dashboard Provisioning | The Scout Overview dashboard is loaded from a labelled ConfigMap and Grafana reports it as provisioned; All three panels exist and every panel query returns data through its own data source; The data source the panels use is provisioned from a ConfigMap, not created by hand |
+| Restore Grafana Writable Storage | The Deployment grafana in telemetry has one ready replica and its health endpoint reports the database as ok; The Secret grafana-admin holds the key admin-password and the user admin signs in with the password starfleet; Image, environment names, probes and Service are unchanged; the data directory is not a ConfigMap; the memory limit is at least 256Mi |
+| Repair Grafana Secret Keys | The Deployment grafana in telemetry has one ready replica and its health endpoint reports the database as ok; The Secret grafana-admin holds the key admin-password and the user admin signs in with the password starfleet; Image, environment names, probes and Service are unchanged; the data directory is not a ConfigMap; the memory limit is at least 256Mi |
+| Size Grafana Memory For Startup | The Deployment grafana in telemetry has one ready replica and its health endpoint reports the database as ok; The Secret grafana-admin holds the key admin-password and the user admin signs in with the password starfleet; Image, environment names, probes and Service are unchanged; the data directory is not a ConfigMap; the memory limit is at least 256Mi |
 
-A query variable fills a drop-down list from metric labels. Grafana substitutes the selected namespace into every panel query before sending it to Prometheus. An empty error series makes a ratio empty, rather than zero, so check both sides of a division when a panel shows no data.
+If a result is missing, follow the same order used in the lessons: verify the source, inspect the selection or configuration, wait for reconciliation, and check fresh evidence. Retry the relevant independent lab when you need more practice. The section capstone combines these operations into a broader task.
 
-Provisioning loads data sources and dashboards from files. The playground's sidecars copy ConfigMaps with the selected labels into Grafana's provisioning directories. Export only the dashboard model, retain stable UIDs, and store the JavaScript Object Notation (JSON) document in a labelled ConfigMap. The dashboard and its data source then return when Grafana starts in a new pod.
-
-Temporary pod storage loses the Grafana database when the pod is replaced. Persistent storage can retain that database, but keeping dashboard files under version control also makes changes reviewable and repeatable. Prove recovery by checking the restored dashboard and a working data source query after the replacement.
+Remove any completed lab environment. The playground can now be released:
 
 <!-- astrona:playground:destroy -->

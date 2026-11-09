@@ -1,6 +1,6 @@
 # Add Kubernetes Metadata And Drop Records
 
-A log record that says only `level=ERROR` and a pod name is hard to use. People ask which Deployment failed and on which node, and most lines are routine `INFO` messages that nobody needs. This part adds the Deployment and node name with the `k8s_attributes` processor, which needs permission to read pods. It then removes the `INFO` lines with the `filter` processor.
+A raw container log line needs Kubernetes identity before it can be grouped by workload. Configure metadata extraction and the Kubernetes attributes processor, check its API permissions, then filter only the records the pipeline should keep.
 
 ## Add the Deployment name
 
@@ -197,3 +197,29 @@ You now know how to give each log record the Deployment and node name, how to re
 > - **Fixing the error with `cluster-admin`.** The processor needs `get`, `list` and `watch` on `pods` only. A broad role gives a log reader the power to change the cluster.
 > - **Waiting for a restart.** The processor retries on its own. Check the log again after about 30 seconds before you restart anything.
 > - **Filtering on a namespace that is silent.** The `starfleet` pods write almost no log lines, so a filter on that namespace would show no change. Check which pods really log before you choose a condition.
+
+## Your mission: Restore Collector Kubernetes Metadata
+
+The `logs` Collector runs as a DaemonSet in `monitoring`. It reads `probe` error logs and exposes `log_error_lines_total` for Prometheus.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-020-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-20/labs/lab-01
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-020/module-20/labs/lab-01
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-020-02
+astrona start ats-020-playground-020-02
+```

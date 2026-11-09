@@ -1,6 +1,6 @@
 # Connect Grafana To Loki
 
-A dashboard panel that points at a missing data source shows nothing, however good its query is. Grafana does not hold logs. It sends each query to a data source and draws the answer, so the connection comes first.
+Grafana queries Loki through a data source. Configure the connection, inspect its UID and line limit, and make a query before relying on a dashboard panel.
 
 Loki stores log lines in compressed chunks and indexes only their labels. Lines with exactly the same set of labels form one **stream**. In this environment each stream has the labels `namespace`, `pod` and `container`, so each container has its own stream. Loki runs in **single-binary mode**, where one process does all the work of writing and reading. That is enough for a small environment.
 

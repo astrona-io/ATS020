@@ -1,6 +1,6 @@
 # A DaemonSet Collector Reads The Log Files
 
-A log pipeline has to start where the log lines are written: in files on each node. This part looks at those files, then deploys an OpenTelemetry Collector that reads them on every node. It proves the pipeline works with the debug exporter, which prints each log record to the Collector's own log.
+The Collector must read the container log files on each node before it can enrich or count records. Follow the host-path mount, file pattern and container parser, then verify that newly written lines enter the pipeline.
 
 ## Where the container logs live
 
@@ -216,3 +216,29 @@ The `file_log` receiver now delivers every line of every container on the node, 
 > - **No `exclude` for the Collector's own log.** With the `debug` exporter, the Collector writes a line for every record it reads, including those lines. Exclude `monitoring_logs-collector-*`.
 > - **Missing `hostPath` mount.** Without the `volumes` and `volumeMounts` fields, the Collector starts and finds no files. Check for `Started watching file` lines.
 > - **Using `filelog` or `k8sattributes` from older examples.** Version 0.165.0 accepts these names but logs a deprecation warning. The new names are `file_log` and `k8s_attributes`.
+
+## Your mission: Repair Container Log File Collection
+
+The `logs` Collector has working permissions and a scrape target, but its file receiver watches the wrong directory.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-020-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-020/module-20/labs/lab-03
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-020/module-20/labs/lab-03
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-020-02-03
+astrona start ats-020-playground-020-02
+```

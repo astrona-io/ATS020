@@ -191,7 +191,7 @@ questions:
     difficulty: intermediate
     learning_objective: Explain how a saved panel edit differs from a dashboard kept as code.
     source_readings:
-      - sections/section-020/module-30/course-030-edit-a-panel-and-act-on-the-result.md
+      - sections/section-020/module-30/course-030-repair-and-save-a-loki-dashboard.md
     prompt: "You edit a panel in the web interface and save it. Grafana's database is on an `emptyDir` volume. What happens when the Grafana Pod is replaced, if the dashboard is not provisioned?"
     options:
       - id: a
@@ -213,7 +213,7 @@ questions:
     difficulty: advanced
     learning_objective: Act on a query result by scaling the controller that owns the Pods.
     source_readings:
-      - sections/section-020/module-30/course-030-edit-a-panel-and-act-on-the-result.md
+      - sections/section-020/module-30/course-030-repair-and-save-a-loki-dashboard.md
     prompt: "A query shows that `depot-0` and `probe-7c9f6-abcde` write error lines. Which action stops them?"
     options:
       - id: a

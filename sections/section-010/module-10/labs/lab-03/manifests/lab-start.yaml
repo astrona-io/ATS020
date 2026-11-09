@@ -1,0 +1,308 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-raw
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-discovery
+  namespace: starfleet
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-discovery
+  namespace: starfleet
+subjects:
+- kind: ServiceAccount
+  name: prometheus-raw
+  namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-discovery
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-raw
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+      scrape_timeout: 4s
+    scrape_configs:
+      - job_name: starfleet-pods
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [starfleet]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_telemetry]
+            action: keep
+            regex: primary|reserve
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: metrics
+          - source_labels: [__meta_kubernetes_pod_ready]
+            action: keep
+            regex: 'true'
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-raw
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-raw
+  template:
+    metadata:
+      labels:
+        app: prometheus-raw
+    spec:
+      serviceAccountName: prometheus-raw
+      securityContext:
+        fsGroup: 65534
+      containers:
+      - name: prometheus
+        image: quay.io/prometheus/prometheus:v3.15.0-distroless
+        args:
+        - --config.file=/etc/prometheus/prometheus.yml
+        - --storage.tsdb.path=/prometheus
+        - --web.enable-lifecycle
+        ports:
+        - name: http
+          containerPort: 9090
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: http
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+        volumeMounts:
+        - name: configuration
+          mountPath: /etc/prometheus
+          readOnly: true
+        - name: data
+          mountPath: /prometheus
+      volumes:
+      - name: configuration
+        configMap:
+          name: prometheus-raw
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-raw
+  namespace: monitoring
+spec:
+  selector:
+    app: prometheus-raw
+  ports:
+  - name: http
+    port: 9090
+    targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: queue-metrics
+  namespace: starfleet
+data:
+  server.py: |
+    import os
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    class Metrics(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path != '/metrics':
+                self.send_error(404)
+                return
+            body = ('# HELP starfleet_queue_items Synthetic queued items per Pod.\n'
+                    '# TYPE starfleet_queue_items gauge\n'
+                    f'starfleet_queue_items {int(os.environ["QUEUE_ITEMS"])}\n').encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; version=0.0.4')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+    HTTPServer(('0.0.0.0', 8080), Metrics).serve_forever()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scout
+  template:
+    metadata:
+      labels:
+        app: scout
+        telemetry: primary
+    spec:
+      containers:
+      - name: metrics
+        image: python:3.13.18-alpine3.24
+        command:
+        - python3
+        - /app/server.py
+        env:
+        - name: QUEUE_ITEMS
+          value: '12'
+        ports:
+        - name: metrics
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        volumeMounts:
+        - name: server
+          mountPath: /app
+          readOnly: true
+      volumes:
+      - name: server
+        configMap:
+          name: queue-metrics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+        telemetry: reserve
+    spec:
+      containers:
+      - name: metrics
+        image: python:3.13.18-alpine3.24
+        command:
+        - python3
+        - /app/server.py
+        env:
+        - name: QUEUE_ITEMS
+          value: '90'
+        ports:
+        - name: metrics
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        volumeMounts:
+        - name: server
+          mountPath: /app
+          readOnly: true
+      volumes:
+      - name: server
+        configMap:
+          name: queue-metrics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shuttle
+  namespace: starfleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shuttle
+  template:
+    metadata:
+      labels:
+        app: shuttle
+        telemetry: disabled
+    spec:
+      containers:
+      - name: metrics
+        image: python:3.13.18-alpine3.24
+        command:
+        - python3
+        - /app/server.py
+        env:
+        - name: QUEUE_ITEMS
+          value: '200'
+        ports:
+        - name: metrics
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        volumeMounts:
+        - name: server
+          mountPath: /app
+          readOnly: true
+      volumes:
+      - name: server
+        configMap:
+          name: queue-metrics

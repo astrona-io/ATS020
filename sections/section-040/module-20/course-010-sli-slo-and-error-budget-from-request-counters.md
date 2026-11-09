@@ -1,6 +1,6 @@
 # SLI, SLO And Error Budget From Request Counters
 
-A platform team cannot promise that a service never fails. It can promise how often the service may fail, and then measure whether it keeps that promise. Three terms describe the promise. This part defines them and calculates all three for `scout` from one Prometheus counter.
+Measure availability from good requests divided by all requests, using matching rate windows. Compare that service level indicator (SLI) with a 99% service level objective (SLO), then calculate how much of its error budget remains.
 
 ## Three terms for one promise
 
@@ -121,8 +121,6 @@ flowchart TB
 
 The diagram shows how the two request rates become the SLI, the error ratio and the remaining budget.
 
-You can now turn a request counter into an SLI, compare it with an SLO and say how much error budget is left. The number tells you where `scout` stands today. It does not tell you how fast the budget goes, or when someone should be woken up. That is the question of burn rate.
-
 ## Common pitfalls
 
 > [!WARNING]
@@ -131,3 +129,29 @@ You can now turn a request counter into an SLI, compare it with an SLO and say h
 > - **A regex that matches nothing.** Prometheus anchors regular expressions at both ends. `status!~"5.."` works. `status=~"5xx"` looks for the literal text `5xx` and matches no status.
 > - **A new rule that reads the wrong label.** A PrometheusRule without `release: kps` is valid, but Prometheus does not select it and the series never appears.
 > - **Reading a negative budget as a bug.** A negative remaining budget is correct when the SLI is below the SLO. It means the budget is overspent.
+
+## Your mission: Record Availability And Error Budget
+
+Traffic to `scout` includes HTTP 500 responses. Create recording rules that measure availability and the remaining budget for a 99% objective.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-040-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-040/module-20/labs/lab-04
+```
+
+Submit after verifying the result:
+
+```sh
+astrona submit -c sections/section-040/module-20/labs/lab-04
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-040-02-04
+astrona start ats-020-playground-040-02
+```

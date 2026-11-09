@@ -1,6 +1,3 @@
-# Starting objects for the lab: the namespace, the healthy shuttle client and
-# the Services of the four workloads. The broken Deployments are in
-# faults-start.yaml.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -24,12 +21,17 @@ spec:
         app: shuttle
     spec:
       containers:
-        - name: shuttle
-          image: curlimages/curl:8.23.0
-          command: ["sleep", "infinity"]
-          resources:
-            requests: {cpu: 10m, memory: 16Mi}
-            limits: {memory: 32Mi}
+      - name: shuttle
+        image: curlimages/curl:8.23.0
+        command:
+        - sleep
+        - infinity
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
 ---
 apiVersion: v1
 kind: Service
@@ -40,45 +42,6 @@ spec:
   selector:
     app: scout
   ports:
-    - name: http
-      port: 9898
-      targetPort: http
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: probe
-  namespace: starfleet
-spec:
-  selector:
-    app: probe
-  ports:
-    - name: http
-      port: 8080
-      targetPort: http
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: cargo
-  namespace: starfleet
-spec:
-  selector:
-    app: cargo
-  ports:
-    - name: http
-      port: 8080
-      targetPort: http
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: beacon
-  namespace: starfleet
-spec:
-  selector:
-    app: beacon
-  ports:
-    - name: http
-      port: 9898
-      targetPort: http
+  - name: http
+    port: 9898
+    targetPort: http

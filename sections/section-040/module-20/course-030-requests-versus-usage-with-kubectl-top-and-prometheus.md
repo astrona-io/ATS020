@@ -1,6 +1,6 @@
 # Requests Versus Usage With kubectl top And Prometheus
 
-A cluster can be full and idle at the same time. The scheduler places pods by what they request, not by what they use. If every pod asks for far more than it needs, the cluster looks full, new pods stay `Pending`, and the nodes sit almost idle. This part measures both sides of the gap: what each container requested and what it really uses.
+Kubernetes schedules pods using requests, while metrics report what containers actually consume. Compare both for the same workload and units. Use recent samples to investigate, then a representative history to choose new requests.
 
 ## Requests, limits and usage
 
@@ -115,8 +115,6 @@ promql 'sum by (pod) (kube_pod_container_resource_requests{namespace="starfleet"
 ```
 
 A ratio above `1` means the request is higher than the usage. Each `scout` pod requests 8 times the memory it uses. A ratio below `1` means the container uses more than it requested. The `probe` pod has a ratio of `0.53`: it uses almost twice the memory it asked for, so the scheduler reserved too little for it.
-
-You can now read the request and the usage of every container with `kubectl top`, with the Kubernetes API and with Prometheus, and you know which component reports which number. The ratios above come from one moment. A request must cover the peak, and a peak needs a time range. The next step is to rank the workloads by their gap and to choose new values.
 
 ## Common pitfalls
 

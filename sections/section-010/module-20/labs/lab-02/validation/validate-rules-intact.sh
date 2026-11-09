@@ -30,4 +30,6 @@ for expr in "$RATIO_EXPR" "$LATENCY_EXPR"; do
   echo "$expr" | grep -Eq 'vector\(|scalar\(' && fail "an expression types a number with vector() or scalar(); it must come from the metrics"
 done
 
+[ "$(printf '%s' "$LATENCY_EXPR" | tr -d '[:space:]')" = 'histogram_quantile(0.95,sumby(le)(rate(http_request_duration_seconds_bucket{namespace="starfleet"}[5m])))' ] || fail 'keep the unassigned recording rule unchanged'
+
 echo "PASS: the PrometheusRule scout-queries holds both recording rules and they read the real metrics"

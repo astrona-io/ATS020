@@ -1,9 +1,3 @@
-# Starting workloads for the service level and efficiency playground.
-# `scout` (podinfo) asks for far more CPU and memory than it uses. `probe`
-# (go-httpbin) asks for far less than it uses. `shuttle` runs a traffic loop:
-# 19 normal requests and one request to /status/500 to `scout` in every
-# round (an error ratio of 5%), and a few requests to `probe`. ServiceMonitor
-# `scout` makes Prometheus scrape the metrics of `scout`.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -27,18 +21,21 @@ spec:
         app: scout
     spec:
       containers:
-        - name: scout
-          image: ghcr.io/stefanprodan/podinfo:6.17.0
-          ports:
-            - name: http
-              containerPort: 9898
-          readinessProbe:
-            httpGet:
-              path: /readyz
-              port: http
-          resources:
-            requests: {cpu: 250m, memory: 256Mi}
-            limits: {memory: 256Mi}
+      - name: scout
+        image: ghcr.io/stefanprodan/podinfo:6.17.0
+        ports:
+        - name: http
+          containerPort: 9898
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: http
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
@@ -51,9 +48,9 @@ spec:
   selector:
     app: scout
   ports:
-    - name: http
-      port: 9898
-      targetPort: http
+  - name: http
+    port: 9898
+    targetPort: http
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -67,9 +64,9 @@ spec:
     matchLabels:
       app: scout
   endpoints:
-    - port: http
-      path: /metrics
-      interval: 15s
+  - port: http
+    path: /metrics
+    interval: 15s
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -89,18 +86,21 @@ spec:
         app: probe
     spec:
       containers:
-        - name: probe
-          image: mccutchen/go-httpbin:2.25.0
-          ports:
-            - name: http
-              containerPort: 8080
-          readinessProbe:
-            httpGet:
-              path: /status/200
-              port: http
-          resources:
-            requests: {cpu: 1m, memory: 2Mi}
-            limits: {memory: 128Mi}
+      - name: probe
+        image: mccutchen/go-httpbin:2.25.0
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /status/200
+            port: http
+        resources:
+          requests:
+            cpu: 5m
+            memory: 24Mi
+          limits:
+            memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
@@ -113,9 +113,9 @@ spec:
   selector:
     app: probe
   ports:
-    - name: http
-      port: 8080
-      targetPort: http
+  - name: http
+    port: 8080
+    targetPort: http
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -157,16 +157,21 @@ spec:
         app: shuttle
     spec:
       containers:
-        - name: shuttle
-          image: curlimages/curl:8.23.0
-          command: ["sh", "/traffic/traffic.sh"]
-          volumeMounts:
-            - name: traffic
-              mountPath: /traffic
-          resources:
-            requests: {cpu: 10m, memory: 16Mi}
-            limits: {memory: 32Mi}
-      volumes:
+      - name: shuttle
+        image: curlimages/curl:8.23.0
+        command:
+        - sh
+        - /traffic/traffic.sh
+        volumeMounts:
         - name: traffic
-          configMap:
-            name: shuttle-traffic
+          mountPath: /traffic
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+      volumes:
+      - name: traffic
+        configMap:
+          name: shuttle-traffic

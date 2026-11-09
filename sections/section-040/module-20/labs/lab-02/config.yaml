@@ -6,7 +6,6 @@ metadata:
     prerequisites: prerequisites.md
     question: question.md
     solution: solution.md
-
 runtime:
   type: kind
   kind:
@@ -14,58 +13,54 @@ runtime:
     addons:
       metricsServer: true
     preloadImages:
-      - quay.io/prometheus-operator/prometheus-operator:v0.94.1
-      - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
-      - quay.io/prometheus/prometheus:v3.15.0-distroless
-      - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
-      - ghcr.io/stefanprodan/podinfo:6.17.0
-      - mccutchen/go-httpbin:2.25.0
-      - curlimages/curl:8.23.0
-
+    - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+    - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+    - quay.io/prometheus/prometheus:v3.15.0-distroless
+    - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+    - ghcr.io/stefanprodan/podinfo:6.17.0
+    - mccutchen/go-httpbin:2.25.0
+    - curlimages/curl:8.23.0
 bootstrap:
   init:
-    - name: prepare
-      description: "Install a trimmed kube-prometheus-stack 92.22.0 with kube-state-metrics in monitoring"
-      type: file
-      source: bootstrap/01-prepare.sh
+  - name: prepare
+    description: Install a trimmed kube-prometheus-stack 92.22.0 with kube-state-metrics in monitoring
+    type: file
+    source: bootstrap/01-prepare.sh
   manifests:
-    - name: lab-start
-      description: "scout (requests far above its usage), probe (memory request below its usage), the shuttle traffic loop and the ServiceMonitor for scout"
-      type: file
-      source: manifests/lab-start.yaml
+  - name: lab-start
+    description: Starting resources for reduce excess resource requests
+    type: file
+    source: manifests/lab-start.yaml
   waitFor:
-    - resource: deploy/scout
-      namespace: starfleet
-    - resource: deploy/probe
-      namespace: starfleet
-    - resource: deploy/shuttle
-      namespace: starfleet
-
+  - resource: deploy/scout
+    namespace: starfleet
+  - resource: deploy/probe
+    namespace: starfleet
+  - resource: deploy/shuttle
+    namespace: starfleet
 testing:
   init:
-    - name: solution
-      description: Reference solution applied by `astrona test`
-      type: file
-      source: solution/apply.sh
-    - name: wait-for-usage
-      description: Waits until Prometheus holds usage data for scout and probe
-      type: file
-      source: testing/wait-for-usage.sh
-
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+  - name: wait-for-usage
+    description: Waits until Prometheus holds usage data for scout and probe
+    type: file
+    source: testing/wait-for-usage.sh
 validation:
   scripts:
-    - name: scout-rightsized
-      description: The running scout pods request memory and CPU close to measured peak usage and keep a memory limit
-      type: file
-      source: validation/validate-scout-rightsized.sh
-    - name: probe-rightsized
-      description: The running probe pod requests at least its measured peak memory, with a bounded request and a memory limit
-      type: file
-      source: validation/validate-probe-rightsized.sh
-    - name: workloads-healthy
-      description: Replicas, readiness and restarts are unchanged and scout still answers 200 to shuttle
-      type: file
-      source: validation/validate-workloads-healthy.sh
-
+  - name: scout-rightsized
+    description: The running scout pods request memory and CPU close to measured peak usage and keep a memory limit
+    type: file
+    source: validation/validate-scout-rightsized.sh
+  - name: workloads-healthy
+    description: Replicas, readiness and restarts are unchanged and scout still answers 200 to shuttle
+    type: file
+    source: validation/validate-workloads-healthy.sh
 teardown:
   keepCluster: false

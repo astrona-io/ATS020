@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-020-01-04
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - docker.io/grafana/grafana:13.2.3-distroless
+    - curlimages/curl:8.23.0
+bootstrap:
+  manifests:
+  - name: lab-start
+    description: Starting resources for repair grafana secret keys
+    type: file
+    source: manifests/lab-start.yaml
+  init:
+  - name: prepare
+    description: Check that the terminal has kubectl, curl and jq, and show the state of the Grafana Pod
+    type: file
+    source: bootstrap/01-prepare.sh
+testing:
+  init:
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: grafana-ready
+    description: The Deployment grafana in telemetry has one ready replica and its health endpoint reports the database
+      as ok
+    type: file
+    source: validation/validate-grafana-ready.sh
+  - name: login-works
+    description: The Secret grafana-admin holds the key admin-password and the user admin signs in with the password
+      starfleet
+    type: file
+    source: validation/validate-login-works.sh
+  - name: only-allowed-changes
+    description: Image, environment names, probes and Service are unchanged; the data directory is not a ConfigMap;
+      the memory limit is at least 256Mi
+    type: file
+    source: validation/validate-only-allowed-changes.sh
+teardown:
+  keepCluster: false

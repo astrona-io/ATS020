@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: probe-maintenance
+  namespace: starfleet
+  labels:
+    release: kps
+spec:
+  groups:
+  - name: probe-maintenance
+    rules:
+    - alert: ProbeMaintenance
+      expr: vector(1)
+      labels:
+        namespace: starfleet
+        team: probe
+        severity: info
+      annotations:
+        summary: Scheduled probe maintenance fixture

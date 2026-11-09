@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-040-01-04
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+    - quay.io/prometheus-operator/prometheus-operator:v0.94.1
+    - quay.io/prometheus-operator/prometheus-config-reloader:v0.94.1
+    - quay.io/prometheus/prometheus:v3.15.0-distroless
+    - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
+    - gitea/gitea:28.3.0-rootless
+    - quay.io/argoproj/argocd:v3.6.1
+    - public.ecr.aws/docker/library/redis:8.2.3-alpine
+    - ghcr.io/stefanprodan/podinfo:6.17.0
+    - curlimages/curl:8.23.0
+bootstrap:
+  init:
+  - name: prepare
+    description: Install a trimmed kube-prometheus-stack 92.22.0, Gitea 28.3.0 and Argo CD 3.6.1, then make the delivery
+      history of the Application scout
+    type: file
+    source: bootstrap/01-prepare.sh
+  manifests:
+  - name: lab-start
+    description: Starting resources for measure time to restore service
+    type: file
+    source: manifests/lab-start.yaml
+  waitFor:
+  - resource: deploy/shuttle
+    namespace: starfleet
+testing:
+  init:
+  - name: verify-start
+    description: Verify the intended starting fault and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: solution
+    description: Reference solution applied by `astrona test`
+    type: file
+    source: solution/apply.sh
+validation:
+  scripts:
+  - name: timestamp-evidence
+    description: Submitted durations match the live deployment history and Git commits
+    type: file
+    source: validation/validate-evidence.sh
+teardown:
+  keepCluster: false

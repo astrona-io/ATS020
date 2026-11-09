@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: scout-routing
+  namespace: starfleet
+spec:
+  route:
+    receiver: scout-webhook
+    matchers:
+    - name: team
+      value: scout
+      matchType: '='
+    groupBy:
+    - namespace
+    - alertname
+    groupWait: 5s
+    groupInterval: 15s
+    repeatInterval: 5m
+  receivers:
+  - name: scout-webhook
+    webhookConfigs:
+    - url: http://alert-receiver.monitoring:8080/
+      sendResolved: true

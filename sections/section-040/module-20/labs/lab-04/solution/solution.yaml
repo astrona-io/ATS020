@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: scout-sli
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  groups:
+  - name: scout-sli
+    rules:
+    - record: scout:sli:ratio_rate5m
+      expr: sum(rate(http_requests_total{namespace="starfleet",container="scout",status!~"5.."}[5m])) / sum(rate(http_requests_total{namespace="starfleet",container="scout"}[5m]))
+    - record: scout:sli:ratio_rate1h
+      expr: sum(rate(http_requests_total{namespace="starfleet",container="scout",status!~"5.."}[1h])) / sum(rate(http_requests_total{namespace="starfleet",container="scout"}[1h]))
+    - record: scout:error_budget_remaining:ratio1h
+      expr: 1 - (1 - scout:sli:ratio_rate1h) / (1 - 0.99)

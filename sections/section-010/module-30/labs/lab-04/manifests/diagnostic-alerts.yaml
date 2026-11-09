@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: scout-inhibition
+  namespace: starfleet
+  labels:
+    release: kps
+spec:
+  groups:
+  - name: scout-inhibition
+    rules:
+    - alert: ScoutUnavailable
+      expr: vector(1)
+      labels:
+        namespace: starfleet
+        team: scout-inhibit
+        severity: critical
+    - alert: ScoutLatency
+      expr: vector(1)
+      labels:
+        namespace: starfleet
+        team: scout-inhibit
+        severity: warning

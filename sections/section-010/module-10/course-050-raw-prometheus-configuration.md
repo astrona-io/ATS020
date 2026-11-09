@@ -4,7 +4,7 @@ The `probe` Deployment exposes metrics, but Prometheus never requests them.
 There is no Prometheus Operator to read a PodMonitor. Instead, this server
 reads `prometheus.yml` from a ConfigMap, a Kubernetes object that holds
 configuration text. To add the missing Pods, you must change the file and
-make Prometheus load it before using its data to choose a scaling action.
+make Prometheus load it. The result is a healthy target for every selected pod.
 
 ## Read the file Prometheus actually uses
 
@@ -155,65 +155,30 @@ still reload the old file if the mount has not updated yet. Prometheus
 rejects an invalid new configuration and keeps the previous one. Without
 the lifecycle flag, use a restart instead of the HTTP reload route.
 
-## Query a workload total and act on it
-
-Prometheus Query Language (PromQL) selects metrics and calculates results.
-A time series is one metric name and label set with samples collected over
-time. The fixture exposes `starfleet_queue_items`, a gauge whose value can
-rise or fall. Run this query against the forwarded Service:
-
-```sh
-curl -fsSG http://127.0.0.1:9090/api/v1/query --data-urlencode 'query=sum by (deployment) (starfleet_queue_items{job="starfleet-pods",namespace="starfleet"})' | jq '.data.result'
-```
-
-`sum by (deployment)` adds the Pod values for each Deployment, keeping only
-the grouping label. Read the Deployment name in `metric.deployment` and
-compare the numbers in `value[1]`. Wait until both selected workloads appear;
-a missing workload is not a zero queue. `shuttle` is outside this query's
-selected population even though its fixture reports a larger queue.
-
-The fixture assigns `probe` the larger per-Pod queue. After confirming that
-its total is highest, add replicas:
-
-```sh
-kubectl -n starfleet scale deployment probe --replicas=3
-kubectl -n starfleet rollout status deployment/probe --timeout=180s
-kubectl -n starfleet get deployments scout probe shuttle
-```
-
-Look for three ready `probe` replicas and one ready replica on each other
-Deployment. This synthetic gauge stays fixed per Pod; it teaches choosing an
-action from a query, not a real queue draining model. In a real service,
-verify that extra replicas can share the work, then measure the effect.
-
-Use Operator resources when a Prometheus Operator manages the server:
-ServiceMonitor selects Service endpoints and PodMonitor selects Pods, and
-the controller generates and reloads Prometheus configuration. Use raw
-`scrape_configs` when the server is managed directly from a file. Creating a
-monitor resource has no effect without a controller configured to read it;
-editing an Operator-generated file can be overwritten by its next update.
-In either style, the running configuration and healthy targets prove what
-Prometheus actually loaded, and the query supplies the evidence for an action.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Removing the keep rule.** That collects disabled workloads too. Extend the accepted values instead.
-> - **Adding a second keep rule for the new value.** Sequential keep rules require every match. Put alternative values in the same expression.
-> - **Applying without loading.** Check the running configuration after a restart or reload, not only the ConfigMap.
-> - **Reloading before the mount updates.** Wait and retry, or restart the Deployment to mount the new file.
-> - **Choosing a winner before discovery finishes.** Compare both workload totals before scaling.
+> - Extend the existing keep rule; a second keep rule requires both matches.
+> - Keep the named-port and readiness filters.
+> - Inspect the running configuration after changing the ConfigMap.
+> - Wait for discovery and the first scrape before submitting.
 
-## Your mission: Extend Raw Prometheus Discovery And Scale A Workload
+## Your mission: Extend Raw Prometheus Pod Discovery
 
-You can now extend a raw discovery job, load the file and compare workload
-totals. Complete the task in the running lab and submit it:
+Plain Prometheus discovers only `telemetry: primary` Pods. The `reserve` workload is missing from the `starfleet-pods` job.
+
+This independent lab has 4 tasks. Allow 10–15 minutes for task work, plus environment startup and telemetry collection.
+
+Use the lab started above.
+
+Submit after verifying the result:
 
 ```sh
-astrona submit --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-010/module-10/labs/lab-02
+astrona submit -c sections/section-010/module-10/labs/lab-02
 ```
 
-When finished, remove the lab and resume the playground:
+Remove the lab and resume the playground:
 
 ```sh
 astrona destroy ats-020-lab-010-01-02

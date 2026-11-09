@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: scout
+  namespace: outpost
+  labels:
+    release: kps
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  podMetricsEndpoints:
+  - port: http
+    path: /metrics
+    interval: 15s
