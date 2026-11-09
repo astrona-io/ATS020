@@ -4,7 +4,7 @@ This playground gives you pods that write log lines and no log pipeline. A log p
 
 ## What's in the box
 
-The cluster runs Kubernetes 1.35.8. The `monitoring` namespace holds Prometheus 3.15.0 and the Prometheus Operator 0.94.1. Alertmanager, Grafana and the exporters for nodes and Kubernetes objects are disabled to save memory. The `cert-manager` namespace holds cert-manager 1.21.2, which the OpenTelemetry Operator 0.160.0 needs for its webhook certificate. The operator turns an `OpenTelemetryCollector` resource into a running Collector. The image `otel/opentelemetry-collector-contrib:0.162.0` is already on the node.
+The cluster runs Kubernetes 1.35.8. The `monitoring` namespace holds Prometheus 3.15.0 and the Prometheus Operator 0.94.1. Alertmanager, Grafana and the exporters for nodes and Kubernetes objects are disabled to save memory. The `cert-manager` namespace holds cert-manager 1.21.3, which the OpenTelemetry Operator 0.160.0 needs for its webhook certificate. The operator turns an `OpenTelemetryCollector` resource into a running Collector. The image `otel/opentelemetry-collector-contrib:0.162.0` is already on the node.
 
 | Namespace | Contents |
 | --- | --- |

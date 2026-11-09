@@ -5,7 +5,7 @@
 - **Author:** Paris Nakita Kejser
 - **Type:** Astrona playground — no grading
 
-A single-node kind cluster running Kubernetes 1.35.8, with cert-manager 1.21.2,
+A single-node kind cluster running Kubernetes 1.35.8, with cert-manager 1.21.3,
 the OpenTelemetry Operator 0.160.0 and a trimmed Prometheus stack (the
 Prometheus Operator and one Prometheus) in `monitoring`. `scout` runs in
 `starfleet`, `probe` runs in `outpost`, and a `shuttle` pod sends steady
