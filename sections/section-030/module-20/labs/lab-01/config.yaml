@@ -35,7 +35,7 @@ bootstrap:
       type: file
       source: manifests/lab-start.yaml
     - name: relay-start
-      description: "The relay Deployment and an Instrumentation, with three faults in how relay is instrumented"
+      description: "The relay Deployment and an Instrumentation, with misplaced annotation and incorrect Instrumentation selection"
       type: file
       source: manifests/relay-start.yaml
   waitFor:
@@ -52,6 +52,10 @@ bootstrap:
 
 testing:
   init:
+    - name: verify-start
+      description: Verify the intended starting fault and rejection before applying the solution
+      type: file
+      source: testing/verify-start.sh
     - name: solution
       description: Reference solution applied by `astrona test`
       type: file

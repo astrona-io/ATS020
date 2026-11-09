@@ -1,0 +1,52 @@
+# Working auto-instrumentation for the trace-reading lab.
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: nodejs
+  namespace: starfleet
+spec:
+  exporter:
+    endpoint: http://otel-collector.observability:4318
+  propagators:
+    - tracecontext
+    - baggage
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay
+  namespace: starfleet
+  labels:
+    app: relay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay
+  template:
+    metadata:
+      labels:
+        app: relay
+      annotations:
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
+    spec:
+      containers:
+        - name: relay
+          image: node:22-alpine
+          command: ["node", "/app/server.js"]
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: app
+              mountPath: /app
+          resources:
+            requests: {cpu: 10m, memory: 48Mi}
+            limits: {memory: 256Mi}
+      volumes:
+        - name: app
+          configMap:
+            name: relay-app

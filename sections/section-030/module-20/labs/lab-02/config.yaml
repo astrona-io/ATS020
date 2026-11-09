@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-020-lab-030-02-02
+  docs:
+    prerequisites: prerequisites.md
+    question: question.md
+    solution: solution.md
+
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.8
+    preloadImages:
+      - quay.io/jetstack/cert-manager-controller:v1.21.3
+      - quay.io/jetstack/cert-manager-webhook:v1.21.3
+      - quay.io/jetstack/cert-manager-cainjector:v1.21.3
+      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.160.0
+      - ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.78.0
+      - otel/opentelemetry-collector-contrib:0.162.0
+      - jaegertracing/jaeger:2.22.0
+      - ghcr.io/stefanprodan/podinfo:6.15.0
+      - node:22-alpine
+      - curlimages/curl:8.22.0
+
+bootstrap:
+  init:
+    - name: install-operator
+      description: "Install cert-manager 1.21.3 and the OpenTelemetry Operator 0.160.0, and wait for its webhook"
+      type: file
+      source: bootstrap/01-install-operator.sh
+  manifests:
+    - name: lab-start
+      description: "Jaeger 2.22.0, the Collector otel, scout with tracing on, the relay ConfigMap and Service, and the shuttle traffic loop"
+      type: file
+      source: manifests/lab-start.yaml
+    - name: relay-start
+      description: "The relay Deployment with working Node.js injection and W3C trace context propagation"
+      type: file
+      source: manifests/relay-start.yaml
+  waitFor:
+    - resource: deploy/jaeger
+      namespace: observability
+    - resource: deploy/otel-collector
+      namespace: observability
+    - resource: deploy/scout
+      namespace: starfleet
+    - resource: deploy/relay
+      namespace: starfleet
+    - resource: deploy/shuttle
+      namespace: starfleet
+
+testing:
+  init:
+    - name: solution
+      description: Reference solution applied by `astrona test`
+      type: file
+      source: solution/apply.sh
+
+validation:
+  scripts:
+    - name: trace-evidence
+      description: The saved slow trace matches Jaeger and links relay's request to scout's handler
+      type: file
+      source: validation/validate-trace-evidence.sh
+    - name: slow-operation
+      description: The findings identify the downstream handler and its measured duration in the saved trace
+      type: file
+      source: validation/validate-slow-operation.sh
+
+teardown:
+  keepCluster: false

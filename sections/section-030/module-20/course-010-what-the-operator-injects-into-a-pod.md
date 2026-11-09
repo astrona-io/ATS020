@@ -1,18 +1,22 @@
-# What The Operator Injects Into A Pod
+# What the Operator Injects into a Pod
 
-A trace is only as complete as the services that create spans. `scout` creates its own spans, but `relay`, the service in front of it, has no tracing code at all. Adding a tracing library to every service means changing code, rebuilding images and rolling out each one. The OpenTelemetry Operator can instead add a tracing agent to a pod at the moment the pod is created. This part shows what the Operator adds, which resource and annotation tell it to do so, and why only new pods change.
+Requests pass through `relay` before reaching `scout`, but Jaeger initially shows only the work in `scout`. The OpenTelemetry Operator can add a Node.js tracing agent to `relay` when Kubernetes creates its pod. The agent records supported operations without changes to the application source.
 
-## A trace that starts too late
+A **span** records one operation and its timing. A **trace** groups related spans under one trace identifier. Instrumenting `relay` will add its incoming and outgoing requests to the recorded request path.
 
-A **span** is one timed step of a request. A **trace** is the set of all spans of one request, and all of them share one **trace ID**. In the playground, `shuttle` sends a request to `relay` every 2 seconds, and `relay` sends one request to `scout`. So every request crosses two services. Start a port-forward to Jaeger in a second terminal and leave it running:
+## Inspect the missing service
+
+Jaeger's application programming interface (API) lets you see which services have exported spans. Its responses use JavaScript Object Notation (JSON), which `jq` can filter.
 
 <!-- astrona:playground:renew -->
+
+Start a port-forward in a second terminal and leave it running:
 
 ```sh
 kubectl -n observability port-forward svc/jaeger 16686:16686
 ```
 
-Ask the Jaeger API which services have sent spans. Then define a small helper that prints the spans of the newest traces of one service. It leaves out the `GET /readyz` spans that the readiness probe of `scout` creates:
+In your first terminal, list the services and define a helper that prints span identifiers. The helper excludes `scout`'s readiness-probe spans so the application requests are easier to see:
 
 ```sh
 curl -fsS http://127.0.0.1:16686/api/v3/services | jq -c .services
@@ -24,7 +28,7 @@ list_spans() {
 list_spans scout 3 | head -2
 ```
 
-Only `scout` and `jaeger` itself appear. The first two spans of `scout` show a trace that starts at `scout`. Your trace IDs differ:
+The output initially resembles this; identifiers and ordering vary:
 
 ```text
 ["jaeger","scout"]
@@ -32,13 +36,15 @@ Only `scout` and `jaeger` itself appear. The first two spans of `scout` show a t
 {"service":"scout","name":"GET /","traceId":"a3772cb5867739d7d3e3839dd3ac6b62","spanId":"1d5802525a98f026","parentSpanId":null}
 ```
 
-The span `GET /` is the root span, because its `parentSpanId` is `null`. The request really began one step earlier, in `relay`. `relay` creates no spans and sends no trace context to `scout`, so `scout` starts a new trace for every request. Jaeger cannot show the step in `relay`, and it cannot show how much of the time went there.
+`scout`'s `GET /` span has no parent. It starts a trace even though the request passed through `relay` first. `relay` records no spans and sends no tracing context, so Jaeger cannot show its part of the request.
 
-## How the injection works
+The helper's first argument selects a service; the second limits the requested traces. Both time bounds are required by the search API. The wide range suits this temporary playground; use an incident's time window for operational investigations.
 
-The OpenTelemetry Operator watches for a pod that asks to be instrumented. The pod asks with an **annotation**, a key-value pair in its metadata. For Node.js the key is `instrumentation.opentelemetry.io/inject-nodejs`. The settings for the agent come from an **Instrumentation**, a custom resource of the Operator that holds the exporter endpoint, the propagators and the sampler.
+## How the Operator adds the agent
 
-The work happens in a **mutating admission webhook**. This is an HTTP service that the Kubernetes API server calls when it receives a request to create an object. The service can change the object before the API server stores it. The webhook of the Operator reads the annotation, finds the Instrumentation in the namespace of the pod, and adds an init container, a volume and environment variables to the pod.
+An **Instrumentation** is a custom resource containing settings for injected agents. An **annotation** is a metadata key-value pair; `instrumentation.opentelemetry.io/inject-nodejs` tells the Operator that a pod needs the Node.js agent.
+
+The Operator's **mutating admission webhook** receives pod-creation requests from the Kubernetes API server. For an eligible pod, it reads the annotation, selects an Instrumentation resource, and adds an init container, a shared volume, and environment variables:
 
 ```mermaid
 sequenceDiagram
@@ -53,13 +59,13 @@ sequenceDiagram
   K->>K: run init container, then relay
 ```
 
-The diagram shows that the change happens while the pod is created, before the kubelet starts any container. The init container copies the Node.js agent into a shared volume and exits. The `relay` container then starts with the environment variable `NODE_OPTIONS`, which makes Node.js load the agent before the application code. The application itself does not change.
+The pod is changed before its containers start. The init container copies the agent into the shared volume and exits; `NODE_OPTIONS` then makes Node.js load the agent before the application.
 
-This has one consequence that the exam likes to test. The webhook only sees create requests. A pod that already runs is never changed, so a pod must be created again after the Instrumentation and the annotation both exist.
+This injection occurs at pod creation. Updating an Instrumentation resource does not rewrite environment variables in a running pod. The Deployment must create replacement pods to use the new settings.
 
-## Create the Instrumentation
+## Create the agent settings
 
-Start with the Instrumentation. Save this as `instrumentation-nodejs.yaml`:
+The agent will export spans to the Collector and pass trace context to `scout`. Save this as `instrumentation-nodejs.yaml`:
 
 ```yaml
 apiVersion: opentelemetry.io/v1alpha1
@@ -78,20 +84,24 @@ spec:
     argument: "1"
 ```
 
-The field `exporter.endpoint` is where the agent sends its spans. Here it is the Service `otel-collector` on port `4318`, the OTLP (OpenTelemetry Protocol) HTTP port of the Collector. The field `propagators` lists the formats in which the agent passes trace context to the next service. The field `sampler` decides which traces the agent keeps, and `parentbased_traceidratio` with the argument `1` keeps every trace.
-
 Apply it:
 
 ```sh
 kubectl apply -f instrumentation-nodejs.yaml
 ```
 
-Then check the result. The Instrumentation exists, and the running `relay` pod has no init container yet:
+`exporter.endpoint` selects the Collector's OpenTelemetry Protocol (OTLP) receiver over Hypertext Transfer Protocol (HTTP), on port `4318`. The `tracecontext` propagator carries trace identity in requests; `baggage` carries additional context key-value pairs.
+
+The **sampler** decides which spans to sample. `parentbased_traceidratio` with argument `"1"` samples every new root trace and follows an existing parent's sampling decision. It does not override an incoming parent marked as unsampled.
+
+Check the resource and the running `relay` pod:
 
 ```sh
 kubectl -n starfleet get instrumentation
 kubectl -n starfleet get pods -l app=relay -o 'custom-columns=NAME:.metadata.name,INIT:.spec.initContainers[*].name'
 ```
+
+The resource exists, but the pod still has no init container:
 
 ```text
 NAME     AGE   ENDPOINT                                   SAMPLER                    SAMPLER ARG
@@ -100,11 +110,11 @@ NAME                     INIT
 relay-58cd79c99d-qdvxc   <none>
 ```
 
-The Instrumentation alone changes nothing. No pod has asked for it, and the running pod was created before it existed.
+Creating the Instrumentation supplied settings. The existing pod has neither requested injection nor been replaced.
 
-## Annotate the pod template
+## Request injection on the pod template
 
-The annotation must be on the **pod template** of the Deployment, because the pods are created from the template. Save this as `relay-patch.yaml`:
+The Deployment's **pod template** contains the metadata and container specification used for new pods. Put the annotation there so the resulting pods carry it. Save this as `relay-patch.yaml`:
 
 ```yaml
 spec:
@@ -114,13 +124,17 @@ spec:
         instrumentation.opentelemetry.io/inject-nodejs: "true"
 ```
 
-The value `"true"` means "use the Instrumentation in the namespace of this pod". Apply the patch. A change to the pod template makes the Deployment create a new pod, so the webhook sees a create request. Wait for the rollout and list the pods:
+`"true"` selects an Instrumentation in the pod's namespace; this playground has only `nodejs`. An explicit value of `nodejs` selects that named resource, while `<namespace>/<name>` selects one in another namespace.
+
+Apply the patch and wait for the rollout:
 
 ```sh
 kubectl -n starfleet patch deployment relay --patch-file relay-patch.yaml
 kubectl -n starfleet rollout status deployment/relay
 kubectl -n starfleet get pods -l app=relay
 ```
+
+A change to the pod template creates a replacement pod:
 
 ```text
 deployment.apps/relay patched
@@ -133,12 +147,14 @@ relay-58cd79c99d-qdvxc   1/1     Terminating   0          2m25s
 relay-78b85c779-jvqnj    1/1     Running       0          6s
 ```
 
-The old pod is still shutting down, and the new pod is `Running`. Wait a few seconds until only the new pod is listed. Then read what the webhook added to it. The first command shows the init container and its image. The second prints the environment variables that matter. Your pod name differs:
+Wait until the old pod disappears before inspecting `.items[0]` in the following commands. The first command prints the init container's name and image; the second prints the selected environment variables:
 
 ```sh
 kubectl -n starfleet get pod -l app=relay -o jsonpath='{.items[0].spec.initContainers[0].name}{"\n"}{.items[0].spec.initContainers[0].image}{"\n"}'
 kubectl -n starfleet get pod -l app=relay -o json | jq -r '.items[0].spec.containers[0].env[] | select(.name|test("^(NODE_OPTIONS|OTEL_(SERVICE_NAME|EXPORTER_OTLP_ENDPOINT|PROPAGATORS|TRACES_SAMPLER|TRACES_SAMPLER_ARG))$")) | "\(.name)=\(.value)"'
 ```
+
+The injected values should include:
 
 ```text
 opentelemetry-auto-instrumentation-nodejs
@@ -151,13 +167,39 @@ OTEL_TRACES_SAMPLER=parentbased_traceidratio
 OTEL_TRACES_SAMPLER_ARG=1
 ```
 
-The init container `opentelemetry-auto-instrumentation-nodejs` is the proof that the webhook ran. The values of the variables come from the Instrumentation: the endpoint, the propagators and the sampler. The Operator also sets `OTEL_SERVICE_NAME` to `relay`, the name of the workload, and `NODE_OPTIONS` loads the agent. The pod has more `OTEL_` variables than these, and the command shows only the ones that matter here.
+The init container shows that the webhook added the agent files. `NODE_OPTIONS` tells the application process to load them. The endpoint, propagators, and sampler match the Instrumentation resource; the service name identifies this workload as `relay`.
 
-You now know what the Operator adds to a pod, which two resources trigger it, and why only a new pod changes. The open question is whether the spans of `relay` really reach Jaeger and join the spans of `scout` in one trace.
+These checks establish that injection happened and show what the process will load. Delivery still needs a separate check: Jaeger must receive new `relay` spans, and those spans must link to `scout` through the same trace and parent identifiers.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Expecting the Instrumentation alone to change a pod.** The webhook only changes pods that carry the annotation and are created afterwards.
-> - **Looking at the old pod.** During a rollout two pods exist for a short time. Check the pod in `Running` state, not the one in `Terminating`.
-> - **Reading the init container as a failure.** The init container runs once, copies the agent and exits. Its status `Completed` is the normal end.
+> - **Creating settings without requesting injection.** The Instrumentation resource alone does not instrument this workload.
+> - **Annotating the Deployment's own metadata.** Put the request under `spec.template.metadata.annotations`.
+> - **Inspecting a terminating pod.** Wait for the replacement pod before reading its injected settings.
+> - **Treating a completed init container as a failure.** This container copies the agent and exits normally.
+> - **Assuming injection proves delivery.** Check recent spans in Jaeger as well as the pod's configuration.
+
+## Your mission: Enable Node.js Agent Injection
+
+You can now configure and verify an injected agent. Create the settings, request injection, inspect the replacement pod, and confirm that Jaeger receives its spans.
+
+Pause the playground and start the lab:
+
+```sh
+astrona stop ats-020-playground-030-02
+astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-20/labs/lab-03
+```
+
+Grade the completed tasks:
+
+```sh
+astrona submit -c sections/section-030/module-20/labs/lab-03
+```
+
+Remove the lab and resume the playground:
+
+```sh
+astrona destroy ats-020-lab-030-02-03
+astrona start ats-020-playground-030-02
+```

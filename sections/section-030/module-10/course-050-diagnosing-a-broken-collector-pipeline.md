@@ -1,10 +1,16 @@
-# Diagnosing A Broken Collector Pipeline
+# Diagnosing a Broken Collector Pipeline
 
-A Collector that is `Running` is not a Collector that works. The pod can be healthy while spans never reach the backend, because the fault is in the configuration the Collector reads, not in Kubernetes. This part breaks the pipeline in two ways and follows the symptoms back to their causes, using the Service, the Collector log and the Collector's own metrics.
+The `scout` pod can keep serving requests while its traces fail to reach Jaeger. A Collector pod can also remain `Running` with a broken export destination. Kubernetes readiness and trace delivery answer different questions.
 
-## Break the pipeline
+You will introduce two configuration faults, then follow the errors from the application to the receiver and exporter. A **receiver** accepts spans, an **exporter** sends them onward, and a **pipeline** connects them through any processors.
 
-Save this as `opentelemetrycollector-otel-broken.yaml`. It has the same name as the working Collector, so applying it replaces the configuration. It has two faults. One is easy to see in the YAML once you know to look. The other only shows up in the logs:
+## Introduce two configuration faults
+
+The `OpenTelemetryCollector` resource below replaces the configuration of `otel`. It defines separate OpenTelemetry Protocol (OTLP) receivers for gRPC, a remote procedure call transport, and Hypertext Transfer Protocol (HTTP). Only the HTTP receiver appears in the trace pipeline, and the Jaeger exporter points to port `4316`.
+
+<!-- astrona:playground:renew -->
+
+Save this as `opentelemetrycollector-otel-broken.yaml`:
 
 ```yaml
 apiVersion: opentelemetry.io/v1beta1
@@ -42,40 +48,46 @@ spec:
 
 Apply it:
 
-<!-- astrona:playground:renew -->
-
 ```sh
 kubectl apply -f opentelemetrycollector-otel-broken.yaml
 ```
 
-## Symptom one: the application cannot connect
+Allow about 40 seconds for the Operator to create the replacement pod. Its process can start because the configuration is valid, even though the selected receiver and export address do not match the intended connections.
 
-Wait about 40 seconds for the new pod. The Collector pod is `1/1 Running`, and the Operator shows no error. The first sign of trouble is in the application. `scout` writes an error each time it fails to send spans:
+## Find why the application cannot connect
+
+`scout` exports over gRPC to port `4317`. Read its latest export error:
 
 ```sh
 kubectl -n starfleet logs deploy/scout --tail=1
 ```
 
+The log can show a connection timeout like this:
+
 ```text
 {"level":"info","ts":"2026-11-02T19:12:14.080Z","caller":"errorhandler/errorhandler.go:36","msg":"exporter export timeout: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 10.96.220.64:4317: i/o timeout\""}
 ```
 
-The address `10.96.220.64` is the cluster IP of a Service, and port `4317` is where `scout` sends. The connection times out. Look at the Service that the Operator built:
+The destination is the Collector Service's cluster address on port `4317`. Check which ports that Service exposes:
 
 ```sh
 kubectl -n observability get service otel-collector
 ```
+
+Only the HTTP port appears:
 
 ```text
 NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
 otel-collector   ClusterIP   10.96.220.64   <none>        4318/TCP   12m
 ```
 
-The Service has only port `4318`. The Operator builds the Service ports from the receivers that the pipelines use, so no pipeline uses a receiver on `4317`. The Collector log confirms it. Only one server started:
+The Operator derives Service ports from receivers used by the pipelines. The resource defines `otlp/grpc`, but its `traces` pipeline lists only `otlp/http`. Check the Collector's startup messages to confirm which receiver started:
 
 ```sh
 kubectl -n observability logs deploy/otel-collector | awk -F'\t' '/Starting|Everything/{print $2, $3, $4}'
 ```
+
+The filtered log contains an HTTP server startup and no gRPC server startup:
 
 ```text
 info service@v0.162.0/service.go:233 Starting otelcol-contrib...
@@ -84,37 +96,45 @@ info otlpreceiver@v0.162.0/otlp.go:175 Starting HTTP server
 info service@v0.162.0/service.go:256 Everything is ready. Begin running and processing data.
 ```
 
-There is no `Starting GRPC server` line. The receiver `otlp/grpc` is defined, but the `traces` pipeline lists only `otlp/http`. An unused receiver never starts. In `opentelemetrycollector-otel-broken.yaml`, change the pipeline line to `receivers: [otlp/grpc, otlp/http]` and apply the file again. Wait about 40 seconds.
+Edit the pipeline in `opentelemetrycollector-otel-broken.yaml` so that its receiver list is `receivers: [otlp/grpc, otlp/http]`. Apply the same file again with `kubectl apply -f opentelemetrycollector-otel-broken.yaml` and allow about 40 seconds for the replacement pod. Check the Service again: it should now expose both ports.
 
-## Symptom two: the exporter cannot deliver
+## Find why the exporter cannot deliver
 
-The Service now has both ports, and `scout` can connect. Spans enter the Collector, but they do not leave. Search the Collector log for failed exports. The command prints the first connection error it finds:
+With the gRPC receiver active, spans can enter the Collector. The exporter now attempts to deliver them and exposes the second fault. Search for the first connection timeout in the Collector log:
 
 ```sh
 kubectl -n observability logs deploy/otel-collector | grep -m1 -o 'dial tcp [0-9.:]*: i/o timeout'
 ```
 
+The error names the destination port:
+
 ```text
 dial tcp 10.96.10.202:4316: i/o timeout
 ```
 
-The Collector tries to reach `10.96.10.202` on port `4316`. Compare it with the Jaeger Service:
+Compare that address with Jaeger's Service:
 
 ```sh
 kubectl -n observability get service jaeger
 ```
+
+Jaeger exposes these ports:
 
 ```text
 NAME     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                       AGE
 jaeger   ClusterIP   10.96.10.202   <none>        4317/TCP,4318/TCP,16686/TCP   5m51s
 ```
 
-The exporter points at a port that does not exist. In the file, change `jaeger.observability:4316` to `jaeger.observability:4317` and apply the file again. Wait about 40 seconds, then prove the fix with two checks from `shuttle`. First, the Collector's counters must be equal and rising, which shows that spans enter and leave. Second, Jaeger must list `scout`. Your numbers differ:
+The exporter uses `4316`, but Jaeger's OTLP/gRPC receiver listens on `4317`. Change the endpoint in the file to `jaeger.observability:4317`, apply it again, and allow the new Collector pod to start.
+
+Read the Collector's accepted-span and sent-span counters, then check the Jaeger application programming interface (API) for `scout`:
 
 ```sh
 kubectl exec -n starfleet deploy/shuttle -- curl -s otel-collector-monitoring.observability:8888/metrics | grep -E "^otelcol_(receiver_accepted_spans|exporter_sent_spans)"
 kubectl exec -n starfleet deploy/shuttle -- curl -s jaeger.observability:16686/api/v3/services | grep -o '"scout"'
 ```
+
+A working configuration produces output like this:
 
 ```text
 otelcol_exporter_sent_spans{exporter="otlp_grpc/jaeger",server_address="jaeger.observability",server_port="4317"} 55
@@ -122,29 +142,31 @@ otelcol_receiver_accepted_spans{receiver="otlp/grpc",transport="grpc"} 55
 "scout"
 ```
 
-## Read the symptoms
+Repeat the counter query after a few seconds. Both counters should rise as requests continue. Batching can make them differ briefly, and a Collector restart resets them. The service list confirms that Jaeger knows `scout`; search for a trace created after the repair to confirm current delivery.
 
-The two faults gave two different signs, in two different places. The table adds a third fault, a pipeline that names an exporter that is not defined. In that case the new Collector pod stops with `Error`, and the Deployment keeps the old pod running, so traces may still flow while the new configuration never applies.
+## Use each symptom to choose the next check
 
-| Symptom | Where to look | Cause |
+The first fault prevented spans from reaching the Collector. Repairing it exposed the export failure. A third common fault is a misspelled component name in a pipeline, which can stop the new Collector process before it starts receiving data.
+
+| Symptom | Next check | Likely cause in this exercise |
 | --- | --- | --- |
-| The application logs `i/o timeout` to the Collector Service | `kubectl get service` shows a missing port; the Collector log has no `Starting GRPC server` line | A receiver is defined, but no pipeline lists it |
-| The Collector log repeats `Exporting failed. Will retry` | The address and port in the `dial tcp` text | The exporter endpoint has the wrong host or port |
-| The new Collector pod is in `Error` | `kubectl logs` of that pod: `Error: invalid configuration: service::pipelines::traces: references exporter "otlp_grpc/jaegar" which is not configured` | A pipeline names a part that is not defined |
+| `scout` times out connecting to port `4317` | Collector Service ports and receiver startup messages | The gRPC receiver is not listed in the pipeline |
+| The Collector retries exports to port `4316` | Exporter endpoint and Jaeger Service ports | The exporter uses the wrong port |
+| A new Collector pod exits with an invalid-configuration error | Logs from that specific pod | The pipeline refers to an undefined component |
 
-You can now read a Collector fault from its symptom: the Service ports and the startup lines show which receivers run, the retry lines show where the exporter fails, and the counters show whether spans pass through. Every fix is proved when `scout` appears in Jaeger and the two counters rise together.
+A failed rollout can leave an older pod serving traffic. Inspect the new pod's logs when a change fails, and confirm that the intended configuration is running. Service ports, startup logs, and exporter counters narrow down the fault; a recent trace in Jaeger confirms the repaired path.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Trusting `Running`.** The pod runs while the pipeline is broken. Check the log and the counters.
-> - **Fixing the wrong layer first.** While the receiver is unused, no span reaches the exporter, so the exporter fault stays hidden. Fix, wait, look again.
-> - **Reading the log of the old pod.** After a bad change two pods can exist. Use `kubectl get pods` and read the log of the pod in `Error`.
-> - **Sending `scout` straight to Jaeger.** Spans arrive, but the Collector is bypassed and the pipeline stays broken.
+> - **Trusting `Running` alone.** Check receiver activity, successful exports, and recent stored traces.
+> - **Stopping after the first fix.** A receiver failure can hide an exporter failure. Repeat the checks after each repair.
+> - **Reading an old pod's logs.** Select the failing pod explicitly when a rollout leaves several pods running.
+> - **Sending `scout` directly to Jaeger.** That bypasses the Collector whose pipeline you need to repair.
 
-## Your mission: Fix A Broken Collector Pipeline
+## Your mission: Fix a Broken Collector Pipeline
 
-You can now find out why spans do not reach Jaeger and prove the fix with the Collector counters and the Jaeger API. The mission gives you a Collector that is `Running` and a `scout` whose traces are missing. Fix the Collector so that the traces of `scout` arrive in Jaeger through it.
+You can now distinguish a receiver failure from an export failure. The mission gives you a running Collector and missing `scout` traces; repair the pipeline and verify that new spans reach Jaeger through it.
 
 Pause the playground, then start the lab:
 
@@ -156,13 +178,13 @@ astrona stop ats-020-playground-030-01
 astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-10/labs/lab-01
 ```
 
-The task is on the next page. When you have fixed the pipeline, grade your work:
+When you have repaired the pipeline, grade your work:
 
 ```sh
 astrona submit -c sections/section-030/module-10/labs/lab-01
 ```
 
-When the lab is done, remove it and start the playground again:
+Remove the lab and restart the playground when you finish:
 
 ```sh
 astrona destroy ats-020-lab-030-01

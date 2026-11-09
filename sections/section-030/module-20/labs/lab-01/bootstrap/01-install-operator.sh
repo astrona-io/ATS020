@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tool install for the "Get Two Services Into One Trace" lab
+# Tool install for the "Repair Missing Agent Injection" lab
 # (`ats-020-lab-030-02`).
 #
 # Installs the tools only; Jaeger, the Collector, scout, relay and shuttle

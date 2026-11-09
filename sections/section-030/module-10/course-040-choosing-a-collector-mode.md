@@ -1,17 +1,21 @@
-# Choosing A Collector Mode
+# Choosing a Collector Mode
 
-One Collector configuration can run in more than one way. Where the Collector runs decides how many copies exist, how far the data travels to reach it, and which failures it shares with the application. This part creates a Collector in each of the modes the Operator supports and shows what each one builds.
+The `otel` Collector receives spans from applications through one shared Service. This is a **gateway** deployment: applications send telemetry to a central Collector for processing and export. Other tasks, such as reading files on every node, need a different placement.
 
-## Four modes, four shapes
+The `mode` field of an `OpenTelemetryCollector` custom resource selects the workload that the OpenTelemetry Operator creates. The pipeline configuration still controls what the Collector receives and where it sends the data.
 
-The `mode` field of an OpenTelemetryCollector tells the Operator which Kubernetes object runs the Collector.
+## Match the mode to the task
 
-- `deployment` creates a Deployment with a Service. One shared Collector, or a few copies behind the Service, receives data from many applications. Call this a **gateway**.
-- `daemonset` creates a DaemonSet, which runs one pod on every node. Applications and other tools on a node send data to the Collector on the same node. Call this an **agent**.
-- `sidecar` creates no workload. The Operator adds a Collector container to every pod that asks for it with an annotation. Each application gets its own Collector.
-- `statefulset` creates a StatefulSet. It gives each pod a stable name, and the Operator uses it with the Target Allocator for Prometheus scraping. This module does not use it.
+The Operator supports four modes. Choose one based on where the Collector needs to run:
 
-The usual choice is a gateway for shared processing, an agent where something must run on every node (reading files from the node, for example), and a sidecar where one application needs its own settings.
+| Mode | What the Operator creates | Typical use |
+| --- | --- | --- |
+| `deployment` | A Deployment with one or more Collector replicas | Shared processing and export through a gateway |
+| `daemonset` | A DaemonSet with a pod on each eligible node | Node-level collection, such as reading local log files |
+| `sidecar` | A Collector container injected into annotated application pods | Collection with settings and resources dedicated to an application pod |
+| `statefulset` | A StatefulSet with stable pod identities | Collection that needs stable identities or persistent storage configured for each replica |
+
+A node-local Collector is often called an **agent**. An agent can forward data to a gateway using the OpenTelemetry Protocol (OTLP), as this layout shows:
 
 ```mermaid
 flowchart LR
@@ -20,29 +24,31 @@ flowchart LR
   G -->|"OTLP"| J["Jaeger"]
 ```
 
-The diagram shows a common layout: an agent on the node forwards to a gateway, and only the gateway talks to the backend.
+The agent collects near the application, and the gateway handles shared processing before export to Jaeger. A DaemonSet alone does not make application traffic node-local: the application's endpoint and routing must direct it to the Collector on the same node.
 
-## The mode cannot change in place
+## Check whether the mode can change
 
-The `otel` Collector runs in `deployment` mode. Try to turn it into a DaemonSet by patching its `mode` field:
+The `otel` resource uses `deployment` mode. Its validating webhook, which checks updates before Kubernetes accepts them, rejects changes to this field.
 
 <!-- astrona:playground:renew -->
+
+Try changing the existing Collector to a DaemonSet:
 
 ```sh
 kubectl -n observability patch opentelemetrycollector otel --type merge -p '{"spec":{"mode":"daemonset"}}'
 ```
 
-The Operator's validating webhook refuses the change:
+The webhook refuses the update:
 
 ```text
 Error from server (Forbidden): admission webhook "vopentelemetrycollectorcreateupdatebeta.kb.io" denied the request: the OpenTelemetry Collector mode is set to deployment, which does not support modification
 ```
 
-To change the mode of an existing Collector you must delete it and create it again. Leave `otel` as it is and create two more Collectors with other names.
+The failed patch leaves `otel` unchanged. Changing its mode would require replacing the resource. Keep the gateway running and use separate resource names to inspect the other modes.
 
-## Create an agent
+## Create a node agent
 
-Save this as `opentelemetrycollector-agent.yaml`. It receives OTLP on port `4317` and forwards to the gateway `otel-collector`:
+The agent will accept OTLP over gRPC, a remote procedure call transport, on port `4317` and forward it to `otel-collector`. Save this as `opentelemetrycollector-agent.yaml`:
 
 ```yaml
 apiVersion: opentelemetry.io/v1beta1
@@ -80,11 +86,13 @@ Apply it:
 kubectl apply -f opentelemetrycollector-agent.yaml
 ```
 
-Then list what the Operator created. The label selects the objects that belong to the `agent` Collector:
+Then check the result. The label selects the DaemonSet and pods belonging to the `agent` resource:
 
 ```sh
 kubectl -n observability get daemonset,pod -l app.kubernetes.io/instance=observability.agent
 ```
+
+The single-node playground produces one agent pod:
 
 ```text
 NAME                             DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
@@ -94,11 +102,13 @@ NAME                        READY   STATUS    RESTARTS   AGE
 pod/agent-collector-4n8mc   1/1     Running   0          20s
 ```
 
-The playground has one node, so the DaemonSet has one pod. A cluster with five nodes would run five. The Operator named the objects `agent-collector`, after the resource name `agent`, and it also created the Services `agent-collector`, `agent-collector-headless` and `agent-collector-monitoring`.
+Pod names and ages will differ. The DaemonSet creates a pod on each eligible node; node selectors, taints, and tolerations can affect placement. The Operator also creates receiver and monitoring Services for this Collector.
 
-## Inject a sidecar
+The agent is ready to receive spans, but creating it does not change `scout`'s exporter endpoint. `scout` continues sending directly to the gateway.
 
-A sidecar Collector is created in two steps. First, create an OpenTelemetryCollector with `mode: sidecar`. It runs nothing by itself. Save this as `opentelemetrycollector-edge.yaml`:
+## Inject a Collector into an application pod
+
+A **sidecar** is a supporting container that runs alongside an application in the same pod. First define the Collector configuration that the Operator will inject. Save this as `opentelemetrycollector-edge.yaml`:
 
 ```yaml
 apiVersion: opentelemetry.io/v1beta1
@@ -130,17 +140,21 @@ spec:
           exporters: [otlp_grpc/gateway]
 ```
 
+Apply it:
+
 ```sh
 kubectl apply -f opentelemetrycollector-edge.yaml
 ```
 
-Second, add the annotation `sidecar.opentelemetry.io/inject` to the pod template of the workload. Its value is the name of the Collector. The Operator's mutating webhook reads the annotation when a pod is created, so the change only reaches new pods. Patching the pod template makes the Deployment roll out a new pod:
+This resource creates no standalone Collector workload. The Operator injects it when a new pod requests it through the `sidecar.opentelemetry.io/inject` annotation. Add the annotation to `scout`'s pod template, using `edge` as the resource name:
 
 ```sh
 kubectl -n starfleet patch deployment scout --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"sidecar.opentelemetry.io/inject":"edge"}}}}}'
 kubectl -n starfleet rollout status deploy/scout
 kubectl -n starfleet get pods
 ```
+
+Changing the pod template triggers a rollout. The output below omits the rollout's waiting messages:
 
 ```text
 deployment.apps/scout patched
@@ -152,24 +166,27 @@ scout-787bdfdc65-z2vhl     1/1     Terminating   0          15m
 shuttle-65f695c8c6-c5857   1/1     Running       0          15m
 ```
 
-The output leaves out the `Waiting for deployment` lines of the rollout.
-
-The new `scout` pod shows `2/2`: the application and the Collector. The Collector is not in the container list. Kubernetes 1.35 runs it as a native sidecar, an init container with `restartPolicy: Always`. Check:
+The replacement `scout` pod reports `2/2` ready: the application and the Collector. In this playground, the Operator injects a Kubernetes native sidecar, which appears under `initContainers` with `restartPolicy: Always`. Inspect those fields:
 
 ```sh
 kubectl -n starfleet get pod -l app=scout -o jsonpath='{.items[0].spec.initContainers[0].name}{" "}{.items[0].spec.initContainers[0].restartPolicy}{"\n"}'
 ```
 
+The injected container reports:
+
 ```text
 otc-container Always
 ```
 
-Because the Collector shares the pod, the application would reach it at `localhost:4317`. This module leaves the `scout` endpoint as it is, so `scout` still sends to the gateway. You can now name the four modes and create an agent and a sidecar. The question left is what to do when the Collector runs but no trace arrives.
+Containers in a pod share its network, so an application can reach this Collector at `localhost:4317`. Injection does not change `scout`'s exporter setting; its spans still go to the gateway. The exercise demonstrates placement and injection without rerouting application traffic.
+
+Collector placement determines which applications share a process and where collection happens. The pipeline determines whether that process can receive and export spans, so even a correctly placed Collector still needs delivery checks.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Changing `mode` on an existing Collector.** The webhook denies it. Delete the resource and create it again.
-> - **Expecting a `sidecar` Collector to run on its own.** It runs nothing until a pod carries the `sidecar.opentelemetry.io/inject` annotation.
-> - **Annotating a running pod.** The webhook only acts when a pod is created. Annotate the pod template of the Deployment, so that new pods get the sidecar.
-> - **Putting the annotation on the Deployment's own metadata.** It must be on the pod template, under `spec.template.metadata`.
+> - **Changing an existing Collector's mode.** The webhook rejects the update. Create a replacement resource with the required mode.
+> - **Expecting sidecar mode to create a Deployment.** Injection happens only when an annotated pod is created.
+> - **Annotating the Deployment's own metadata.** Put the annotation under `spec.template.metadata.annotations`.
+> - **Expecting injection to reroute telemetry.** The application must use the sidecar's endpoint to send through it.
+> - **Assuming a DaemonSet guarantees local traffic.** Check how applications select the Collector endpoint.

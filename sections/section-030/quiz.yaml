@@ -177,7 +177,7 @@ questions:
     difficulty: advanced
     learning_objective: "Find why a pod was not instrumented (annotation on the wrong object, Instrumentation in another namespace, pod not restarted)"
     source_readings:
-      - sections/section-030/module-20/course-030-finding-why-a-pod-is-not-instrumented.md
+      - sections/section-030/module-20/course-040-finding-why-a-pod-is-not-instrumented.md
     prompt: "The annotation is on the pod template, the pod was recreated, and the pod still has no init container. The Instrumentation `nodejs` exists in the namespace `observability`, and the pod runs in `starfleet`. What is wrong?"
     options:
       - id: a

@@ -124,6 +124,18 @@ Strict guidelines:
   then pause the playground (`astrona stop <playground name>`), the
   `astrona run` and `astrona submit` commands, and finally
   `astrona destroy <lab name>` plus `astrona start <playground name>`.
+- **Keep module labs small and independent.** Give each lab 3–5 concrete
+  tasks around one realistic outcome. Aim for 10–15 minutes of task work;
+  state separately that cluster startup and telemetry export add time.
+  Split unrelated faults or skills into separate labs, each with its own
+  starting state, reference solution, and focused graders. A learner must
+  be able to start any lab without completing another one first. Keep
+  broader integration work in the section capstone.
+- **Section 030 is the pilot for this format.** Its module-20 labs cover
+  injection setup, slow-trace analysis, propagation repair, and missing
+  injection. The user will test the full section before authorizing this
+  restructuring elsewhere. Do not extend the rewrite or lab split to other
+  sections until that review is complete and the user asks to continue.
 - **Renew the playground before hands-on work.** Every reading part that
   runs commands has `<!-- astrona:playground:renew -->` exactly once, on its
   own line, right before the first hands-on step (the first "Save this as"
@@ -580,6 +592,14 @@ have `testing/smoke.sh`: it runs the commands the pages teach, with the YAML
 taken from the pages, and checks the results the pages show. Give every new
 playground one. Read telemetry with retries, because spans and metrics
 arrive in batches.
+
+New labs must be included in this automatic testing. The workflow discovers
+`labs/lab-*/config.yaml` through `scripts/ci/list-environments.sh`; verify
+that newly added labs appear in its output. It also runs each lab's
+`testing/test-*.py` grader tests before the full lifecycle test. For repair
+labs, use a testing step before the reference solution to verify the
+intended starting fault and that the unfinished state fails grading.
+Keep these checks in CI when splitting or renaming labs.
 
 Graders check **behaviour**, not just that an object exists: query
 Prometheus for the target or the alert, read the trace from the Jaeger API,
