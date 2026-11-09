@@ -8,7 +8,7 @@
 #   2. installs a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator,
 #      one Prometheus, kube-state-metrics and the kubelet scrape job) into
 #      `monitoring`,
-#   3. installs Gitea 28.1.0 (plumbing: the Git server) into `gitea`,
+#   3. installs Gitea 28.3.0 (plumbing: the Git server) into `gitea`,
 #   4. installs Argo CD 3.6.1 into `argocd` and scales down the parts that
 #      this lab does not use,
 #   5. tells Prometheus to scrape the Argo CD application controller,
@@ -58,7 +58,7 @@ helm upgrade --install kps kube-prometheus-stack \
 kubectl -n monitoring rollout status statefulset/prometheus-kps-prometheus --timeout=300s
 kubectl -n monitoring rollout status deployment/kps-kube-state-metrics --timeout=300s
 
-echo "[playground] Installing Gitea 28.1.0 (plumbing)..."
+echo "[playground] Installing Gitea 28.3.0 (plumbing)..."
 kubectl apply -f "$(find_file gitea.yaml)"
 kubectl -n gitea rollout status deployment/gitea --timeout=300s
 
