@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 Argo CD has synced ten revisions of `scout`. The recording rule selects failed sync operations, so it does not count the deployments.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the Application history and the labels on `argocd_app_sync_total`.
@@ -15,8 +13,5 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep the Application, Git history and counter data unchanged. Use the source counter, not a constant count.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep the Application, Git history and counter data unchanged.
+- Use the source counter, not a constant count.

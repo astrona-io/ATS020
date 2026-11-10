@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 `ProbeMaintenance` fires in Prometheus and has reached Alertmanager. Suppress its notifications during a planned maintenance window.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Find the maintenance alert and read its labels.
@@ -15,8 +13,6 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Use exactly two equality matchers: `alertname="ProbeMaintenance"` and `namespace="starfleet"`. Set duration to `30m`, author to `platform`, and comment to `probe maintenance window`. Keep both alerting rules and the routing configuration.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Use exactly two equality matchers: `alertname="ProbeMaintenance"` and `namespace="starfleet"`.
+- Set duration to `30m`, author to `platform`, and comment to `probe maintenance window`.
+- Keep both alerting rules and the routing configuration.

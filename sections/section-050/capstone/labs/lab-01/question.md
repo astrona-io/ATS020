@@ -6,7 +6,7 @@ A release went out and the namespace `starfleet` is down. Three workloads are un
 
 The four faults are independent and none of them shows its cause in the `STATUS` column. Find each cause, fix it, and prove the recovery.
 
-## Task
+## Tasks
 
 1. Find out why each of the three workloads is not serving, and write down the cause of each in one line.
 2. Fix each workload so that its pod is `Ready` and does not restart.
@@ -24,9 +24,3 @@ The four faults are independent and none of them shows its cause in the `STATUS`
 - Do not remove the memory limit of `cargo`. Size it to what the process really uses, and keep it below `1Gi`. Do not change the command of `cargo`.
 - Keep the `ValidatingWebhookConfiguration` `starfleet-policy` with `failurePolicy: Fail`. Do not delete it and do not set `failurePolicy: Ignore`. Fix the Service behind it, which is in the namespace `webhook-system`.
 - Do not change `shuttle`.
-
-## How the answer is checked
-
-The grader runs five checks. Three check one workload each: a `Ready` pod, no restarts, the rules above for that workload, and a `200` from `shuttle`. The fourth creates a real Deployment in `starfleet` and checks that the webhook server logged a new request, so a bypass does not pass. The fifth checks that the workloads, their Services, the webhook configuration, the webhook server and `shuttle` are still in place. The grader waits and retries for a few minutes, because pods and endpoints update late.
-
-Hint: start with `kubectl -n starfleet get pods`, then read the last state and the events of each broken pod. For the webhook, read the error text of a failing create: it names the Service. A memory limit that is too low leaves no error in the log.

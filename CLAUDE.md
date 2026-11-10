@@ -126,7 +126,9 @@ Strict guidelines:
   `astrona destroy <lab name>` plus `astrona start <playground name>`.
 - **Keep module labs small and independent.** Give each lab 3–5 concrete
   tasks around one realistic outcome. Aim for 10–15 minutes of task work;
-  state separately that cluster startup and telemetry export add time.
+  state separately that cluster startup and telemetry export add time (the
+  platform shows `estimated_duration` from `astrona.yaml`; `question.md` does
+  not repeat it).
   Split unrelated faults or skills into separate labs, each with its own
   starting state, reference solution, and focused graders. A learner must
   be able to start any lab without completing another one first. Keep
@@ -143,8 +145,9 @@ Strict guidelines:
   create filler tasks just to give every page a lab.
 - **A lab must prove its starting state and its repair.** In `testing.init`,
   run `testing/verify-start.sh` before the reference solution. Assert the
-  intended fault and require an explicit grading failure from unfinished
-  work. Then apply the solution, wait for reconciliation or telemetry with
+  intended fault, then run every grader and require an explicit `FAIL:`
+  from each one: nothing may be solved at the start, and that includes
+  checks that only guard against a bypass. Then apply the solution, wait for reconciliation or telemetry with
   a timeout, and run the behavioral graders. Keep unrelated resources in a
   working state. Check constraints that prevent bypassing the task.
 - **Test every lab automatically.** The `labs` GitHub Actions workflow
@@ -217,7 +220,7 @@ Strict guidelines:
   path. Name a thing in plain words when the reader needs it ("the task is on
   the next page"), and state a fact on the page itself instead of sending the
   reader somewhere else. Repository files for authors (the root `README.md`,
-  a lab's or playground's `README.md`) may link.
+  a playground's `README.md`) may link.
 - **No links to outside sources.** Course pages, labs and playground docs do
   not link to or point at outside websites (the one exception is the
   `resources` field of a lab entry in `astrona.yaml`) (official docs, GitHub, blogs,
@@ -502,9 +505,8 @@ A lab folder holds:
 | Path | Purpose |
 | --- | --- |
 | `config.yaml` | Lab definition; `metadata.docs` points at `question.md` and `solution.md` |
-| `README.md` | Short intro for authors with `estimated_duration` front matter and the run, submit and destroy commands |
 | `prerequisites.md` | What the learner needs before starting |
-| `question.md` | The exam-style task. Starts with `# Question` and `Solve this question on: \`terminal\`` |
+| `question.md` | The exam-style task. Starts with `# Question` and `Solve this question on: \`terminal\``, then one context paragraph (workloads, namespaces, Service ports, the symptom), numbered `## Tasks` and bulleted `## Constraints`. No other sections |
 | `solution.md` | Step-by-step walkthrough with real output |
 | `bootstrap/` | Tool install (for example `01-install-prometheus.sh`) and the starting state (`02-seed-workloads.sh`) |
 | `manifests/` | `lab-start.yaml` (workloads) and any faulty configuration the learner must fix |

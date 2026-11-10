@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 Traffic to `scout` includes HTTP 500 responses. Create recording rules that measure availability and the remaining budget for a 99% objective.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the request counter and confirm the status labels that represent failed requests.
@@ -15,8 +13,7 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Use record names `scout:sli:ratio_rate5m`, `scout:sli:ratio_rate1h` and `scout:error_budget_remaining:ratio1h`. Aggregate scout request rates across pods. Keep traffic and the workload unchanged. A fresh cluster contains less than an hour of samples.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Use record names `scout:sli:ratio_rate5m`, `scout:sli:ratio_rate1h` and `scout:error_budget_remaining:ratio1h`.
+- Aggregate scout request rates across pods.
+- Keep traffic and the workload unchanged.
+- A fresh cluster contains less than an hour of samples.

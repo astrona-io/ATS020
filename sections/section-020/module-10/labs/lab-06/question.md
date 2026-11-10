@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 Grafana loads the request dashboard, but its provisioned Prometheus data source is missing. The data source ConfigMap exists in `monitoring`.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the data source ConfigMap and the sidecar selector.
@@ -15,8 +13,6 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep the data source in `datasource-prometheus`. Do not add a second data source through the API or web interface. Keep its UID and Prometheus URL.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep the data source in `datasource-prometheus`.
+- Do not add a second data source through the API or web interface.
+- Keep its UID and Prometheus URL.

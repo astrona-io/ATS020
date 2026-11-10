@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 Both `relay` and `scout` send spans to Jaeger, but their requests appear in separate traces. The Node.js agent is already injected into `relay`. An agent-settings change removed trace context propagation.
 
-Allow about 10 minutes for the four tasks, plus cluster startup and span export time.
-
 ## Tasks
 
 1. Inspect the Instrumentation `nodejs` in `starfleet` and the running `relay` pod's `OTEL_PROPAGATORS`. Identify why the outgoing request cannot continue the trace in `scout`.
@@ -15,8 +13,6 @@ Allow about 10 minutes for the four tasks, plus cluster startup and span export 
 
 ## Constraints
 
-Keep `relay`'s image `node:22-alpine`, command, and application code unchanged. Do not modify `scout`, `shuttle`, the Collector, or Jaeger. Send spans through the Collector, and keep the `relay` Deployment.
-
-## How the answer is checked
-
-Three checks verify the injected settings, unchanged application design, and a recent parent link from `relay` to `scout`. Merely seeing both service names is not enough. A settings edit alone also fails while the running pod still uses its old environment.
+- Keep `relay`'s image `node:22-alpine`, command, and application code unchanged.
+- Do not modify `scout`, `shuttle`, the Collector, or Jaeger.
+- Send spans through the Collector, and keep the `relay` Deployment.
