@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Grader: probe still has a liveness probe (removing it hides the fault), the
-# probe checks the served port 8080, and it now passes: the pod is Ready, its restart count does not grow over
-# 25 seconds, and shuttle gets a 200 from the Service.
+# probe checks the served port 8080, and it now passes: the pod is Ready, its
+# restart count does not grow over 25 seconds, and shuttle gets a 200 from the
+# Service.
 set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
