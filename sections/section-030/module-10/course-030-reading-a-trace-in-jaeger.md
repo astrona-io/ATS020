@@ -1,7 +1,6 @@
 ---
-title: "Reading and Analyzing Traces in Jaeger"
 maturity: published
-reviewed: "2026-11-09"
+last_reviewed: "2026-11-09"
 ---
 
 # Reading and Analyzing Traces in Jaeger

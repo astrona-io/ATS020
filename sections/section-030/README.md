@@ -1,7 +1,6 @@
 ---
-title: "Distributed Tracing With OpenTelemetry And Jaeger"
 maturity: published
-reviewed: "2026-11-08"
+last_reviewed: "2026-11-08"
 ---
 
 # Distributed Tracing With OpenTelemetry and Jaeger

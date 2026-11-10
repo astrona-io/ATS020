@@ -1,7 +1,6 @@
 ---
-title: "A Collector with an OTLP Receiver and a Jaeger Exporter"
 maturity: published
-reviewed: "2026-11-09"
+last_reviewed: "2026-11-09"
 ---
 
 # A Collector with an OTLP Receiver and a Jaeger Exporter

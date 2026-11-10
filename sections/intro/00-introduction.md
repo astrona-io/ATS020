@@ -1,7 +1,6 @@
 ---
-title: "Introduction"
 maturity: published
-reviewed: "2026-11-08"
+last_reviewed: "2026-11-08"
 ---
 
 # Introduction

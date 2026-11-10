@@ -1,7 +1,6 @@
 ---
-title: "Get Your Machine Ready"
 maturity: published
-reviewed: "2026-11-08"
+last_reviewed: "2026-11-08"
 ---
 
 # Get Your Machine Ready

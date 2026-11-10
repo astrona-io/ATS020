@@ -1,7 +1,6 @@
 ---
-title: "How This Course Is Made"
 maturity: published
-reviewed: "2026-11-08"
+last_reviewed: "2026-11-08"
 ---
 
 # How This Course Is Made

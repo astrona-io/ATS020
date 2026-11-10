@@ -1,7 +1,6 @@
 ---
-title: "The Operator And Its Webhook"
 maturity: published
-reviewed: "2026-11-08"
+last_reviewed: "2026-11-08"
 ---
 
 # The Operator and Its Webhook

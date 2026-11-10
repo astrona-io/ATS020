@@ -1,7 +1,6 @@
 ---
-title: "Run An OpenTelemetry Collector With The Operator"
 maturity: published
-reviewed: "2026-11-08"
+last_reviewed: "2026-11-08"
 ---
 
 # Run An OpenTelemetry Collector With The Operator
