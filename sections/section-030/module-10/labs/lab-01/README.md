@@ -15,6 +15,14 @@ client and a Collector named `otel` that is `Running` but broken. The learner
 finds the two faults in its exporter and proves the fix with the Collector
 counters and the Jaeger API.
 
+The browser workspace has four tabs next to the main terminal: **Jaeger**
+(port forward `jaeger-ui`, `127.0.0.1:26686` to `svc/jaeger:16686`),
+**Collector metrics** (port forward `collector-metrics`, `127.0.0.1:28888` to
+`svc/otel-collector-monitoring:8888`), **Logs** (a second terminal) and
+**Collector reference** (`docs/collector-reference.md`). The host ports are
+not the services' own ports, so a local Jaeger or Collector does not block
+them.
+
 ## Run it
 
 ```sh
@@ -32,6 +40,7 @@ solution with `astrona test -c .`.
 | --- | --- |
 | `config.yaml` | Lab definition |
 | `prerequisites.md` | What the learner needs first |
+| `docs/collector-reference.md` | Collector reference shown on the workspace's **Collector reference** tab |
 | `question.md` | The task |
 | `solution.md` | The walkthrough with real output |
 | `bootstrap/01-install-operator.sh` | Installs cert-manager and the Operator |

@@ -12,6 +12,8 @@ Use `--watch` until the end, because a plain `astrona submit` finishes the attem
 
 ## Find the first fault
 
+In the browser workspace, you can keep the Collector log open on the **Logs** tab with `kubectl -n observability logs deploy/otel-collector -f` and run the other commands in the first terminal. The commands below read only the last lines, so they work in any terminal.
+
 Read the log of the Collector for the exporter errors:
 
 ```sh
@@ -115,6 +117,8 @@ kubectl exec -n starfleet deploy/shuttle -- curl -s jaeger.observability:16686/a
 ```text
 "scout"
 ```
+
+In the browser workspace, the same proof is on two tabs. The **Collector metrics** tab shows both counters; reload it to see them rise. On the **Jaeger** tab, choose `scout` in the **Service** list and select **Find Traces** to see its recent traces.
 
 ## Wrong fixes the grader rejects
 

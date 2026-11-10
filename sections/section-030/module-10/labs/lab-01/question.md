@@ -12,6 +12,8 @@ The operations team reports that no trace of `scout` shows up in Jaeger. The pod
 2. Fix the OpenTelemetryCollector `otel` so that the spans of `scout` arrive in Jaeger through the Collector.
 3. Prove the fix. The two counters `otelcol_receiver_accepted_spans` and `otelcol_exporter_sent_spans` must be above `0`, and the Jaeger API must list `scout` as a service.
 
+In the browser workspace, the **Jaeger** tab shows the Jaeger UI and the **Collector metrics** tab shows the Collector's metrics on port `8888`. The **Logs** tab is a second terminal, so you can follow the Collector log while you edit in the first one. The **Collector reference** tab lists the fields of the Collector configuration. Outside the browser workspace, the same pages are on `http://127.0.0.1:26686` and `http://127.0.0.1:28888/metrics`.
+
 ## Constraints
 
 - Keep the Collector named `otel`, in the `observability` namespace, in `deployment` mode.
