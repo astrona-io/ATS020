@@ -85,6 +85,10 @@ bootstrap:
 
 testing:
   init:
+    - name: verify-start
+      description: Reject the unfinished lab before applying the reference solution
+      type: file
+      source: testing/verify-start.sh
     - name: solution
       description: Reference solution applied by `astrona test`
       type: file
@@ -96,10 +100,10 @@ testing:
 
 validation:
   scripts:
-    - name: collector-intact
-      description: The Collector otel is still a deployment with the Service otel-collector on 4317, and scout still sends to it
+    - name: exporter-endpoint
+      description: The traces exporter of the Collector otel points at the Service jaeger
       type: file
-      source: validation/validate-collector-intact.sh
+      source: validation/validate-exporter-endpoint.sh
     - name: collector-counters
       description: The Collector's own counters show spans accepted and sent
       type: file

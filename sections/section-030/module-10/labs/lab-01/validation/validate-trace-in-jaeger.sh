@@ -8,6 +8,30 @@ set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+# The fix must stay inside the Collector: the same OpenTelemetryCollector in
+# deployment mode, the Service otel-collector on 4317, scout still sending to
+# it, and a real exporter (not only debug) in the traces pipeline. A bypass
+# fails here, so it can never pass a check.
+check_design_kept() {
+  local mode ports endpoint exporters name real=""
+  mode="$(kubectl -n observability get opentelemetrycollector otel -o jsonpath='{.spec.mode}' 2>/dev/null)" \
+    || fail "OpenTelemetryCollector otel is missing in namespace observability (do not delete it)"
+  [ "$mode" = "deployment" ] || fail "Collector mode is '$mode', expected deployment"
+  ports="$(kubectl -n observability get service otel-collector -o jsonpath='{.spec.ports[*].port}' 2>/dev/null)" \
+    || fail "Service otel-collector is missing"
+  case " $ports " in *" 4317 "*) ;; *) fail "Service otel-collector has ports '$ports', expected 4317";; esac
+  endpoint="$(kubectl -n starfleet get deployment scout -o jsonpath='{.spec.template.spec.containers[?(@.name=="scout")].env[?(@.name=="OTEL_EXPORTER_OTLP_ENDPOINT")].value}' 2>/dev/null)"
+  [ "$endpoint" = "http://otel-collector.observability:4317" ] \
+    || fail "scout sends to '$endpoint'; it must keep sending to http://otel-collector.observability:4317 (fix the Collector, not scout)"
+  exporters="$(kubectl -n observability get opentelemetrycollector otel -o jsonpath='{.spec.config.service.pipelines.traces.exporters[*]}' 2>/dev/null)"
+  for name in $exporters; do
+    case "$name" in debug*|logging*|nop*) ;; *) real="$real $name";; esac
+  done
+  [ -n "$real" ] || fail "the traces pipeline exports only to '${exporters:-nothing}'; it must export to Jaeger"
+}
+
+check_design_kept
+
 # Prints "accepted sent" from the Collector's own counters, or nothing.
 collector_counters() {
   local pod metrics

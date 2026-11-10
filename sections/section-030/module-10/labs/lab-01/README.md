@@ -47,5 +47,7 @@ solution with `astrona test -c .`.
 | `manifests/lab-start.yaml` | Jaeger, `scout` and `shuttle` |
 | `manifests/collector-start.yaml` | The broken Collector (the fault is the material) |
 | `solution/` | Reference end state, applied only by `astrona test` |
+| `testing/verify-start.sh` | Proves the start fault and that every grader fails on the untouched lab |
 | `testing/wait-for-pipeline.sh` | Waits for spans before grading in tests |
+| `testing/test-validation.py` | Grader tests against a fake cluster: untouched fails all, solution passes all, bypasses fail |
 | `validation/` | One script per check |

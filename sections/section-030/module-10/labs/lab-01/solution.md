@@ -122,9 +122,13 @@ In the browser workspace, the same proof is on two tabs. The **Collector metrics
 
 ## Wrong fixes the grader rejects
 
-- Changing `OTEL_EXPORTER_OTLP_ENDPOINT` on `scout` to `jaeger.observability:4317`. Spans arrive in Jaeger, but the Collector is bypassed, and the first check fails.
-- Deleting the Collector, or changing its mode. The first check fails.
-- Replacing the exporter with a `debug` exporter. The log shows spans, but nothing reaches Jaeger, and the second and third checks fail.
+Every check first makes sure the fix stays inside the Collector. A fix that goes around it fails every check:
+
+- Changing `OTEL_EXPORTER_OTLP_ENDPOINT` on `scout` to `jaeger.observability:4317`. Spans arrive in Jaeger, but the Collector is bypassed.
+- Deleting the Collector, or changing its mode.
+- Replacing the exporter with a `debug` exporter. The log shows spans, but nothing reaches Jaeger.
+
+After you fix only the host, the exporter check passes and the two other checks still fail, because the exporter cannot send yet.
 
 When the watch terminal shows every check passing, press Ctrl-C to stop the watch, then submit once:
 
