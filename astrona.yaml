@@ -783,27 +783,29 @@ modules:
     title: Question
     path: sections/section-030/module-10/labs/lab-01/question.md
   - type: lab
-    title: Fix A Broken Collector Pipeline Lab
+    title: Send Spans From A Pod To Jaeger And Export Its Exceptions Lab
     path: sections/section-030/module-10/labs/lab-01
-    difficulty: intermediate
-    estimated_duration: 20m
+    difficulty: beginner
+    estimated_duration: 15m
     topic: tracing
     task_kind: troubleshooting
     tags:
-    - otel-collector
-    - collector-pipeline
+    - opentelemetry
     - otlp
     - jaeger
-    - opentelemetry
+    - span-status
+    - exception-event
     learning_goals:
-    - Find the faults in the exporter of a running Collector from its Service ports and logs
-    - Fix the OpenTelemetryCollector without changing its mode, its Service or the address scout sends to
-    - Prove the fix with rising Collector counters and scout spans in Jaeger
+    - Switch OpenTelemetry on in a Deployment and point its OTLP endpoint at the Jaeger Service in another namespace
+    - Prove the fix from the pod log and the services the Jaeger query API lists
+    - Export the exception span events of the pod from the Jaeger API as a JSON array
     resources:
-    - name: OpenTelemetry Collector configuration
-      url: https://opentelemetry.io/docs/collector/configuration/
-    - name: OpenTelemetry Operator for Kubernetes
-      url: https://opentelemetry.io/docs/platforms/kubernetes/operator/
+    - name: 'OpenTelemetry: OTLP exporter configuration'
+      url: https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/
+    - name: 'OpenTelemetry semantic conventions: exceptions on spans'
+      url: https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/
+    - name: 'Kubernetes: kubectl set env'
+      url: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_env/
   - type: reading
     title: Finding A Service By Tag
     path: sections/section-030/module-10/course-060-finding-a-service-by-tag.md

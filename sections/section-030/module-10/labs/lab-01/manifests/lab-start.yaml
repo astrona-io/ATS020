@@ -1,24 +1,30 @@
-# Starting workloads for the "Fix A Broken Collector Pipeline" lab: Jaeger 2.23.0
-# (one pod, in-memory storage) in `observability`, `scout` (podinfo) in
-# `starfleet` with tracing switched on, and a `shuttle` pod that sends steady
-# traffic to `scout`. `scout` sends its spans over OTLP to
-# `otel-collector.observability:4317`. The Collector that owns that Service
-# comes from collector-start.yaml and is broken on purpose.
+# Starting state for the "Send Spans From A Pod To Jaeger" lab: Jaeger 2.23.0
+# (one pod, in-memory storage) in the namespace `tracing`, and the trace
+# emitter `probe` in its own namespace `outpost`.
+#
+# `probe` is broken on purpose, in two ways that both stop its spans:
+#   1. OTEL_ENABLED is "false", so the program creates no spans at all,
+#   2. OTEL_EXPORTER_OTLP_ENDPOINT names jaeger.observability, a namespace that
+#      does not exist here (Jaeger runs in `tracing`).
+# TARGET_URL names a Service that does not exist, so once spans flow, each one
+# ends with the status ERROR and an `exception` event. That error is the
+# evidence the learner exports, not a fault to repair.
+# Do not fix this in the bootstrap. The fault is the material.
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: starfleet
+  name: tracing
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: observability
+  name: outpost
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jaeger
-  namespace: observability
+  namespace: tracing
   labels:
     app: jaeger
 spec:
@@ -53,7 +59,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: jaeger
-  namespace: observability
+  namespace: tracing
   labels:
     app: jaeger
 spec:
@@ -70,108 +76,136 @@ spec:
       port: 16686
       targetPort: ui
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: scout
-  namespace: starfleet
-  labels:
-    app: scout
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: scout
-  template:
-    metadata:
-      labels:
-        app: scout
-    spec:
-      containers:
-        - name: scout
-          image: ghcr.io/stefanprodan/podinfo:6.17.0
-          command:
-            - ./podinfo
-            - --port=9898
-            - --otel-service-name=scout
-          env:
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://otel-collector.observability:4317
-            - name: OTEL_EXPORTER_OTLP_INSECURE
-              value: "true"
-          ports:
-            - name: http
-              containerPort: 9898
-          readinessProbe:
-            httpGet:
-              path: /readyz
-              port: http
-          resources:
-            requests: {cpu: 10m, memory: 32Mi}
-            limits: {memory: 64Mi}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: scout
-  namespace: starfleet
-  labels:
-    app: scout
-spec:
-  selector:
-    app: scout
-  ports:
-    - name: http
-      port: 9898
-      targetPort: http
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: shuttle-traffic
-  namespace: starfleet
+  name: trace-emitter
+  namespace: outpost
 data:
-  traffic.sh: |
-    #!/bin/sh
-    # Steady traffic for the tracing lab. Every 2 seconds: one normal
-    # request to scout. Every 10th round: one /delay/1 request, so some
-    # traces are slow.
-    i=0
-    while true; do
-      i=$((i+1))
-      curl -s -o /dev/null http://scout.starfleet:9898/
-      [ $((i % 10)) -eq 0 ] && curl -s -o /dev/null http://scout.starfleet:9898/delay/1
-      sleep 2
-    done
+  emitter.py: |
+    """Send one span every 2 seconds over OTLP/HTTP in OpenTelemetry Protocol JSON.
+
+    OTEL_ENABLED must be "true", or the program creates no spans.
+    OTEL_EXPORTER_OTLP_ENDPOINT is the base address of the OTLP/HTTP receiver;
+    the program adds the path /v1/traces, as the OpenTelemetry SDKs do.
+    Inside each span the program sends one HTTP request to TARGET_URL. When the
+    request fails, the span gets the status code ERROR (2) and one span event
+    named "exception" with the attributes that the OpenTelemetry semantic
+    conventions define for a recorded exception.
+    """
+    import json
+    import os
+    import secrets
+    import time
+    import traceback
+    import urllib.request
+
+    service = os.environ["TRACE_SERVICE"]
+    target_url = os.environ["TARGET_URL"]
+    enabled = os.environ.get("OTEL_ENABLED", "false").strip().lower() == "true"
+    endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "").rstrip("/")
+
+
+    def string_attributes(pairs):
+        return [{"key": key, "value": {"stringValue": value}} for key, value in pairs.items()]
+
+
+    if enabled:
+        print(f"OpenTelemetry is on: sending spans to {endpoint}/v1/traces", flush=True)
+    else:
+        print("OpenTelemetry is off (OTEL_ENABLED is not true): no spans are created", flush=True)
+
+    while True:
+        started = time.time_ns()
+        span = {
+            "traceId": secrets.token_hex(16),
+            "spanId": secrets.token_hex(8),
+            "name": "call-target",
+            "kind": 3,
+            "startTimeUnixNano": str(started),
+            "attributes": string_attributes({"target.url": target_url}),
+            "events": [],
+            "status": {"code": 1},
+        }
+        try:
+            with urllib.request.urlopen(target_url, timeout=3) as response:
+                response.read()
+        except Exception as error:  # noqa: BLE001 - every failure must land in the span
+            span["status"] = {"code": 2, "message": f"{type(error).__name__}: {error}"}
+            span["events"].append({
+                "timeUnixNano": str(time.time_ns()),
+                "name": "exception",
+                "attributes": string_attributes({
+                    "exception.type": type(error).__name__,
+                    "exception.message": str(error),
+                    "exception.stacktrace": traceback.format_exc(),
+                }),
+            })
+        span["endTimeUnixNano"] = str(time.time_ns())
+        if enabled:
+            payload = {"resourceSpans": [{
+                "resource": {"attributes": string_attributes({"service.name": service})},
+                "scopeSpans": [{"scope": {"name": "astrona-trace-fixture"}, "spans": [span]}],
+            }]}
+            request = urllib.request.Request(
+                f"{endpoint}/v1/traces",
+                data=json.dumps(payload).encode(),
+                headers={"Content-Type": "application/json"},
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=5) as response:
+                    response.read()
+            except Exception as error:  # noqa: BLE001 - a bad endpoint must not stop the loop
+                print(f"Span export to {endpoint}/v1/traces failed: {error}", flush=True)
+        time.sleep(2)
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shuttle
-  namespace: starfleet
+  name: probe
+  namespace: outpost
   labels:
-    app: shuttle
+    app: probe
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: shuttle
+      app: probe
   template:
     metadata:
       labels:
-        app: shuttle
+        app: probe
     spec:
+      # The program does not handle SIGTERM; a short grace period lets the old
+      # pod go quickly after each change.
+      terminationGracePeriodSeconds: 5
       containers:
-        - name: shuttle
-          image: curlimages/curl:8.23.0
-          command: ["sh", "/traffic/traffic.sh"]
-          volumeMounts:
-            - name: traffic
-              mountPath: /traffic
+        - name: probe
+          image: python:3.13.18-alpine3.24
+          command:
+            - python3
+            - /emitter/emitter.py
+          env:
+            - name: TRACE_SERVICE
+              value: probe
+            # No Service named relay exists in outpost: every call fails and
+            # every span records an exception. Leave it as it is.
+            - name: TARGET_URL
+              value: http://relay.outpost:8080
+            # Fault 1: tracing is switched off.
+            - name: OTEL_ENABLED
+              value: "false"
+            # Fault 2: Jaeger does not run in observability.
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://jaeger.observability:4318
           resources:
             requests: {cpu: 10m, memory: 16Mi}
-            limits: {memory: 32Mi}
+            limits: {memory: 48Mi}
+          volumeMounts:
+            - name: emitter
+              mountPath: /emitter
+              readOnly: true
       volumes:
-        - name: traffic
+        - name: emitter
           configMap:
-            name: shuttle-traffic
+            name: trace-emitter
