@@ -22,17 +22,6 @@ spec:
       pipelines: {}  # which receivers, processors and exporters work together, per signal
 ```
 
-## Fields of an OTLP gRPC exporter
-
-OTLP is the OpenTelemetry Protocol, the wire format for telemetry. Port `4317` carries OTLP over gRPC.
-
-| Field | Meaning |
-| --- | --- |
-| `endpoint` | `host:port` the exporter connects to. Inside the cluster, the host is a Service name: `<service>.<namespace>` |
-| `tls.insecure` | `true` sends plain gRPC with no TLS (Transport Layer Security). Default `false`: the exporter starts a TLS handshake |
-| `tls.ca_file` | A CA certificate file used to check the server's certificate when TLS is on |
-| `timeout` | How long one export request may take |
-
 ## Services the Operator creates
 
 For an OpenTelemetryCollector named `<name>`, the Operator creates these Services in the same namespace:
@@ -53,14 +42,7 @@ The Collector reports its own metrics on port `8888` at `/metrics`. Three counte
 | `otelcol_exporter_sent_spans` | an exporter delivers spans to its backend |
 | `otelcol_exporter_send_failed_spans` | an exporter fails to deliver spans |
 
-The Collector log names the exporter and the error for every failed export. The `error` field says what went wrong:
-
-| Error text contains | Meaning |
-| --- | --- |
-| `no children to pick from` | the gRPC client found no address for the host, often a Service name that does not exist |
-| `connection refused` | the address exists, but nothing listens on that port |
-| `first record does not look like a TLS handshake` | the exporter speaks TLS, but the server answers in plain text |
-| `authentication handshake failed: x509` | TLS is on, but the server's certificate is not trusted |
+The Collector log has one line for every failed export. Read the `error` field of that line: it says what the exporter tried and why it failed.
 
 ## Jaeger
 
