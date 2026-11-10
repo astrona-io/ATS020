@@ -1,7 +1,6 @@
 ---
-title: "Welcome To The Course"
 maturity: published
-reviewed: "2026-11-08"
+last_reviewed: "2026-11-08"
 ---
 
 # Welcome To The Course
