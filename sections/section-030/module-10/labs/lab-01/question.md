@@ -4,14 +4,11 @@ Solve this question on: `terminal`
 
 Spans from `scout` in the `starfleet` namespace do not reach Jaeger. `scout` sends them to the OpenTelemetryCollector `otel` in the `observability` namespace, through the Service `otel-collector` on port `4317`. The Collector pod is `Running`.
 
-## Task
+## Tasks
 
-Fix the OpenTelemetryCollector `otel` so that the spans of `scout` reach the Service `jaeger` in `observability`.
-
-The fix is done when:
-
-- the Collector's counters `otelcol_receiver_accepted_spans` and `otelcol_exporter_sent_spans` on port `8888` are above `0`
-- Jaeger lists `scout` as a service
+1. Fix the exporter of the OpenTelemetryCollector `otel` so that it connects to the Service `jaeger` in `observability`.
+2. Make the exporter deliver spans: the counters `otelcol_receiver_accepted_spans` and `otelcol_exporter_sent_spans` on port `8888` are both above `0`.
+3. Prove that Jaeger lists `scout` as a service.
 
 ## Constraints
 
