@@ -46,6 +46,10 @@ bootstrap:
 
 testing:
   init:
+    - name: verify-start
+      description: Proves nothing is solved at the start and every grader fails
+      type: file
+      source: testing/verify-start.sh
     - name: solution
       description: Reference solution applied by `astrona test`
       type: file
