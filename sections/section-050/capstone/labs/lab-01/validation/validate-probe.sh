@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Grader: probe still has a liveness probe (removing it hides the fault) and
-# the probe now passes: the pod is Ready, its restart count does not grow over
+# Grader: probe still has a liveness probe (removing it hides the fault), the
+# probe checks the served port 8080, and it now passes: the pod is Ready, its restart count does not grow over
 # 25 seconds, and shuttle gets a 200 from the Service.
 set -uo pipefail
 
@@ -12,6 +12,13 @@ IMAGE="$(kubectl -n starfleet get deployment probe -o jsonpath='{.spec.template.
 
 PROBE="$(kubectl -n starfleet get deployment probe -o jsonpath='{.spec.template.spec.containers[?(@.name=="probe")].livenessProbe}' 2>/dev/null)"
 [ -n "$PROBE" ] || fail "probe has no livenessProbe. Do not remove the probe: point it at a port and path that the server serves"
+# The server listens only on 8080 (port name http). A probe on any other port
+# keeps killing the container, even if the pod looks Ready for a moment.
+PROBE_PORT="$(jq -r '.httpGet.port // .tcpSocket.port // empty' <<<"$PROBE")"
+case "$PROBE_PORT" in
+  8080|http) ;;
+  *) fail "the liveness probe of probe checks port '${PROBE_PORT:-none}', but the server listens on 8080 (port name http)" ;;
+esac
 
 for attempt in $(seq 1 36); do
   READY="$(kubectl -n starfleet get deployment probe -o jsonpath='{.status.readyReplicas}' 2>/dev/null)"
