@@ -42,6 +42,10 @@ testing:
       description: Wait until Jaeger holds traces from all three services
       type: file
       source: testing/wait-for-traces.sh
+    - name: verify-start
+      description: Prove nothing is solved at the start and every grader fails
+      type: file
+      source: testing/verify-start.sh
     - name: solution
       description: Find both services by tag, change their Deployments and export five traces
       type: file

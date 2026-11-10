@@ -188,7 +188,7 @@ spec:
         - name: INCIDENT_CODE
           value: queue-pressure
         - name: RESPONSE_DELAY_MS
-          value: '20'
+          value: '50'
         resources:
           requests:
             cpu: 10m
@@ -231,7 +231,7 @@ spec:
         - name: INCIDENT_CODE
           value: none
         - name: RESPONSE_DELAY_MS
-          value: '20'
+          value: '50'
         resources:
           requests:
             cpu: 10m
