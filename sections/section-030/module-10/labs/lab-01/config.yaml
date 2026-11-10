@@ -20,6 +20,43 @@ runtime:
       - jaegertracing/jaeger:2.23.0
       - ghcr.io/stefanprodan/podinfo:6.17.0
       - curlimages/curl:8.23.0
+  # Host ports are not the services' own ports (16686, 8888) and stay below
+  # 32768, so they do not clash with a local Jaeger, a dev server or the
+  # ports the operating system hands out for outgoing connections.
+  portForwards:
+    - name: jaeger-ui
+      resource: svc/jaeger
+      namespace: observability
+      hostPort: 26686
+      targetPort: 16686
+      scheme: http
+      description: Jaeger UI, the traces of scout appear here
+    - name: collector-metrics
+      resource: svc/otel-collector-monitoring
+      namespace: observability
+      hostPort: 28888
+      targetPort: 8888
+      scheme: http
+      description: The Collector's own metrics
+
+tabs:
+  - name: jaeger
+    title: Jaeger
+    type: browser
+    portForward: jaeger-ui
+    path: /search
+  - name: metrics
+    title: Collector metrics
+    type: browser
+    portForward: collector-metrics
+    path: /metrics
+  - name: logs
+    title: Logs
+    type: terminal
+  - name: reference
+    title: Collector reference
+    type: docs
+    file: docs/collector-reference.md
 
 bootstrap:
   init:
@@ -48,6 +85,10 @@ bootstrap:
 
 testing:
   init:
+    - name: verify-start
+      description: Reject the unfinished lab before applying the reference solution
+      type: file
+      source: testing/verify-start.sh
     - name: solution
       description: Reference solution applied by `astrona test`
       type: file
@@ -59,10 +100,10 @@ testing:
 
 validation:
   scripts:
-    - name: collector-intact
-      description: The Collector otel is still a deployment with the Service otel-collector on 4317, and scout still sends to it
+    - name: exporter-endpoint
+      description: The traces exporter of the Collector otel points at the Service jaeger
       type: file
-      source: validation/validate-collector-intact.sh
+      source: validation/validate-exporter-endpoint.sh
     - name: collector-counters
       description: The Collector's own counters show spans accepted and sent
       type: file

@@ -41,8 +41,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ASTRONA_VERSION: "0.4.14"
-  ASTRONA_SHA256: "9e0e5d9b67d6a8b6ff62cf47276163933d072585f498671a5a4e0477ebab82ee"
+  ASTRONA_VERSION: "0.5.5"
+  ASTRONA_SHA256: "c53acb4fd7d1d5bb0a0571011edeeb080b5cafaac0a8d5e76ad9bd996f33cab8"
   KIND_VERSION: "0.33.0"
   ASTRONA_NO_UPDATE_CHECK: "1"
 
