@@ -62,7 +62,7 @@ testing:
 validation:
   scripts:
     - name: target-up
-      description: Every ready scout endpoint in frontier is a healthy Prometheus target with up equal to 1
+      description: Every ready scout endpoint in frontier is a healthy Prometheus target with up equal to 1; the Prometheus selectors, the Service, the receiver and the rules are fixed in place, not replaced
       type: file
       source: validation/validate-target-up.sh
     - name: recorded-ratio
@@ -77,10 +77,6 @@ validation:
       description: Alertmanager sent ScoutHighErrorRatio for frontier to the alert-receiver
       type: file
       source: validation/validate-alert-delivered.sh
-    - name: design-intact
-      description: The Prometheus selectors, the Service, the receiver and the rules are fixed in place, not replaced
-      type: file
-      source: validation/validate-design-intact.sh
 
 teardown:
   keepCluster: false

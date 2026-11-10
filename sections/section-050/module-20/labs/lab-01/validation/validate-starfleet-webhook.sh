@@ -7,6 +7,22 @@
 set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
+
+# The design must stay (checked first, before the task): both webhook
+# configurations keep failurePolicy Fail, and the workloads, ServiceMonitor
+# and PrometheusRule.
+kubectl get validatingwebhookconfiguration starfleet-policy -o json | jq -e '
+  .webhooks[0] | .failurePolicy == "Fail" and .clientConfig.service.name == "starfleet-policy"
+  and .clientConfig.service.namespace == "webhook-system"
+  and (.rules[0].resources | index("deployments")) != null
+  and .namespaceSelector.matchLabels["kubernetes.io/metadata.name"] == "starfleet"
+' >/dev/null || fail 'the webhook configuration was removed or bypassed'
+expected=$(kubectl -n webhook-system get secret webhook-ca -o jsonpath='{.data.tls\.crt}')
+actual=$(kubectl get validatingwebhookconfiguration starfleet-policy -o jsonpath='{.webhooks[0].clientConfig.caBundle}')
+[ "$actual" = "$expected" ] || fail 'the trusted CA was changed'
+kubectl -n webhook-system get deployment starfleet-policy >/dev/null 2>&1 || fail 'the webhook Deployment starfleet-policy was removed'
+kubectl -n webhook-system get service starfleet-policy >/dev/null 2>&1 || fail 'the webhook Service starfleet-policy was removed'
+
 count_answers() { kubectl -n webhook-system logs -l app=starfleet-policy --tail=-1 2>/dev/null | grep -c ' allowed' || true; }
 
 kubectl get validatingwebhookconfiguration starfleet-policy >/dev/null 2>&1 \

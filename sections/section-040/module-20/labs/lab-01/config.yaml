@@ -58,13 +58,8 @@ testing:
     source: testing/wait-for-ratio.sh
 validation:
   scripts:
-  - name: rules-intact
-    description: The PrometheusRule scout-slo keeps its two recording rules and its multi-window alert with a real
-      threshold and a short for
-    type: file
-    source: validation/validate-rules-intact.sh
   - name: error-ratio
-    description: Both recording rules return the real error ratio of scout, from the request counter
+    description: Both recording rules return the real error ratio of scout, from the request counter; the PrometheusRule scout-slo keeps its two recording rules and its multi-window alert with a real
     type: file
     source: validation/validate-error-ratio.sh
   - name: alert-firing

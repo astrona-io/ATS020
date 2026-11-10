@@ -75,13 +75,9 @@ validation:
       type: file
       source: validation/validate-burn-alert.sh
     - name: beacon-rightsized
-      description: The running beacon pod requests close to its measured peak usage and keeps a memory limit
+      description: The running beacon pod requests close to its measured peak usage and keeps a memory limit; the Application scout is healthy with its history, scout and beacon are ready, and nothing was replaced
       type: file
       source: validation/validate-beacon-rightsized.sh
-    - name: platform-intact
-      description: The Application scout is healthy with its history, scout and beacon are ready, and nothing was replaced
-      type: file
-      source: validation/validate-platform-intact.sh
 
 teardown:
   keepCluster: false

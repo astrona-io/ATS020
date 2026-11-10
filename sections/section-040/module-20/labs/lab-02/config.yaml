@@ -55,12 +55,8 @@ testing:
 validation:
   scripts:
   - name: scout-rightsized
-    description: The running scout pods request memory and CPU close to measured peak usage and keep a memory limit
+    description: The running scout pods request memory and CPU close to measured peak usage and keep a memory limit; replicas, readiness and restarts are unchanged and scout still answers 200 to shuttle
     type: file
     source: validation/validate-scout-rightsized.sh
-  - name: workloads-healthy
-    description: Replicas, readiness and restarts are unchanged and scout still answers 200 to shuttle
-    type: file
-    source: validation/validate-workloads-healthy.sh
 teardown:
   keepCluster: false

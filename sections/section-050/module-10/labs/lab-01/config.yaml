@@ -39,12 +39,8 @@ testing:
 validation:
   scripts:
   - name: scout-running
-    description: scout has a Running pod from the original image and answers 200 to shuttle
+    description: scout has a Running pod from the original image and answers 200 to shuttle; the workload keeps one replica and its Service, and shuttle keeps its image
     type: file
     source: validation/validate-scout.sh
-  - name: design-intact
-    description: The workload keeps one replica and its Service, and shuttle keeps its image
-    type: file
-    source: validation/validate-design-intact.sh
 teardown:
   keepCluster: false

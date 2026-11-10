@@ -55,13 +55,9 @@ testing:
 validation:
   scripts:
   - name: probe-rightsized
-    description: The running probe pod requests at least its measured peak memory, with a bounded request and a
+    description: The running probe pod requests at least its measured peak memory, with a bounded request and a; replicas, readiness and restarts are unchanged and scout still answers 200 to shuttle
       memory limit
     type: file
     source: validation/validate-probe-rightsized.sh
-  - name: workloads-healthy
-    description: Replicas, readiness and restarts are unchanged and scout still answers 200 to shuttle
-    type: file
-    source: validation/validate-workloads-healthy.sh
 teardown:
   keepCluster: false

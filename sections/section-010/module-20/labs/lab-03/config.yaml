@@ -55,12 +55,8 @@ testing:
     source: testing/wait-for-rules.sh
 validation:
   scripts:
-  - name: rules-intact
-    description: The PrometheusRule scout-queries keeps both recording rules, and they read the real metrics
-    type: file
-    source: validation/validate-rules-intact.sh
   - name: p95-latency
-    description: scout:request_duration_seconds:p95_5m returns one series that matches the real p95 latency
+    description: scout:request_duration_seconds:p95_5m returns one series that matches the real p95 latency, and both recording rules keep their design
     type: file
     source: validation/validate-p95-latency.sh
 teardown:

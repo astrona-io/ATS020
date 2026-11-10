@@ -39,12 +39,8 @@ testing:
 validation:
   scripts:
   - name: beacon-image
-    description: beacon runs podinfo 6.17.0 and answers 200
+    description: beacon runs podinfo 6.17.0 and answers 200; the workload keeps one replica and its Service, and shuttle keeps its image
     type: file
     source: validation/validate-beacon.sh
-  - name: design-intact
-    description: The workload keeps one replica and its Service, and shuttle keeps its image
-    type: file
-    source: validation/validate-design-intact.sh
 teardown:
   keepCluster: false

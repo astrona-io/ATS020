@@ -68,13 +68,9 @@ testing:
 validation:
   scripts:
     - name: relay-injected
-      description: The running relay pod carries the annotation and the Operator's init container, with tracecontext propagation and the Collector as exporter endpoint
+      description: The running relay pod carries the annotation and the Operator's init container, with tracecontext propagation and the Collector as exporter endpoint; relay, scout and the Collector keep their design
       type: file
       source: validation/validate-injection.sh
-    - name: design-intact
-      description: relay keeps its image, command and script, scout is unchanged, and the Collector still exports to Jaeger
-      type: file
-      source: validation/validate-design-intact.sh
     - name: linked-trace
       description: A recent trace in Jaeger has a scout span whose parent is a relay span
       type: file

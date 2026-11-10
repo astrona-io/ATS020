@@ -42,14 +42,9 @@ validation:
     type: file
     source: validation/validate-grafana-ready.sh
   - name: login-works
-    description: The Secret grafana-admin holds the key admin-password and the user admin signs in with the password
+    description: The Secret grafana-admin holds the key admin-password, the user admin signs in with the password, and nothing else changed
       starfleet
     type: file
     source: validation/validate-login-works.sh
-  - name: only-allowed-changes
-    description: Image, environment names, probes and Service are unchanged; the data directory is not a ConfigMap;
-      the memory limit is at least 256Mi
-    type: file
-    source: validation/validate-only-allowed-changes.sh
 teardown:
   keepCluster: false

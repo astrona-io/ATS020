@@ -7,6 +7,22 @@
 set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
+
+# The design must stay (checked first, before the task): both webhook
+# configurations keep failurePolicy Fail, and the workloads, ServiceMonitor
+# and PrometheusRule.
+kubectl get validatingwebhookconfiguration outpost-policy -o json | jq -e '
+  .webhooks[0] | .failurePolicy == "Fail" and .clientConfig.service.name == "outpost-policy"
+  and .clientConfig.service.namespace == "webhook-system"
+  and (.rules[0].resources | index("deployments")) != null
+  and .namespaceSelector.matchLabels["kubernetes.io/metadata.name"] == "outpost"
+' >/dev/null || fail 'the webhook configuration was removed or bypassed'
+expected=$(kubectl -n webhook-system get secret webhook-ca -o jsonpath='{.data.tls\.crt}')
+actual=$(kubectl get validatingwebhookconfiguration outpost-policy -o jsonpath='{.webhooks[0].clientConfig.caBundle}')
+[ "$actual" = "$expected" ] || fail 'the trusted CA was changed'
+kubectl -n webhook-system get deployment outpost-policy >/dev/null 2>&1 || fail 'the webhook Deployment outpost-policy was removed'
+kubectl -n webhook-system get service outpost-policy >/dev/null 2>&1 || fail 'the webhook Service outpost-policy was removed'
+
 count_answers() { kubectl -n webhook-system logs -l app=outpost-policy --tail=-1 2>/dev/null | grep -c ' allowed' || true; }
 
 kubectl get validatingwebhookconfiguration outpost-policy >/dev/null 2>&1 \

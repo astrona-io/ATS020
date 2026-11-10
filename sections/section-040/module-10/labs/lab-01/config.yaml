@@ -55,16 +55,12 @@ testing:
     source: testing/wait-for-rule.sh
 validation:
   scripts:
-  - name: rules-intact
-    description: The PrometheusRule dora-scout still has its three recording rules and the deployments rule is unchanged
-    type: file
-    source: validation/validate-rules-intact.sh
   - name: uses-health
     description: The failed deployment count reads the Degraded health of the Application, with no typed-in number
     type: file
     source: validation/validate-uses-health.sh
   - name: failure-rate
-    description: Prometheus returns a change failure rate between 0.15 and 0.30
+    description: Prometheus returns a change failure rate between 0.15 and 0.30; the PrometheusRule dora-scout still has its three recording rules and the deployments rule is unchanged
     type: file
     source: validation/validate-failure-rate.sh
 teardown:

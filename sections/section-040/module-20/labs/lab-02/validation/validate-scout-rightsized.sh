@@ -13,6 +13,39 @@ set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+# The design must stay (checked first, before the task): replicas, readiness
+# and restarts are unchanged and scout still answers 200 to shuttle.
+check_deployment() {
+  local name="$1" want="$2" json
+  json="$(kubectl -n starfleet get deployment "$name" -o json 2>/dev/null)" || fail "Deployment $name is missing"
+  local spec ready updated gen observed
+  spec="$(printf '%s' "$json" | jq '.spec.replicas')"
+  ready="$(printf '%s' "$json" | jq '.status.readyReplicas // 0')"
+  updated="$(printf '%s' "$json" | jq '.status.updatedReplicas // 0')"
+  gen="$(printf '%s' "$json" | jq '.metadata.generation')"
+  observed="$(printf '%s' "$json" | jq '.status.observedGeneration // 0')"
+  [ "$spec" = "$want" ] || fail "Deployment $name has $spec replicas, expected $want"
+  [ "$gen" = "$observed" ] || fail "Deployment $name rollout has not been observed yet"
+  [ "$updated" = "$want" ] || fail "Deployment $name has $updated updated replicas, expected $want"
+  [ "$ready" = "$want" ] || fail "Deployment $name has $ready ready replicas, expected $want"
+}
+
+# Allow a rollout that just finished to settle.
+for attempt in $(seq 1 24); do
+  if (check_deployment scout 2 && check_deployment probe 1) >/dev/null 2>&1; then break; fi
+  sleep 5
+done
+check_deployment scout 2
+check_deployment probe 1
+
+CODE=""
+for attempt in $(seq 1 12); do
+  CODE="$(kubectl -n starfleet exec deploy/shuttle -- curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://scout.starfleet.svc.cluster.local:9898/ 2>/dev/null)"
+  [ "$CODE" = "200" ] && break
+  sleep 5
+done
+[ "$CODE" = "200" ] || fail "shuttle gets '${CODE:-no answer}' from scout, expected 200"
+
 prom() {
   kubectl get --raw "/api/v1/namespaces/monitoring/services/kps-prometheus:9090/proxy/api/v1/query?query=$1" 2>/dev/null \
     | jq -r '.data.result[0].value[1] // empty' 2>/dev/null

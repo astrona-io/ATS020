@@ -144,7 +144,7 @@ Run the command again after two minutes:
 {"alertname":"ScoutErrorBudgetBurn","state":"firing"}
 ```
 
-The watch terminal now shows all three checks passing. Press Ctrl-C to stop the watch, then submit once:
+The watch terminal now shows both checks passing. Press Ctrl-C to stop the watch, then submit once:
 
 ```sh
 astrona submit -c sections/section-040/module-20/labs/lab-01

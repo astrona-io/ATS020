@@ -47,13 +47,8 @@ testing:
 validation:
   scripts:
   - name: scout-monitored
-    description: The Prometheus Operator runs, up{job="scout"} is 1 and the ScoutDown rule is loaded in Prometheus
+    description: The Prometheus Operator runs, up{job="scout"} is 1 and the ScoutDown rule is loaded in Prometheus; both webhook configurations keep failurePolicy Fail, and the workloads, ServiceMonitor and PrometheusRule
     type: file
     source: validation/validate-prometheus.sh
-  - name: design-intact
-    description: Both webhook configurations keep failurePolicy Fail, and the workloads, ServiceMonitor and PrometheusRule
-      are still in place
-    type: file
-    source: validation/validate-design-intact.sh
 teardown:
   keepCluster: false

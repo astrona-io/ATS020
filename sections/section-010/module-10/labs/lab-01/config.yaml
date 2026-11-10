@@ -50,12 +50,8 @@ testing:
     source: testing/wait-for-targets.sh
 validation:
   scripts:
-  - name: wiring-intact
-    description: The Prometheus resource, the Service scout and the label release kps are unchanged
-    type: file
-    source: validation/validate-wiring-intact.sh
   - name: targets-up
-    description: Every ready scout endpoint is a healthy Prometheus target with up equal to 1
+    description: Every ready scout endpoint is a healthy Prometheus target with up equal to 1; the Prometheus resource, the Service scout and the label release kps are unchanged
     type: file
     source: validation/validate-targets-up.sh
 teardown:

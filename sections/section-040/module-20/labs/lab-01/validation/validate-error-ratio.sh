@@ -9,6 +9,40 @@ set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+# The design must stay (checked first, before the task): the PrometheusRule
+# scout-slo keeps its two recording rules and its multi-window alert with a
+# real.
+RULE="$(kubectl -n monitoring get prometheusrule scout-slo -o json 2>/dev/null)" \
+  || fail "PrometheusRule scout-slo is missing in namespace monitoring (do not delete it)"
+
+LABEL="$(printf '%s' "$RULE" | jq -r '.metadata.labels.release // ""')"
+[ "$LABEL" = "kps" ] || fail "PrometheusRule scout-slo has release='$LABEL'; Prometheus only reads rules labelled release=kps"
+
+for record in scout:error_ratio:rate5m scout:error_ratio:rate1h; do
+  printf '%s' "$RULE" | jq -e --arg r "$record" '[.spec.groups[].rules[] | select(.record == $r)] | length == 1' >/dev/null \
+    || fail "the recording rule $record is missing (keep both recording rules)"
+done
+
+ALERT="$(printf '%s' "$RULE" | jq -c '[.spec.groups[].rules[] | select(.alert == "ScoutErrorBudgetBurn")][0] // empty')"
+[ -n "$ALERT" ] || fail "the alerting rule ScoutErrorBudgetBurn is missing (do not delete it)"
+
+EXPR="$(printf '%s' "$ALERT" | jq -r '.expr' | tr -d ' ')"
+case "$EXPR" in *5m*) ;; *) fail "the alert no longer reads the 5 minute window: '$EXPR'" ;; esac
+case "$EXPR" in *1h*) ;; *) fail "the alert no longer reads the 1 hour window: '$EXPR'" ;; esac
+case "$EXPR" in *and*) ;; *) fail "the alert must require both windows with 'and': '$EXPR'" ;; esac
+if printf '%s' "$EXPR" | grep -Eq '>0(\.0*)?(and|$|\))'; then
+  fail "the alert threshold is zero; a burn rate threshold of 0 fires on a single failed request"
+fi
+
+FOR="$(printf '%s' "$ALERT" | jq -r '.for // ""')"
+case "$FOR" in
+  *s) SECONDS_FOR="${FOR%s}" ;;
+  *m) SECONDS_FOR="$(( ${FOR%m} * 60 ))" ;;
+  *) fail "the alert has no 'for' value (or one in an unknown unit: '$FOR')" ;;
+esac
+[ "$SECONDS_FOR" -ge 1 ] || fail "the alert needs a 'for' value, for example 2m"
+[ "$SECONDS_FOR" -le 300 ] || fail "the alert 'for' is $FOR; keep it at 5m or less"
+
 query() {
   kubectl get --raw "/api/v1/namespaces/monitoring/services/kps-prometheus:9090/proxy/api/v1/query?query=$1" 2>/dev/null
 }

@@ -9,10 +9,13 @@ kubectl -n outpost get statefulset cargo -o json | jq -e '.spec.replicas == 2' >
 # check only needs the failure.
 output=$(mktemp)
 trap 'rm -f "$output"' EXIT
+problems=0
 for grader in "$lab_dir"/validation/validate-*.sh; do
   if (sleep() { :; }; export -f sleep; bash "$grader") >"$output" 2>&1; then
-    cat "$output"; echo "FAIL: $(basename "$grader") passed on the untouched lab"; exit 1
+    cat "$output"; echo "FAIL: $(basename "$grader") passed on the untouched lab"; problems=1
+  elif ! grep -q '^FAIL:' "$output"; then
+    cat "$output"; echo "FAIL: $(basename "$grader") gave no explicit grading failure"; problems=1
   fi
-  grep -q '^FAIL:' "$output" || { cat "$output"; echo "FAIL: $(basename "$grader") gave no explicit grading failure"; exit 1; }
 done
+[ "$problems" = 0 ] || exit 1
 echo 'PASS: the intended fault is present, and every grader fails on the untouched lab'
