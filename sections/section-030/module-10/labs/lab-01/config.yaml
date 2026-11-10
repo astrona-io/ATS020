@@ -12,106 +12,77 @@ runtime:
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
-      - quay.io/jetstack/cert-manager-controller:v1.21.3
-      - quay.io/jetstack/cert-manager-webhook:v1.21.3
-      - quay.io/jetstack/cert-manager-cainjector:v1.21.3
-      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.162.0
-      - otel/opentelemetry-collector-contrib:0.165.0
       - jaegertracing/jaeger:2.23.0
-      - ghcr.io/stefanprodan/podinfo:6.17.0
-      - curlimages/curl:8.23.0
-  # Host ports are not the services' own ports (16686, 8888) and stay below
-  # 32768, so they do not clash with a local Jaeger, a dev server or the
-  # ports the operating system hands out for outgoing connections.
+      - python:3.13.18-alpine3.24
+
+  # The host port is not Jaeger's own port (16686) and stays below 32768, so it
+  # does not clash with a local Jaeger or the ports the operating system hands
+  # out for outgoing connections.
   portForwards:
     - name: jaeger-ui
       resource: svc/jaeger
-      namespace: observability
+      namespace: tracing
       hostPort: 26686
       targetPort: 16686
       scheme: http
-      description: Jaeger UI, the traces of scout appear here
-    - name: collector-metrics
-      resource: svc/otel-collector-monitoring
-      namespace: observability
-      hostPort: 28888
-      targetPort: 8888
-      scheme: http
-      description: The Collector's own metrics
+      description: Jaeger UI, the traces of probe appear here after the fix
 
 tabs:
+  - name: terminal
+    title: Terminal
+    type: terminal
   - name: jaeger
     title: Jaeger
     type: browser
     portForward: jaeger-ui
     path: /search
-  - name: metrics
-    title: Collector metrics
-    type: browser
-    portForward: collector-metrics
-    path: /metrics
-  - name: logs
-    title: Logs
-    type: terminal
-  - name: reference
-    title: Collector reference
-    type: docs
-    file: docs/collector-reference.md
 
 bootstrap:
   init:
-    - name: install-operator
-      description: "Install cert-manager 1.21.3 and the OpenTelemetry Operator 0.162.0, and wait for its webhook"
+    - name: prepare
+      description: Check that the terminal has kubectl, curl and jq, and remove the answer file left by an earlier attempt
       type: file
-      source: bootstrap/01-install-operator.sh
+      source: bootstrap/01-prepare.sh
   manifests:
     - name: lab-start
-      description: "Jaeger 2.23.0 in observability, scout with tracing on in starfleet, and the shuttle traffic loop"
+      description: "Jaeger 2.23.0 in tracing, and probe in outpost with OpenTelemetry switched off and the wrong OTLP endpoint"
       type: file
       source: manifests/lab-start.yaml
-    - name: collector-start
-      description: "The Collector otel in observability, with two faults in its exporter"
-      type: file
-      source: manifests/collector-start.yaml
   waitFor:
     - resource: deploy/jaeger
-      namespace: observability
-    - resource: deploy/otel-collector
-      namespace: observability
-    - resource: deploy/scout
-      namespace: starfleet
-    - resource: deploy/shuttle
-      namespace: starfleet
+      namespace: tracing
+    - resource: deploy/probe
+      namespace: outpost
 
 testing:
   init:
     - name: verify-start
-      description: Reject the unfinished lab before applying the reference solution
+      description: Prove that nothing is solved and every grader fails before the reference solution
       type: file
       source: testing/verify-start.sh
     - name: solution
-      description: Reference solution applied by `astrona test`
+      description: Switch tracing on, fix the endpoint, wait for spans and export the exception events
       type: file
       source: solution/apply.sh
-    - name: wait-for-pipeline
-      description: Waits until the fixed Collector has sent spans
-      type: file
-      source: testing/wait-for-pipeline.sh
 
 validation:
   scripts:
+    - name: otel-enabled
+      description: OTEL_ENABLED of the Deployment probe is true and its new pod is ready
+      type: file
+      source: validation/validate-otel-enabled.sh
     - name: exporter-endpoint
-      description: The traces exporter of the Collector otel points at the Service jaeger
+      description: OTEL_EXPORTER_OTLP_ENDPOINT of probe is the Service jaeger in tracing on port 4318
       type: file
       source: validation/validate-exporter-endpoint.sh
-    - name: collector-counters
-      description: The Collector's own counters show spans accepted and sent
+    - name: spans-in-jaeger
+      description: Jaeger holds recent probe spans with an exception event
       type: file
-      source: validation/validate-collector-counters.sh
-    - name: trace-in-jaeger
-      description: Jaeger holds recent spans from the service scout
+      source: validation/validate-spans-in-jaeger.sh
+    - name: exception-exported
+      description: /tmp/ats-020-exception.json holds exception events of probe that the running Jaeger also holds
       type: file
-      source: validation/validate-trace-in-jaeger.sh
+      source: validation/validate-exception-exported.sh
 
 teardown:
   keepCluster: false

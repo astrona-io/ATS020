@@ -164,9 +164,9 @@ A failed rollout can leave an older pod serving traffic. Inspect the new pod's l
 > - **Reading an old pod's logs.** Select the failing pod explicitly when a rollout leaves several pods running.
 > - **Sending `scout` directly to Jaeger.** That bypasses the Collector whose pipeline you need to repair.
 
-## Your mission: Fix a Broken Collector Pipeline
+## Your mission: Send Spans From A Pod To Jaeger And Export Its Exceptions
 
-You can now distinguish a receiver failure from an export failure. The mission gives you a running Collector and missing `scout` traces; repair the pipeline and verify that new spans reach Jaeger through it.
+You can now follow spans from the program that creates them to the place that stores them, and read each step's own evidence. The mission gives you a `probe` pod in its own namespace that sends no spans: switch OpenTelemetry on, point its OTLP endpoint at the Jaeger Service in the `tracing` namespace, and save the `exception` events of its spans from the Jaeger API.
 
 Pause the playground, then start the lab:
 
@@ -178,7 +178,7 @@ astrona stop ats-020-playground-030-01
 astrona run --git ssh://git@github.com/astrona-io/ATS020.git -c sections/section-030/module-10/labs/lab-01
 ```
 
-When you have repaired the pipeline, grade your work:
+When Jaeger lists `probe` and the file holds its exceptions, grade your work:
 
 ```sh
 astrona submit -c sections/section-030/module-10/labs/lab-01

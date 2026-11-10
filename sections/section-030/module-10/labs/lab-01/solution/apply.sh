@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
-# Applies the reference solution. Run by `astrona test` only.
+# Applies the reference solution. Run by `astrona test` only. It switches
+# tracing on, points probe at the Service jaeger in tracing, waits until Jaeger
+# holds a probe span with an exception event, and exports those events. It
+# reads the API through the API server proxy so that it needs no port-forward.
 set -euo pipefail
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FILE=""
-for candidate in "$SCRIPT_DIR/solution.yaml" "./solution/solution.yaml" "./solution.yaml"; do
-  [ -f "$candidate" ] && { FILE="$candidate"; break; }
+api=/api/v1/namespaces/tracing/services/jaeger:16686/proxy/api/v3/traces
+window='query.startTimeMin=2020-01-01T00:00:00Z&query.startTimeMax=2100-01-01T00:00:00Z'
+export_file=/tmp/ats-020-exception.json
+
+kubectl -n outpost set env deployment/probe OTEL_ENABLED=true OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger.tracing:4318
+kubectl -n outpost rollout status deployment/probe --timeout=180s
+
+for attempt in $(seq 1 36); do
+  kubectl get --raw "$api?$window&query.serviceName=probe&query.searchDepth=20" 2>/dev/null |
+    jq -s '[.[].result.resourceSpans[]?.scopeSpans[]?.spans[]?.events[]? | select(.name == "exception")]' >"$export_file" || true
+  jq -e 'length >= 1' "$export_file" >/dev/null 2>&1 && break
+  sleep 5
 done
-[ -n "$FILE" ] || { echo "[solution] ERROR: solution.yaml not found" >&2; exit 1; }
-kubectl apply -f "$FILE"
-kubectl -n observability rollout status deployment/otel-collector --timeout=180s
-echo "[solution] Collector fixed."
+jq -e 'length >= 1' "$export_file" >/dev/null || { echo "[solution] Jaeger returned no exception event for probe" >&2; exit 1; }
+echo "[solution] Exported $(jq length "$export_file") exception events to $export_file."

@@ -1,6 +1,6 @@
 # Solution
 
-The pod of the Collector is `Running`, but its exporter cannot reach Jaeger. The exporter has two faults, one behind the other. The first fault hides the second.
+The Deployment `probe` in `outpost` runs, but Jaeger does not list it. Two settings stop its spans, one behind the other. `OTEL_ENABLED` is `false`, so the program creates no spans. Behind it, `OTEL_EXPORTER_OTLP_ENDPOINT` names a namespace where Jaeger does not run.
 
 Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
 
@@ -10,128 +10,170 @@ astrona submit --watch -c sections/section-030/module-10/labs/lab-01
 
 Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
 
-## Find the first fault
+## Read the starting state
 
-In the browser workspace, you can keep the Collector log open on the **Logs** tab with `kubectl -n observability logs deploy/otel-collector -f` and run the other commands in the first terminal. The commands below read only the last lines, so they work in any terminal.
-
-Read the log of the Collector for the exporter errors:
+The log of the pod says what the program does with its settings. Read it first:
 
 ```sh
-kubectl -n observability logs deploy/otel-collector --tail=3 | grep -o '"error": "[^}]*'
+kubectl -n outpost logs deploy/probe
 ```
 
 ```text
-"error": "rpc error: code = Unavailable desc = no children to pick from", "interval": "36.059981238s"
-"error": "rpc error: code = Unavailable desc = no children to pick from", "interval": "27.939202642s"
+OpenTelemetry is off (OTEL_ENABLED is not true): no spans are created
 ```
 
-The exporter has no address to connect to. Show the exporter endpoint and the Services in `observability`:
+`kubectl set env --list` prints the environment variables of a Deployment without changing anything:
 
 ```sh
-kubectl -n observability get opentelemetrycollector otel -o jsonpath='{.spec.config.exporters}'
-kubectl -n observability get service
-```
-
-The exporter points at `jaeger-collector.observability:4317`. No Service has that name. The Jaeger Service is named `jaeger`.
-
-## Fix the host
-
-Save this as `opentelemetrycollector-otel.yaml`. It changes the host to `jaeger.observability`:
-
-```yaml
-apiVersion: opentelemetry.io/v1beta1
-kind: OpenTelemetryCollector
-metadata:
-  name: otel
-  namespace: observability
-spec:
-  mode: deployment
-  image: otel/opentelemetry-collector-contrib:0.165.0
-  config:
-    receivers:
-      otlp/grpc:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-    processors:
-      batch: {}
-    exporters:
-      otlp_grpc:
-        endpoint: jaeger.observability:4317
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp/grpc]
-          processors: [batch]
-          exporters: [otlp_grpc]
-```
-
-Apply it:
-
-```sh
-kubectl apply -f opentelemetrycollector-otel.yaml
-```
-
-Wait about 40 seconds for the Operator to replace the pod, then read the log again:
-
-```sh
-kubectl -n observability logs deploy/otel-collector --tail=3 | grep -o '"error": "[^}]*'
+kubectl -n outpost set env deployment/probe --list
 ```
 
 ```text
-"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: authentication handshake failed: tls: first record does not look like a TLS handshake\"", "interval": "17.86397711s"
-"error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: authentication handshake failed: tls: first record does not look like a TLS handshake\"", "interval": "33.930809312s"
+# Deployment probe, container probe
+TRACE_SERVICE=probe
+TARGET_URL=http://relay.outpost:8080
+OTEL_ENABLED=false
+OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger.observability:4318
 ```
 
-## Fix the TLS setting
+`OTEL_ENABLED` is `false`. The endpoint also looks wrong, but the log cannot show that yet, because the program sends nothing.
 
-The host is right now, and the exporter reaches Jaeger. The error is different. The exporter starts a TLS (Transport Layer Security) handshake, but the OTLP port of Jaeger speaks plain gRPC. The exporter needs `tls.insecure: true`, which switches TLS off for this connection.
+## Switch OpenTelemetry on
 
-In `opentelemetrycollector-otel.yaml`, add these two lines under `endpoint: jaeger.observability:4317`, with the same indentation as `endpoint`:
-
-```yaml
-        tls:
-          insecure: true
-```
-
-Apply the file again and wait about 40 seconds:
+Set `OTEL_ENABLED` to `true`. `kubectl set env` changes the pod template, so the Deployment controller replaces the pod. Wait for the rollout:
 
 ```sh
-kubectl apply -f opentelemetrycollector-otel.yaml
-```
-
-## Prove the fix
-
-First, read the Collector counters from `shuttle`. Both counters must be above `0` and rise together. Your numbers differ:
-
-```sh
-kubectl exec -n starfleet deploy/shuttle -- curl -s otel-collector-monitoring.observability:8888/metrics | grep -E "^otelcol_(receiver_accepted_spans|exporter_sent_spans)"
-```
-
-Second, ask Jaeger for its services:
-
-```sh
-kubectl exec -n starfleet deploy/shuttle -- curl -s jaeger.observability:16686/api/v3/services | grep -o '"scout"'
+kubectl -n outpost set env deployment/probe OTEL_ENABLED=true
+kubectl -n outpost rollout status deployment/probe --timeout=120s
 ```
 
 ```text
-"scout"
+deployment.apps/probe env updated
+Waiting for deployment "probe" rollout to finish: 0 out of 1 new replicas have been updated...
+Waiting for deployment "probe" rollout to finish: 1 old replicas are pending termination...
+deployment "probe" successfully rolled out
 ```
 
-In the browser workspace, the same proof is on two tabs. The **Collector metrics** tab shows both counters; reload it to see them rise. On the **Jaeger** tab, choose `scout` in the **Service** list and select **Find Traces** to see its recent traces.
+Wait a few seconds, then read the log of the new pod:
 
-## Wrong fixes the grader rejects
+```sh
+kubectl -n outpost logs deploy/probe --tail=3
+```
 
-Every check first makes sure the fix stays inside the Collector. A fix that goes around it fails every check:
+```text
+Span export to http://jaeger.observability:4318/v1/traces failed: <urlopen error [Errno -2] Name does not resolve>
+Span export to http://jaeger.observability:4318/v1/traces failed: <urlopen error [Errno -2] Name does not resolve>
+Span export to http://jaeger.observability:4318/v1/traces failed: <urlopen error [Errno -2] Name does not resolve>
+```
 
-- Changing `OTEL_EXPORTER_OTLP_ENDPOINT` on `scout` to `jaeger.observability:4317`. Spans arrive in Jaeger, but the Collector is bypassed.
-- Deleting the Collector, or changing its mode.
-- Replacing the exporter with a `debug` exporter. The log shows spans, but nothing reaches Jaeger.
+The program now creates spans, but the cluster Domain Name System (DNS) has no name `jaeger.observability`. The first fault hid this second one.
 
-After you fix only the host, the exporter check passes and the two other checks still fail, because the exporter cannot send yet.
+## Point the endpoint at Jaeger
 
-When the watch terminal shows every check passing, press Ctrl-C to stop the watch, then submit once:
+Find the namespace and the ports of the Jaeger Service:
+
+```sh
+kubectl get service -A | grep jaeger
+```
+
+```text
+tracing       jaeger       ClusterIP   10.96.32.82   <none>        4317/TCP,4318/TCP,16686/TCP   3m11s
+```
+
+Jaeger runs in `tracing`. The program sends OTLP over HTTP, which Jaeger receives on `4318`; `4317` is OTLP over gRPC. `OTEL_EXPORTER_OTLP_ENDPOINT` is the base address with no path, because the program adds `/v1/traces` itself:
+
+```sh
+kubectl -n outpost set env deployment/probe OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger.tracing:4318
+kubectl -n outpost rollout status deployment/probe --timeout=120s
+```
+
+```text
+deployment.apps/probe env updated
+Waiting for deployment "probe" rollout to finish: 1 old replicas are pending termination...
+deployment "probe" successfully rolled out
+```
+
+The log of the new pod has no export errors:
+
+```sh
+kubectl -n outpost logs deploy/probe --tail=3
+```
+
+```text
+OpenTelemetry is on: sending spans to http://jaeger.tracing:4318/v1/traces
+```
+
+Jaeger now lists `probe` next to its own service `jaeger`. The **Jaeger** tab shows the same list; in a terminal, read it from the query API on the forwarded port `26686`:
+
+```sh
+curl -s http://127.0.0.1:26686/api/v3/services
+```
+
+```text
+{"services":["jaeger","probe"]}
+```
+
+## Export the exceptions
+
+The version 3 query API needs a time range. Build one that covers the last five minutes. The `date -v` form is for macOS; on Linux, use `date -u -d '-5 min' +%Y-%m-%dT%H:%M:%SZ` and `date -u -d '+1 min' +%Y-%m-%dT%H:%M:%SZ`:
+
+```sh
+START=$(date -u -v-5M +%Y-%m-%dT%H:%M:%SZ)
+END=$(date -u -v+1M +%Y-%m-%dT%H:%M:%SZ)
+TRACES_URL="http://127.0.0.1:26686/api/v3/traces?query.service_name=probe&query.start_time_min=$START&query.start_time_max=$END&query.search_depth=5"
+curl -s "$TRACES_URL" | jq '[.result.resourceSpans[].scopeSpans[].spans[] | {name, status}] | .[0]'
+```
+
+```json
+{
+  "name": "call-target",
+  "status": {
+    "message": "URLError: <urlopen error [Errno -2] Name does not resolve>",
+    "code": 2
+  }
+}
+```
+
+Status code `2` is `ERROR`. The request to `TARGET_URL` fails, and the program records the failure as an `exception` event in each span. Keep only those events and save them:
+
+```sh
+curl -s "$TRACES_URL" | jq '[.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")]' > /tmp/ats-020-exception.json
+jq 'length' /tmp/ats-020-exception.json
+jq '.[0] | {name, attributes: [.attributes[] | select(.key != "exception.stacktrace")]}' /tmp/ats-020-exception.json
+```
+
+```text
+5
+```
+
+```json
+{
+  "name": "exception",
+  "attributes": [
+    {
+      "key": "exception.message",
+      "value": {
+        "stringValue": "<urlopen error [Errno -2] Name does not resolve>"
+      }
+    },
+    {
+      "key": "exception.type",
+      "value": {
+        "stringValue": "URLError"
+      }
+    }
+  ]
+}
+```
+
+The last command hides the long `exception.stacktrace` attribute only on screen; the file keeps it. Each event in the file is a copy of an event Jaeger holds, so the grader can match it.
+
+## Submit
+
+When the watching terminal shows every check as passed, stop it with `Ctrl+C` and grade the lab once:
 
 ```sh
 astrona submit -c sections/section-030/module-10/labs/lab-01
 ```
+
+The graders check four things: `OTEL_ENABLED` is `true` and the new pod is ready; the endpoint is the Service `jaeger` in `tracing` on port `4318`; Jaeger holds recent `probe` spans with an `exception` event; and every event in `/tmp/ats-020-exception.json` matches an exception that Jaeger holds for `probe`. A changed `TARGET_URL` fails every check, because the failing request is the source of the evidence.

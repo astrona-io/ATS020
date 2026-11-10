@@ -1,55 +1,40 @@
 #!/usr/bin/env bash
-# Grader: the traces exporter of the Collector points at the Service jaeger in
-# observability, on an OTLP port (4317 gRPC or 4318 HTTP). The starting
-# exporter points at jaeger-collector, a Service that does not exist, so this
-# check fails until that is fixed.
+# Grader: OTEL_EXPORTER_OTLP_ENDPOINT of the Deployment probe is the OTLP/HTTP
+# port of the Service jaeger in the namespace tracing. The lab starts with
+# jaeger.observability, a namespace that does not exist.
 set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
-# The fix must stay inside the Collector: the same OpenTelemetryCollector in
-# deployment mode, the Service otel-collector on 4317, scout still sending to
-# it, and a real exporter (not only debug) in the traces pipeline. A bypass
-# fails here, so it can never pass a check.
+# probe_env NAME: the value of one environment variable of the probe container.
+probe_env() {
+  jq -r --arg name "$1" '[.spec.template.spec.containers[] | select(.name == "probe") | .env[]? | select(.name == $name) | .value] | first // ""' <<<"$DEPLOYMENT"
+}
+
+# The task changes only OTEL_ENABLED and OTEL_EXPORTER_OTLP_ENDPOINT. The
+# Deployment probe must stay in outpost with its service name, and its
+# TARGET_URL must keep failing: the exceptions it records are the evidence.
 check_design_kept() {
-  local mode ports endpoint exporters name real=""
-  mode="$(kubectl -n observability get opentelemetrycollector otel -o jsonpath='{.spec.mode}' 2>/dev/null)" \
-    || fail "OpenTelemetryCollector otel is missing in namespace observability (do not delete it)"
-  [ "$mode" = "deployment" ] || fail "Collector mode is '$mode', expected deployment"
-  ports="$(kubectl -n observability get service otel-collector -o jsonpath='{.spec.ports[*].port}' 2>/dev/null)" \
-    || fail "Service otel-collector is missing"
-  case " $ports " in *" 4317 "*) ;; *) fail "Service otel-collector has ports '$ports', expected 4317";; esac
-  endpoint="$(kubectl -n starfleet get deployment scout -o jsonpath='{.spec.template.spec.containers[?(@.name=="scout")].env[?(@.name=="OTEL_EXPORTER_OTLP_ENDPOINT")].value}' 2>/dev/null)"
-  [ "$endpoint" = "http://otel-collector.observability:4317" ] \
-    || fail "scout sends to '$endpoint'; it must keep sending to http://otel-collector.observability:4317 (fix the Collector, not scout)"
-  exporters="$(kubectl -n observability get opentelemetrycollector otel -o jsonpath='{.spec.config.service.pipelines.traces.exporters[*]}' 2>/dev/null)"
-  for name in $exporters; do
-    case "$name" in debug*|logging*|nop*) ;; *) real="$real $name";; esac
-  done
-  [ -n "$real" ] || fail "the traces pipeline exports only to '${exporters:-nothing}'; it must export to Jaeger"
+  DEPLOYMENT="$(kubectl -n outpost get deployment probe -o json 2>/dev/null)" \
+    || fail "Deployment probe is missing in namespace outpost (do not delete or move it)"
+  [ "$(probe_env TRACE_SERVICE)" = "probe" ] \
+    || fail "TRACE_SERVICE of probe is '$(probe_env TRACE_SERVICE)'; keep it probe"
+  [ "$(probe_env TARGET_URL)" = "http://relay.outpost:8080" ] \
+    || fail "TARGET_URL of probe is '$(probe_env TARGET_URL)'; keep it http://relay.outpost:8080, its exceptions are the evidence"
 }
 
 check_design_kept
 
-RESULT="$(kubectl -n observability get opentelemetrycollector otel -o json 2>/dev/null | python3 -c '
-import json, re, sys
-spec = json.load(sys.stdin)["spec"]["config"]
-exporters = spec.get("exporters") or {}
-hosts = {"jaeger", "jaeger.observability", "jaeger.observability.svc", "jaeger.observability.svc.cluster.local"}
-seen = []
-for name in spec["service"]["pipelines"]["traces"].get("exporters", []):
-    if re.match(r"(debug|logging|nop)", name):
-        continue
-    endpoint = str((exporters.get(name) or {}).get("endpoint", ""))
-    seen.append(endpoint or "no endpoint")
-    address = re.sub(r"^(https?://|dns:///)", "", endpoint).split("/")[0]
-    host, _, port = address.rpartition(":")
-    if host in hosts and port in ("4317", "4318"):
-        print("PASS " + endpoint)
-        sys.exit(0)
-print("FAIL " + ", ".join(seen))' 2>/dev/null)"
-
-case "$RESULT" in
-  "PASS "*) echo "PASS: the traces exporter sends to ${RESULT#PASS }, the Service jaeger" ;;
-  *) fail "the traces exporter sends to '${RESULT#FAIL }', which is not the Service jaeger in observability on port 4317" ;;
+endpoint="$(probe_env OTEL_EXPORTER_OTLP_ENDPOINT)"
+# Split http://host:port[/] into its parts; any other path breaks /v1/traces.
+if [[ "$endpoint" =~ ^http://([^/:]+):([0-9]+)/?$ ]]; then
+  host="${BASH_REMATCH[1]}"; port="${BASH_REMATCH[2]}"
+else
+  fail "OTEL_EXPORTER_OTLP_ENDPOINT of probe is '${endpoint:-not set}'; it must be http://<host>:<port> with no path"
+fi
+case "$host" in
+  jaeger.tracing|jaeger.tracing.svc|jaeger.tracing.svc.cluster.local) ;;
+  *) fail "OTEL_EXPORTER_OTLP_ENDPOINT of probe points at '$host', which is not the Service jaeger in namespace tracing" ;;
 esac
+[ "$port" = "4318" ] || fail "OTEL_EXPORTER_OTLP_ENDPOINT of probe uses port $port; probe sends OTLP over HTTP, which Jaeger receives on 4318"
+echo "PASS: probe sends spans to $endpoint"
