@@ -93,57 +93,47 @@ Waiting for deployment "probe" rollout to finish: 1 old replicas are pending ter
 deployment "probe" successfully rolled out
 ```
 
-The log of the new pod has no export errors:
+The log of the new pod shows that each span reaches Jaeger, with no export errors:
 
 ```sh
-kubectl -n outpost logs deploy/probe --tail=3
+kubectl -n outpost logs deploy/probe | head -2
 ```
 
 ```text
 OpenTelemetry is on: sending spans to http://jaeger.tracing:4318/v1/traces
+Span sent: trace_id=71eb0f218008e90f62a735211fc5f9be
 ```
 
-Jaeger now lists `probe` next to its own service `jaeger`. The **Jaeger** tab shows the same list; in a terminal, read it from the query API on the forwarded port `26686`:
+Jaeger now lists `probe` next to its own service `jaeger`. The **Jaeger** tab shows the same list; in the terminal, read it from the query API. The lab forwards Jaeger to port `26686` of your machine, and the terminal reaches your machine by the name `host.docker.internal`:
 
 ```sh
-curl -s http://127.0.0.1:26686/api/v3/services
+curl -s http://host.docker.internal:26686/api/v3/services
 ```
 
 ```text
 {"services":["jaeger","probe"]}
 ```
 
-## Export the exceptions
+## Export the exception
 
-The version 3 query API needs a time range. Build one that covers the last five minutes. The `date -v` form is for macOS; on Linux, use `date -u -d '-5 min' +%Y-%m-%dT%H:%M:%SZ` and `date -u -d '+1 min' +%Y-%m-%dT%H:%M:%SZ`:
-
-```sh
-START=$(date -u -v-5M +%Y-%m-%dT%H:%M:%SZ)
-END=$(date -u -v+1M +%Y-%m-%dT%H:%M:%SZ)
-TRACES_URL="http://127.0.0.1:26686/api/v3/traces?query.service_name=probe&query.start_time_min=$START&query.start_time_max=$END&query.search_depth=5"
-curl -s "$TRACES_URL" | jq '[.result.resourceSpans[].scopeSpans[].spans[] | {name, status}] | .[0]'
-```
-
-```json
-{
-  "name": "call-target",
-  "status": {
-    "message": "URLError: <urlopen error [Errno -2] Name does not resolve>",
-    "code": 2
-  }
-}
-```
-
-Status code `2` is `ERROR`. The request to `TARGET_URL` fails, and the program records the failure as an `exception` event in each span. Keep only those events and save them:
+With OpenTelemetry on, `probe` prints the trace ID of every span it sends to Jaeger. Read the last lines of its log:
 
 ```sh
-curl -s "$TRACES_URL" | jq '[.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")]' > /tmp/ats-020-exception.json
-jq 'length' /tmp/ats-020-exception.json
-jq '.[0] | {name, attributes: [.attributes[] | select(.key != "exception.stacktrace")]}' /tmp/ats-020-exception.json
+kubectl -n outpost logs deploy/probe --tail=3
 ```
 
 ```text
-5
+Span sent: trace_id=71eb0f218008e90f62a735211fc5f9be
+Span sent: trace_id=8d59ab9393d4b369ed6e767105b2ffe8
+Span sent: trace_id=fa4c509548c31ef53accace7aa1985e1
+```
+
+Your trace IDs differ. The Jaeger query API returns one trace by its full ID at `/api/v3/traces/<TRACE_ID>`, with no time range. Take the last ID, ask Jaeger for that trace, and keep only its `exception` event:
+
+```sh
+TRACE_ID=$(kubectl -n outpost logs deploy/probe --tail=1 | sed 's/.*trace_id=//')
+curl -s "http://host.docker.internal:26686/api/v3/traces/$TRACE_ID" | jq '.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")' > /workspace/ats-020-exception.json
+jq '{name, attributes: [.attributes[] | select(.key != "exception.stacktrace")]}' /workspace/ats-020-exception.json
 ```
 
 ```json
@@ -166,7 +156,7 @@ jq '.[0] | {name, attributes: [.attributes[] | select(.key != "exception.stacktr
 }
 ```
 
-The last command hides the long `exception.stacktrace` attribute only on screen; the file keeps it. Each event in the file is a copy of an event Jaeger holds, so the grader can match it.
+The request to `TARGET_URL` fails, and the program records the failure as this `exception` event. The last command hides the long `exception.stacktrace` attribute only on screen; the file keeps it. The event in the file is a copy of an event Jaeger holds, so the grader can match it.
 
 ## Submit
 
@@ -176,4 +166,4 @@ When the watching terminal shows every check as passed, stop it with `Ctrl+C` an
 astrona submit -c sections/section-030/module-10/labs/lab-01
 ```
 
-The graders check four things: `OTEL_ENABLED` is `true` and the new pod is ready; the endpoint is the Service `jaeger` in `tracing` on port `4318`; Jaeger holds recent `probe` spans with an `exception` event; and every event in `/tmp/ats-020-exception.json` matches an exception that Jaeger holds for `probe`. A changed `TARGET_URL` fails every check, because the failing request is the source of the evidence.
+The graders check four things: `OTEL_ENABLED` is `true` and the new pod is ready; the endpoint is the Service `jaeger` in `tracing` on port `4318`; Jaeger holds recent `probe` spans with an `exception` event; and the event in `/workspace/ats-020-exception.json` matches an exception that Jaeger holds for `probe`. A changed `TARGET_URL` fails every check, because the failing request is the source of the evidence.

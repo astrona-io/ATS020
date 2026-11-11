@@ -77,7 +77,7 @@ validation:
       type: file
       source: validation/validate-spans-in-jaeger.sh
     - name: exception-exported
-      description: /tmp/ats-020-exception.json holds exception events of probe that the running Jaeger also holds
+      description: /workspace/ats-020-exception.json holds an exception event of probe that the running Jaeger also holds
       type: file
       source: validation/validate-exception-exported.sh
 
