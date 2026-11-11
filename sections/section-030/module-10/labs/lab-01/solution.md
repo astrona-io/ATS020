@@ -50,13 +50,19 @@ Your trace IDs differ. If you see `Span export to ... failed` instead, the endpo
 
 The lab forwards the Jaeger query API to port `26686` of your machine. The terminal reaches your machine by the name `host.docker.internal`. The address `/api/v3/traces/<TRACE_ID>` returns one whole trace by its full 32-character ID, with no time range.
 
-The task asks for one event inside that trace, not the whole response. The response holds the span in `.result.resourceSpans[].scopeSpans[].spans[]`, and each span keeps its events in `events[]`. Take the last trace ID from the log, and let `jq` keep only the event named `exception`:
+You need one full trace ID of `probe`. There are two places to find it:
+
+- **The log of `probe`.** Each `Span sent: trace_id=...` line holds a full trace ID. Copy the part after `trace_id=`.
+- **The Jaeger tab.** In **Search**, pick the service `probe` and click **Find Traces**. The list shows each trace as `probe: call-target` with a short ID of 7 characters, for example `119622c`. Click a trace to open it. The address now ends with `/trace/` and the full ID, for example `/trace/119622c27865e7d46d3c5a19b662df9c`. Copy the full ID from the address. The short ID in the list and in the page title does not work with the API: Jaeger answers `404`.
+
+The task asks for one event inside that trace, not the whole response. The response holds the span in `.result.resourceSpans[].scopeSpans[].spans[]`, and each span keeps its events in `events[]`. Put your trace ID in the address, and let `jq` keep only the event named `exception`. This example uses the trace ID `a4e1c900c778f5bb80e91337a17149fe`; use your own:
 
 ```sh
-TRACE_ID=$(kubectl -n outpost logs deploy/probe --tail=1 | sed 's/.*trace_id=//')
-curl -s "http://host.docker.internal:26686/api/v3/traces/$TRACE_ID" | jq '.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")' > /workspace/ats-020-exception.json
+curl -s http://host.docker.internal:26686/api/v3/traces/a4e1c900c778f5bb80e91337a17149fe | jq '.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")' > /workspace/ats-020-exception.json
 cat /workspace/ats-020-exception.json
 ```
+
+Write the path as `/api/v3/traces/`, with an `s`. Jaeger answers `/api/v3/trace/` with the text `404 page not found`, and `jq` then fails with `Invalid numeric literal`. The filter starts with `.result.resourceSpans[]`, not `.result[]`, because `result` is an object, not a list.
 
 The output below is shortened: the long `exception.stacktrace` value is cut to `...`.
 
