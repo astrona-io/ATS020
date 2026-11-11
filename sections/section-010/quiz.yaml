@@ -17,11 +17,11 @@ questions:
   learning_objective: Read the Prometheus targets page and the `up` metric to say which targets are scraped and which fail
   source_readings:
   - sections/section-010/module-10/course-010-targets-and-the-up-metric.md
-  prompt: A team deployed a new service and asks why `up{namespace="billing"}` returns nothing at all. Which statement is correct?
+  prompt: A team deployed a new service and `up{namespace="billing"}` returns no series. Which explanation should you investigate before treating this as a failed scrape?
   options:
   - id: a
-    text: Prometheus has no target for the service, so it has never tried to scrape it.
-    explanation: Correct. `up` is `0` when Prometheus tried and failed. When no `up` series exists, no monitor produced a target, so Prometheus never tried.
+    text: The selector has no current matching series; inspect target discovery, labels and recent samples.
+    explanation: Correct. A failed scrape produces `up=0`. An empty selector can reflect missing discovery, different labels or stale series; it does not prove Prometheus never scraped the service.
   - id: b
     text: Prometheus tried to scrape the service and every scrape failed.
     explanation: A failed scrape stores `up` with the value `0`. It does not remove the series.
@@ -32,7 +32,7 @@ questions:
     text: The `up` metric is only stored for pods in the `monitoring` namespace.
     explanation: "`up` exists for every target in every namespace."
   correct_option: a
-  explanation: "`up` is `0` when Prometheus tried and failed. When no `up` series exists, no monitor produced a target, so Prometheus never tried."
+  explanation: "A failed scrape produces `up=0`. An empty selector needs discovery, label and sample-age checks before you infer the cause."
 - id: ats020-010-q02
   type: single_choice
   difficulty: intermediate

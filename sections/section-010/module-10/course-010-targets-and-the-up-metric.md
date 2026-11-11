@@ -98,7 +98,7 @@ kps-prometheus	prometheus-kps-prometheus-0	1
 
 Each line is one time series of `up`, the value is `1`, and the labels `job` and `pod` say which target it belongs to. Prometheus added those labels itself while it found the targets. The full series carries more labels, such as `namespace`, `service`, `endpoint` and `instance`, and you can filter on any of them; `query_up '{namespace="monitoring"}'` returns the same three lines.
 
-An empty result is also an answer. `query_up '{namespace="starfleet"}'` prints nothing at all, because Prometheus has never scraped anything in `starfleet`. Keep the two cases apart: `up` with the value `0` means Prometheus tried and failed, and no `up` series at all means Prometheus never tried.
+An empty result is also an answer. `query_up '{namespace="starfleet"}'` prints nothing at all, because Prometheus has never scraped anything in `starfleet`. In this fresh playground no target has been configured yet. More generally, `up=0` records a failed scrape, while an empty query means no current series matches the selector. Check discovered targets, label values and sample age; removed targets become stale, so an empty query does not prove they were never scraped.
 
 ## Where the Prometheus Operator fits
 
@@ -121,7 +121,7 @@ That is the whole job of the operator for this module. It watches ServiceMonitor
 ## Common pitfalls
 
 > [!WARNING]
-> - **Reading "no data" as "down".** `up == 0` means the scrape failed. No `up` series at all means Prometheus has no target for that workload.
+> - **Reading "no data" as "down".** `up == 0` means the scrape failed. No matching `up` series requires discovery, label and sample-age checks.
 > - **Forgetting the port-forward.** The helpers talk to `127.0.0.1:9090`. If the port-forward terminal was closed, `curl` fails with a connection error, not a Prometheus error.
 > - **Expecting a Deployment to be scraped because it serves `/metrics`.** A working endpoint is not a target until a monitor selects it.
 > - **Comparing IP addresses with the page.** Pod IP addresses change with every restart; compare `job`, `namespace` and `pod` instead.

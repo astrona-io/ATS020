@@ -17,11 +17,11 @@ questions:
   learning_objective: Read the Prometheus targets page and the `up` metric to say which targets are scraped and which fail
   source_readings:
   - sections/section-010/module-10/course-010-targets-and-the-up-metric.md
-  prompt: A team deployed a new service and asks why `up{namespace="billing"}` returns nothing at all. Which statement is correct?
+  prompt: A team deployed a new service and `up{namespace="billing"}` returns no series. Which explanation should you investigate before treating this as a failed scrape?
   options:
   - id: a
-    text: Prometheus has no target for the service, so it has never tried to scrape it.
-    explanation: Correct. `up` is `0` when Prometheus tried and failed. When no `up` series exists, no monitor produced a target, so Prometheus never tried.
+    text: The selector has no current matching series; inspect target discovery, labels and recent samples.
+    explanation: Correct. A failed scrape produces `up=0`. An empty selector can reflect missing discovery, different labels or stale series; it does not prove Prometheus never scraped the service.
   - id: b
     text: Prometheus tried to scrape the service and every scrape failed.
     explanation: A failed scrape stores `up` with the value `0`. It does not remove the series.
@@ -32,7 +32,7 @@ questions:
     text: The `up` metric is only stored for pods in the `monitoring` namespace.
     explanation: '`up` exists for every target in every namespace.'
   correct_option: a
-  explanation: '`up` is `0` when Prometheus tried and failed. When no `up` series exists, no monitor produced a target, so Prometheus never tried.'
+  explanation: 'A failed scrape produces `up=0`. An empty selector needs discovery, label and sample-age checks before you infer the cause.'
 - id: ats020-final-q02
   type: single_choice
   difficulty: intermediate
@@ -202,8 +202,8 @@ questions:
     text: Edit the Grafana Deployment and add the Prometheus URL as an environment variable.
     explanation: Grafana does not create a data source from an environment variable of this kind.
   - id: c
-    text: 'Apply a ConfigMap with the label `grafana_datasource: "1"` that holds the data source definition, so the sidecar loads it as a provisioned data source.'
-    explanation: Correct. The sidecar writes the file into Grafana's provisioning directory. Grafana marks the data source as read-only and loads it again on every start.
+    text: 'Apply a ConfigMap with the label `grafana_datasource: "1"` that holds the data source definition with `editable: false`, so the configured sidecar loads it on startup.'
+    explanation: "Correct. The sidecar writes the file into Grafana's provisioning directory. The definition sets `editable: false` and Grafana loads it again on every start."
   - id: d
     text: Create a ServiceMonitor for Grafana.
     explanation: A ServiceMonitor tells Prometheus what to scrape. It does not add a data source to Grafana.
@@ -215,7 +215,7 @@ questions:
   learning_objective: Build a panel from a PromQL query and choose the right visualisation for a rate, a ratio and a latency
   source_readings:
   - sections/section-020/module-10/course-020-panels-for-rate-error-ratio-and-latency.md
-  prompt: A panel must show the share of requests that failed over the last five minutes, as one number between 0 and 1 per service. The counter `http_requests_total` has a `status` label. Which query fits?
+  prompt: A panel must show the share of requests that failed over the last five minutes, as one combined ratio between 0 and 1 for the selected series. The counter `http_requests_total` has a `status` label. Which query fits?
   options:
   - id: a
     text: '`http_requests_total{status=~"5.."}`'
@@ -545,7 +545,7 @@ questions:
   learning_objective: Calculate change failure rate and time to restore from failed and recovered deployments
   source_readings:
   - sections/section-040/module-10/course-030-change-failure-rate-from-application-health.md
-  prompt: The flag `max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0` is `1` while the Application is `Degraded` and `0` otherwise. The Application was `Degraded` twice in the last 6 hours, and it is healthy now. A rule applies `changes()` to the flag over a 6 hour subquery. Which value does `changes()` return, and what must the rule do to get the failed deployments?
+  prompt: The flag `max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0` is `1` while the Application is `Degraded` and `0` otherwise. In this controlled fixture, the flag starts and ends at 0 and contains two complete 0-to-1-to-0 episodes in the last 6 hours. Every transition was sampled, and each episode corresponds to one known failed deployment. A rule applies `changes()` to the flag over a 6 hour subquery. Which value does `changes()` return, and how does this fixture estimate its two failed deployments?
   options:
   - id: a
     text: It returns `2`, and the rule uses the value as it is.
@@ -555,12 +555,12 @@ questions:
     explanation: Multiplying would give eight failures. Each failure is counted twice, so the rule must divide.
   - id: c
     text: It returns `4`, and the rule divides it by two.
-    explanation: Correct. Each failure flips the flag up and back down, so two failures give four changes. Dividing by two gives the failed deployments.
+    explanation: Correct. Each failure flips the flag up and back down, so two failures give four changes. Dividing by two estimates the two known failures in this fixture.
   - id: d
     text: It returns `1`, because the flag has one value now.
     explanation: '`changes()` counts how often the value changed in the range, not the current value.'
   correct_option: c
-  explanation: Each failed deployment flips the flag from `0` to `1` and back to `0`, which is two changes. Four changes divided by two give two failed deployments.
+  explanation: The two complete sampled episodes produce four changes. Division by two works for this fixture; incomplete windows, missed transitions and unrelated health incidents break the mapping to deployments.
 - id: ats020-final-q26
   type: single_choice
   difficulty: intermediate
