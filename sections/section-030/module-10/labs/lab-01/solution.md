@@ -123,27 +123,93 @@ kubectl -n outpost logs deploy/probe --tail=3
 ```
 
 ```text
-Span sent: trace_id=71eb0f218008e90f62a735211fc5f9be
-Span sent: trace_id=8d59ab9393d4b369ed6e767105b2ffe8
-Span sent: trace_id=fa4c509548c31ef53accace7aa1985e1
+Span sent: trace_id=a0731d01872898237c3e8d5342090b92
+Span sent: trace_id=dc683467134689431d087234569a7783
+Span sent: trace_id=145f52dfc694bf640f78814c8caa9f75
 ```
 
-Your trace IDs differ. The Jaeger query API returns one trace by its full ID at `/api/v3/traces/<TRACE_ID>`, with no time range. Take the last ID, ask Jaeger for that trace, and keep only its `exception` event:
+Your trace IDs differ. The Jaeger query API returns one trace by its full ID at `/api/v3/traces/<TRACE_ID>`, with no time range. Take the last ID and look at what Jaeger returns for that trace:
 
 ```sh
 TRACE_ID=$(kubectl -n outpost logs deploy/probe --tail=1 | sed 's/.*trace_id=//')
-curl -s "http://host.docker.internal:26686/api/v3/traces/$TRACE_ID" | jq '.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")' > /workspace/ats-020-exception.json
-jq '{name, attributes: [.attributes[] | select(.key != "exception.stacktrace")]}' /workspace/ats-020-exception.json
+curl -s "http://host.docker.internal:26686/api/v3/traces/$TRACE_ID" | jq .
 ```
+
+The response below is shortened: the long `exception.stacktrace` value is cut to `...`, and small objects are put on one line.
 
 ```json
 {
+  "result": {
+    "resourceSpans": [
+      {
+        "resource": {
+          "attributes": [
+            { "key": "service.name", "value": { "stringValue": "probe" } }
+          ]
+        },
+        "scopeSpans": [
+          {
+            "scope": { "name": "astrona-trace-fixture" },
+            "spans": [
+              {
+                "traceId": "145f52dfc694bf640f78814c8caa9f75",
+                "spanId": "ef24c9b63333b6aa",
+                "name": "call-target",
+                "kind": 3,
+                "startTimeUnixNano": "1794425125390128383",
+                "endTimeUnixNano": "1794425125399694683",
+                "attributes": [
+                  { "key": "target.url", "value": { "stringValue": "http://relay.outpost:8080" } }
+                ],
+                "events": [
+                  {
+                    "timeUnixNano": "1794425125395461388",
+                    "name": "exception",
+                    "attributes": [
+                      { "key": "exception.message", "value": { "stringValue": "<urlopen error [Errno -2] Name does not resolve>" } },
+                      { "key": "exception.stacktrace", "value": { "stringValue": "Traceback (most recent call last):\n ..." } },
+                      { "key": "exception.type", "value": { "stringValue": "URLError" } }
+                    ]
+                  }
+                ],
+                "status": {
+                  "message": "URLError: <urlopen error [Errno -2] Name does not resolve>",
+                  "code": 2
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The response is the whole trace: the resource (`service.name`), the span `call-target` with its attributes and status, and, inside the span, its `events` list. The request to `TARGET_URL` fails, and the program records the failure as the one event in that list, named `exception`. The task asks for that event only, not the whole response. Use `jq` to walk down to the `events` list and keep the event named `exception`:
+
+```sh
+curl -s "http://host.docker.internal:26686/api/v3/traces/$TRACE_ID" | jq '.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")' > /workspace/ats-020-exception.json
+cat /workspace/ats-020-exception.json
+```
+
+The file now holds one JSON object. The output below is shortened the same way:
+
+```json
+{
+  "timeUnixNano": "1794425125395461388",
   "name": "exception",
   "attributes": [
     {
       "key": "exception.message",
       "value": {
         "stringValue": "<urlopen error [Errno -2] Name does not resolve>"
+      }
+    },
+    {
+      "key": "exception.stacktrace",
+      "value": {
+        "stringValue": "Traceback (most recent call last):\n ..."
       }
     },
     {
@@ -156,7 +222,7 @@ jq '{name, attributes: [.attributes[] | select(.key != "exception.stacktrace")]}
 }
 ```
 
-The request to `TARGET_URL` fails, and the program records the failure as this `exception` event. The last command hides the long `exception.stacktrace` attribute only on screen; the file keeps it. The event in the file is a copy of an event Jaeger holds, so the grader can match it.
+The file starts with `"timeUnixNano"` and `"name": "exception"`, not with `"result"`. If you save the whole response instead, the grader fails with "must hold only the exception span event, not the whole API response". The event in the file is a copy of an event Jaeger holds, so the grader can match it.
 
 ## Submit
 

@@ -43,7 +43,7 @@ jq -e '
   all(.[]; type == "object" and .name == "exception" and
     ([.attributes[]?.key] | (index("exception.type") != null and index("exception.message") != null and index("exception.stacktrace") != null)))
 ' <<<"${events:-null}" >/dev/null 2>&1 \
-  || fail "$export_file must be the exception span event as /api/v3/traces/<TRACE_ID> returns it: a JSON object named exception with exception.type, exception.message and exception.stacktrace"
+  || fail "$export_file must hold only the exception span event, not the whole API response: the object with \"name\": \"exception\" from .result.resourceSpans[].scopeSpans[].spans[].events[], with exception.type, exception.message and exception.stacktrace"
 
 # pair: one "type|message" string for an exception event.
 pair='(([.attributes[] | select(.key == "exception.type") | .value.stringValue] | first // "") + "|" + ([.attributes[] | select(.key == "exception.message") | .value.stringValue] | first // ""))'
