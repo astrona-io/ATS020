@@ -28,9 +28,6 @@ runtime:
       description: Jaeger UI, the traces of probe appear here after the fix
 
 tabs:
-  - name: terminal
-    title: Terminal
-    type: terminal
   - name: jaeger
     title: Jaeger
     type: browser
