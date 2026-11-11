@@ -139,6 +139,22 @@ class GraderTests(unittest.TestCase):
         state = {**SOLVED, 'export': [event]}
         self.assertNotEqual(self.grade(state)['validate-exception-exported.sh'][0], 0)
 
+    def test_dynamic_fields_of_the_event_are_not_compared(self):
+        # Each export comes from another span: its time and stacktrace differ
+        # from the event the grader reads, and Jaeger may order the attributes
+        # differently or add fields. Only the event name, the three attribute
+        # keys and the exception type and message must match.
+        event = copy.deepcopy(EVENT)
+        event['timeUnixNano'] = '1794425125395461388'
+        event['attributes'][2]['value']['stringValue'] = 'Traceback (most recent call last):\n  File "/emitter/emitter.py", line 46'
+        event['attributes'].reverse()
+        event['droppedAttributesCount'] = 0
+        no_time = {k: v for k, v in EVENT.items() if k != 'timeUnixNano'}
+        for export in (event, [event], no_time, [EVENT, event]):
+            state = {**SOLVED, 'export': export}
+            code, output = self.grade(state)['validate-exception-exported.sh']
+            self.assertEqual(code, 0, f'{export}: {output}')
+
     def test_whole_api_response_fails_the_export_check(self):
         state = {**SOLVED, 'export': JAEGER_PROBE}
         self.assertNotEqual(self.grade(state)['validate-exception-exported.sh'][0], 0)

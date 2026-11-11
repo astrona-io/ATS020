@@ -8,7 +8,7 @@ The Deployment `probe` in the `outpost` namespace sends one HTTP request every 2
 
 1. Switch OpenTelemetry on in `probe`: set its environment variable `OTEL_ENABLED` to `true`.
 2. Set the environment variable `OTEL_EXPORTER_OTLP_ENDPOINT` of `probe` to the OTLP/HTTP address of the Service `jaeger` in `tracing`. Wait until the new pod is ready.
-3. Take one trace ID of `probe` from its log, and save the `exception` event of that trace from `http://host.docker.internal:26686` to `/workspace/ats-020-exception.json` as a JSON object.
+3. Take one trace ID of `probe` from its log, and save only the `exception` span event of that trace from `http://host.docker.internal:26686` (the object with `"name": "exception"`, not the whole API response) to `/workspace/ats-020-exception.json`.
 
 ## Constraints
 

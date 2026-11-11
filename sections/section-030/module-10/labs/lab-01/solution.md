@@ -1,28 +1,10 @@
 # Solution
 
-The Deployment `probe` in `outpost` runs, but Jaeger does not list it. Two settings stop its spans, one behind the other. `OTEL_ENABLED` is `false`, so the program creates no spans. Behind it, `OTEL_EXPORTER_OTLP_ENDPOINT` names a namespace where Jaeger does not run.
+The Deployment `probe` in `outpost` sends no spans to Jaeger for two reasons. `OTEL_ENABLED` is `false`, so the program creates no spans. `OTEL_EXPORTER_OTLP_ENDPOINT` points at `jaeger.observability`, but Jaeger runs in the namespace `tracing`.
 
-Keep this command running in a second host terminal. It grades the lab every few seconds and records nothing:
+## Tasks 1 and 2: fix the two environment variables
 
-```sh
-astrona submit --watch -c sections/section-030/module-10/labs/lab-01
-```
-
-Use `--watch` until the end, because a plain `astrona submit` finishes the attempt and deletes the lab. Run the plain command once, in the last step.
-
-## Read the starting state
-
-The log of the pod says what the program does with its settings. Read it first:
-
-```sh
-kubectl -n outpost logs deploy/probe
-```
-
-```text
-OpenTelemetry is off (OTEL_ENABLED is not true): no spans are created
-```
-
-`kubectl set env --list` prints the environment variables of a Deployment without changing anything:
+Check the current values first. `kubectl set env --list` prints the environment variables of a Deployment without changing anything:
 
 ```sh
 kubectl -n outpost set env deployment/probe --list
@@ -36,114 +18,69 @@ OTEL_ENABLED=false
 OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger.observability:4318
 ```
 
-`OTEL_ENABLED` is `false`. The endpoint also looks wrong, but the log cannot show that yet, because the program sends nothing.
-
-## Switch OpenTelemetry on
-
-Set `OTEL_ENABLED` to `true`. `kubectl set env` changes the pod template, so the Deployment controller replaces the pod. Wait for the rollout:
+Set both variables with one command. The endpoint is the Service `jaeger` in `tracing` on port `4318`, the port for OTLP over HTTP. It has no path, because the program adds `/v1/traces` itself. `kubectl set env` changes the pod template, so the Deployment controller replaces the pod. Wait for the new pod:
 
 ```sh
-kubectl -n outpost set env deployment/probe OTEL_ENABLED=true
-kubectl -n outpost rollout status deployment/probe --timeout=120s
+kubectl -n outpost set env deployment/probe OTEL_ENABLED=true OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger.tracing:4318
+kubectl -n outpost rollout status deployment/probe --timeout=180s
 ```
 
 ```text
 deployment.apps/probe env updated
-Waiting for deployment "probe" rollout to finish: 0 out of 1 new replicas have been updated...
+Waiting for deployment "probe" rollout to finish: 1 old replicas are pending termination...
 Waiting for deployment "probe" rollout to finish: 1 old replicas are pending termination...
 deployment "probe" successfully rolled out
 ```
 
-Wait a few seconds, then read the log of the new pod:
+The log of the new pod proves that each span reaches Jaeger. Every line gives the trace ID of one span:
 
 ```sh
 kubectl -n outpost logs deploy/probe --tail=3
 ```
 
 ```text
-Span export to http://jaeger.observability:4318/v1/traces failed: <urlopen error [Errno -2] Name does not resolve>
-Span export to http://jaeger.observability:4318/v1/traces failed: <urlopen error [Errno -2] Name does not resolve>
-Span export to http://jaeger.observability:4318/v1/traces failed: <urlopen error [Errno -2] Name does not resolve>
+Span sent: trace_id=a0731d01872898237c3e8d5342090b92
+Span sent: trace_id=dc683467134689431d087234569a7783
+Span sent: trace_id=145f52dfc694bf640f78814c8caa9f75
 ```
 
-The program now creates spans, but the cluster Domain Name System (DNS) has no name `jaeger.observability`. The first fault hid this second one.
+Your trace IDs differ. If you see `Span export to ... failed` instead, the endpoint is still wrong.
 
-## Point the endpoint at Jaeger
+## Task 3: save the exception event
 
-Find the namespace and the ports of the Jaeger Service:
+The lab forwards the Jaeger query API to port `26686` of your machine. The terminal reaches your machine by the name `host.docker.internal`. The address `/api/v3/traces/<TRACE_ID>` returns one whole trace by its full 32-character ID, with no time range.
+
+You need one full trace ID of `probe`. There are two places to find it:
+
+- **The log of `probe`.** Each `Span sent: trace_id=...` line holds a full trace ID. Copy the part after `trace_id=`.
+- **The Jaeger tab.** In **Search**, pick the service `probe` and click **Find Traces**. The list shows each trace as `probe: call-target` with a short ID of 7 characters, for example `119622c`. Click a trace to open it. The address now ends with `/trace/` and the full ID, for example `/trace/119622c27865e7d46d3c5a19b662df9c`. Copy the full ID from the address. The short ID in the list and in the page title does not work with the API: Jaeger answers `404`.
+
+The task asks for one event inside that trace, not the whole response. The response holds the span in `.result.resourceSpans[].scopeSpans[].spans[]`, and each span keeps its events in `events[]`. Put your trace ID in the address, and let `jq` keep only the event named `exception`. This example uses the trace ID `a4e1c900c778f5bb80e91337a17149fe`; use your own:
 
 ```sh
-kubectl get service -A | grep jaeger
+curl -s http://host.docker.internal:26686/api/v3/traces/a4e1c900c778f5bb80e91337a17149fe | jq '.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")' > /workspace/ats-020-exception.json
+cat /workspace/ats-020-exception.json
 ```
 
-```text
-tracing       jaeger       ClusterIP   10.96.32.82   <none>        4317/TCP,4318/TCP,16686/TCP   3m11s
-```
+Write the path as `/api/v3/traces/`, with an `s`. Jaeger answers `/api/v3/trace/` with the text `404 page not found`, and `jq` then fails with `Invalid numeric literal`. The filter starts with `.result.resourceSpans[]`, not `.result[]`, because `result` is an object, not a list.
 
-Jaeger runs in `tracing`. The program sends OTLP over HTTP, which Jaeger receives on `4318`; `4317` is OTLP over gRPC. `OTEL_EXPORTER_OTLP_ENDPOINT` is the base address with no path, because the program adds `/v1/traces` itself:
-
-```sh
-kubectl -n outpost set env deployment/probe OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger.tracing:4318
-kubectl -n outpost rollout status deployment/probe --timeout=120s
-```
-
-```text
-deployment.apps/probe env updated
-Waiting for deployment "probe" rollout to finish: 1 old replicas are pending termination...
-deployment "probe" successfully rolled out
-```
-
-The log of the new pod shows that each span reaches Jaeger, with no export errors:
-
-```sh
-kubectl -n outpost logs deploy/probe | head -2
-```
-
-```text
-OpenTelemetry is on: sending spans to http://jaeger.tracing:4318/v1/traces
-Span sent: trace_id=71eb0f218008e90f62a735211fc5f9be
-```
-
-Jaeger now lists `probe` next to its own service `jaeger`. The **Jaeger** tab shows the same list; in the terminal, read it from the query API. The lab forwards Jaeger to port `26686` of your machine, and the terminal reaches your machine by the name `host.docker.internal`:
-
-```sh
-curl -s http://host.docker.internal:26686/api/v3/services
-```
-
-```text
-{"services":["jaeger","probe"]}
-```
-
-## Export the exception
-
-With OpenTelemetry on, `probe` prints the trace ID of every span it sends to Jaeger. Read the last lines of its log:
-
-```sh
-kubectl -n outpost logs deploy/probe --tail=3
-```
-
-```text
-Span sent: trace_id=71eb0f218008e90f62a735211fc5f9be
-Span sent: trace_id=8d59ab9393d4b369ed6e767105b2ffe8
-Span sent: trace_id=fa4c509548c31ef53accace7aa1985e1
-```
-
-Your trace IDs differ. The Jaeger query API returns one trace by its full ID at `/api/v3/traces/<TRACE_ID>`, with no time range. Take the last ID, ask Jaeger for that trace, and keep only its `exception` event:
-
-```sh
-TRACE_ID=$(kubectl -n outpost logs deploy/probe --tail=1 | sed 's/.*trace_id=//')
-curl -s "http://host.docker.internal:26686/api/v3/traces/$TRACE_ID" | jq '.result.resourceSpans[].scopeSpans[].spans[].events[] | select(.name == "exception")' > /workspace/ats-020-exception.json
-jq '{name, attributes: [.attributes[] | select(.key != "exception.stacktrace")]}' /workspace/ats-020-exception.json
-```
+The output below is shortened: the long `exception.stacktrace` value is cut to `...`.
 
 ```json
 {
+  "timeUnixNano": "1794425125395461388",
   "name": "exception",
   "attributes": [
     {
       "key": "exception.message",
       "value": {
         "stringValue": "<urlopen error [Errno -2] Name does not resolve>"
+      }
+    },
+    {
+      "key": "exception.stacktrace",
+      "value": {
+        "stringValue": "Traceback (most recent call last):\n ..."
       }
     },
     {
@@ -156,14 +93,14 @@ jq '{name, attributes: [.attributes[] | select(.key != "exception.stacktrace")]}
 }
 ```
 
-The request to `TARGET_URL` fails, and the program records the failure as this `exception` event. The last command hides the long `exception.stacktrace` attribute only on screen; the file keeps it. The event in the file is a copy of an event Jaeger holds, so the grader can match it.
+The program sends each request to `TARGET_URL`, and no Service `relay` exists in `outpost`. So every request fails, and the program records the failure as this `exception` event in the span. The file must start with `"timeUnixNano"` and `"name": "exception"`, not with `"result"`. If it starts with `"result"`, you saved the whole response, and the grader fails.
 
 ## Submit
 
-When the watching terminal shows every check as passed, stop it with `Ctrl+C` and grade the lab once:
+Grade the lab:
 
 ```sh
 astrona submit -c sections/section-030/module-10/labs/lab-01
 ```
 
-The graders check four things: `OTEL_ENABLED` is `true` and the new pod is ready; the endpoint is the Service `jaeger` in `tracing` on port `4318`; Jaeger holds recent `probe` spans with an `exception` event; and the event in `/workspace/ats-020-exception.json` matches an exception that Jaeger holds for `probe`. A changed `TARGET_URL` fails every check, because the failing request is the source of the evidence.
+The graders check four things. `OTEL_ENABLED` is `true` and the new pod is ready. The endpoint is the Service `jaeger` in `tracing` on port `4318`. Jaeger holds recent `probe` spans with an `exception` event. The event in `/workspace/ats-020-exception.json` matches an exception that Jaeger holds for `probe`. A plain `astrona submit` ends the attempt and deletes the lab. To check your progress without ending the attempt, run `astrona submit --watch -c sections/section-030/module-10/labs/lab-01` instead.
