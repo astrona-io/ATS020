@@ -46,6 +46,10 @@ bootstrap:
 
 testing:
   init:
+    - name: verify-start
+      description: Proves nothing is solved at the start and every grader fails
+      type: file
+      source: testing/verify-start.sh
     - name: solution
       description: Reference solution applied by `astrona test`
       type: file
@@ -58,7 +62,7 @@ testing:
 validation:
   scripts:
     - name: pipeline-ready
-      description: The Collector otel exists in observability, receives OTLP and exports to Jaeger, and its counters show spans accepted and sent
+      description: The Collector otel exists in observability, receives OTLP and exports to Jaeger, and its counters show spans accepted and sent; relay and scout keep their design and no tracing code was added by hand
       type: file
       source: validation/validate-pipeline.sh
     - name: relay-injected
@@ -73,10 +77,6 @@ validation:
       description: The ConfigMap slow-call names the slowest service and operation of a slow request
       type: file
       source: validation/validate-slow-call.sh
-    - name: design-intact
-      description: relay and scout keep their design and no tracing code was added by hand
-      type: file
-      source: validation/validate-design-intact.sh
 
 teardown:
   keepCluster: false

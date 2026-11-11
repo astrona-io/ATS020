@@ -70,7 +70,7 @@ questions:
     text: The rule needs `increase()` over a longer window. A window of 6 hours is too short to see a failure.
     explanation: The window does not matter here. No series with the phase `Failed` or `Error` exists in any window.
   - id: c
-    text: Argo CD marks a sync as `Failed` only when it cannot apply the manifest. A bad image tag is applied without an error, so the sync ends in `Succeeded`. Read the health status from `argocd_app_info`, which turns `Degraded`.
+    text: In this fixture the bad image manifest applies successfully, so the completed sync is Succeeded. Inspect Degraded health in argocd_app_info and correlate it with the deployed revision.
     explanation: Correct. The sync phase says whether Argo CD applied the change. The health status says whether the workload works, and it is the signal for a failed change.
   - id: d
     text: The rule needs `phase="Running"`, because a failed deployment is a running sync.
@@ -83,7 +83,7 @@ questions:
   learning_objective: Calculate change failure rate and time to restore from failed and recovered deployments
   source_readings:
   - sections/section-040/module-10/course-030-change-failure-rate-from-application-health.md
-  prompt: The flag `max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0` is `1` while the Application is `Degraded` and `0` otherwise. The Application was `Degraded` twice in the last 6 hours, and it is healthy now. A rule applies `changes()` to the flag over a 6 hour subquery. Which value does `changes()` return, and what must the rule do to get the failed deployments?
+  prompt: The flag `max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0` is `1` while the Application is `Degraded` and `0` otherwise. In this controlled fixture, the flag starts and ends at 0 and contains two complete 0-to-1-to-0 episodes in the last 6 hours. Every transition was sampled, and each episode corresponds to one known failed deployment. A rule applies `changes()` to the flag over a 6 hour subquery. Which value does `changes()` return, and how does this fixture estimate its two failed deployments?
   options:
   - id: a
     text: It returns `2`, and the rule uses the value as it is.
@@ -96,9 +96,9 @@ questions:
     explanation: "`changes()` counts how often the value changed in the range, not the current value."
   - id: d
     text: It returns `4`, and the rule divides it by two.
-    explanation: Correct. Each failure flips the flag up and back down, so two failures give four changes. Dividing by two gives the failed deployments.
+    explanation: Correct. Each failure flips the flag up and back down, so two failures give four changes. Dividing by two estimates the two known failures in this fixture.
   correct_option: d
-  explanation: Each failed deployment flips the flag from `0` to `1` and back to `0`, which is two changes. Four changes divided by two give two failed deployments.
+  explanation: The two complete sampled episodes produce four changes. Division by two works for this fixture; incomplete windows, missed transitions and unrelated health incidents break the mapping to deployments.
 - id: ats020-040-q05
   type: single_choice
   difficulty: intermediate

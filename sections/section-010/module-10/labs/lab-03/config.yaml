@@ -46,17 +46,13 @@ testing:
     type: file
     source: solution/apply.sh
   - name: wait-for-targets
-    description: Wait until all selected Pods are healthy targets
+    description: Wait until the busiest Deployment is scaled and every selected Pod is a healthy target
     type: file
     source: testing/wait-for-targets.sh
 validation:
   scripts:
-  - name: targets-up
-    description: The raw job scrapes all primary and reserve Pods and excludes disabled Pods
-    type: file
-    source: validation/validate-targets-up.sh
   - name: busiest-scaled
-    description: The Deployment with the highest live queue total has three ready replicas; the others have one
+    description: Only the Deployment with the highest live queue total has three ready replicas, and every ready primary and reserve Pod is a healthy target
     type: file
     source: validation/validate-busiest-scaled.sh
 teardown:

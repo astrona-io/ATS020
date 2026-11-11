@@ -23,8 +23,8 @@ questions:
         text: "Add the data source in the Grafana web interface and save it."
         explanation: "A data source saved in the interface is not defined as code and can be edited by any admin."
       - id: b
-        text: "Apply a ConfigMap with the label `grafana_datasource: \"1\"` that holds the data source definition, so the sidecar loads it as a provisioned data source."
-        explanation: "Correct. The sidecar writes the file into Grafana's provisioning directory. Grafana marks the data source as read-only and loads it again on every start."
+        text: "Apply a ConfigMap with the label `grafana_datasource: \"1\"` that holds the data source definition with `editable: false`, so the configured sidecar loads it on startup."
+        explanation: "Correct. The sidecar writes the file into Grafana's provisioning directory. The definition sets `editable: false` and Grafana loads it again on every start."
       - id: c
         text: "Edit the Grafana Deployment and add the Prometheus URL as an environment variable."
         explanation: "Grafana does not create a data source from an environment variable of this kind."
@@ -40,7 +40,7 @@ questions:
     learning_objective: "Build a panel from a PromQL query and choose the right visualisation for a rate, a ratio and a latency"
     source_readings:
       - sections/section-020/module-10/course-020-panels-for-rate-error-ratio-and-latency.md
-    prompt: "A panel must show the share of requests that failed over the last five minutes, as one number between 0 and 1 per service. The counter `http_requests_total` has a `status` label. Which query fits?"
+    prompt: "A panel must show the share of requests that failed over the last five minutes, as one combined ratio between 0 and 1 for the selected series. The counter `http_requests_total` has a `status` label. Which query fits?"
     options:
       - id: a
         text: "`http_requests_total{status=~\"5..\"}`"

@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The `logs` Collector runs as a DaemonSet in `monitoring`. It reads `probe` error logs and exposes `log_error_lines_total` for Prometheus.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the Collector logs and test its service account permissions.
@@ -15,8 +13,6 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep the DaemonSet, `file_log` receiver, `k8s_attributes` processor and `count` connector. The service account may only read pods across namespaces. Keep the existing Prometheus and Collector endpoint.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep the DaemonSet, `file_log` receiver, `k8s_attributes` processor and `count` connector.
+- The service account may only read pods across namespaces.
+- Keep the existing Prometheus and Collector endpoint.

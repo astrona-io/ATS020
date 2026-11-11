@@ -61,17 +61,9 @@ testing:
     source: testing/wait-for-prometheus.sh
 validation:
   scripts:
-  - name: target-up
-    description: Prometheus scrapes the Collector's metric endpoint and the target is up
-    type: file
-    source: validation/validate-target-up.sh
   - name: error-metric
-    description: log_error_lines_total carries the probe deployment and outpost namespace labels and keeps rising
+    description: log_error_lines_total carries the probe deployment and outpost namespace labels and keeps rising; the pipeline and read-only pod access stay
     type: file
     source: validation/validate-error-metric.sh
-  - name: least-privilege
-    description: The Collector keeps its pipeline and gets only read access to pods
-    type: file
-    source: validation/validate-least-privilege.sh
 teardown:
   keepCluster: false

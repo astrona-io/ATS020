@@ -11,6 +11,24 @@ set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+# The design must stay (checked first, before the task): the PrometheusRule
+# dora-scout still has its three recording rules and the deployments rule is
+# unchanged.
+RULE="$(kubectl -n monitoring get prometheusrule dora-scout -o json 2>/dev/null)" \
+  || fail "PrometheusRule dora-scout is missing in namespace monitoring (do not delete it)"
+
+LABEL="$(printf '%s' "$RULE" | jq -r '.metadata.labels.release // ""')"
+[ "$LABEL" = "kps" ] || fail "PrometheusRule dora-scout has release='$LABEL'; Prometheus only reads rules labelled release=kps"
+
+for record in dora:deployments:increase6h dora:failed_deployments:count6h dora:change_failure_rate:ratio6h; do
+  printf '%s' "$RULE" | jq -e --arg r "$record" '[.spec.groups[].rules[] | select(.record == $r)] | length == 1' >/dev/null \
+    || fail "the recording rule $record is missing (keep all three rules)"
+done
+
+DEPLOYMENTS="$(printf '%s' "$RULE" | jq -r '.spec.groups[].rules[] | select(.record == "dora:deployments:increase6h") | .expr' | tr -d ' ')"
+EXPECTED='round(sum(increase(argocd_app_sync_total{name="scout",phase="Succeeded"}[6h])))'
+[ "$DEPLOYMENTS" = "$EXPECTED" ] || fail "the deployments rule changed: '$DEPLOYMENTS' (it was already correct, leave it alone)"
+
 query() {
   kubectl get --raw "/api/v1/namespaces/monitoring/services/kps-prometheus:9090/proxy/api/v1/query?query=$1" 2>/dev/null
 }

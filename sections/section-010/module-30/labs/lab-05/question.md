@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 Two warning alerts differ by Pod. A route stops after the first matching child and groups each Pod separately, so the archive receiver is skipped and notifications are split.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Read the two `ScoutRouteCheck` alerts and predict which child routes match.
@@ -15,8 +13,7 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep the default, warning and archive receivers with their existing webhook URL. Keep both diagnostic alerts. Each alert must reach warning and archive, with no default receiver. Preserve the timing fields.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep the default, warning and archive receivers with their existing webhook URL.
+- Keep both diagnostic alerts.
+- Each alert must reach warning and archive, with no default receiver.
+- Preserve the timing fields.

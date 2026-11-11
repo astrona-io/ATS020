@@ -6,8 +6,6 @@ The platform team promises an availability SLO (service level objective) of 99 p
 
 The team stores the alert and two recording rules in the PrometheusRule `scout-slo` in the namespace `monitoring`. The rules `scout:error_ratio:rate5m` and `scout:error_ratio:rate1h` store the share of failed requests over five minutes and over one hour. The alert `ScoutErrorBudgetBurn` reads both. Prometheus shows no alert and no error ratio. The team asks you to fix it.
 
-Allow 10–15 minutes for task work. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Find out why the alert `ScoutErrorBudgetBurn` is not active. Read the rules in the PrometheusRule `scout-slo` and run their expressions in Prometheus, one part at a time.
@@ -22,9 +20,3 @@ Allow 10–15 minutes for task work. Cluster startup and telemetry collection ad
 - Do not set the threshold of the alert to zero.
 - Do not type the error ratio into a rule. Both ratios must come from the counter `http_requests_total`.
 - Do not delete the PrometheusRule or any of its rules.
-
-## How the answer is checked
-
-The grader runs three checks. The first checks that the PrometheusRule, both recording rules and the alert are still there, that the alert keeps both windows, a non-zero threshold and a `for:` of at most five minutes. The second reads the two recording rules from Prometheus and needs a value between `0.03` and `0.08` for each. It also needs `http_requests_total` in each expression. The third needs the alert `ScoutErrorBudgetBurn` in the state `firing`. A changed rule reaches Prometheus after about a minute, and the alert waits for its `for:` time, so the grader retries for several minutes.
-
-Hint: reach Prometheus with `kubectl -n monitoring port-forward svc/kps-prometheus 9090:9090`.

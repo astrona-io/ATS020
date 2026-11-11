@@ -92,4 +92,4 @@ Then press Ctrl-C to stop the watch and submit once:
 astrona submit
 ```
 
-The watch terminal shows all six checks passing after the alert has been firing for two minutes.
+The watch terminal shows all five checks passing after the alert has been firing for two minutes.

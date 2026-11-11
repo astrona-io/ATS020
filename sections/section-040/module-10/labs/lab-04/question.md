@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The lab creates ten real Git revisions and Argo CD deployments, including two failed builds and their reverts. Startup includes this history generation.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Export the Application history and use the commit messages to identify the two failed builds and their reverts.
@@ -15,8 +13,7 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Each measurement has `failed_id`, `restored_id` and numeric `seconds`, ordered by failed id. The report has `measurements` and numeric `mean_seconds`. Keep Git and the Application history unchanged. Calculate from this cluster; do not reuse example durations.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Each measurement has `failed_id`, `restored_id` and numeric `seconds`, ordered by failed id.
+- The report has `measurements` and numeric `mean_seconds`.
+- Keep Git and the Application history unchanged.
+- Calculate from this cluster; do not reuse example durations.

@@ -7,6 +7,22 @@ set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+# The design must stay (checked first, before the task): the workload keeps
+# one replica and its Service, and shuttle keeps its image.
+SHUTTLE_IMAGE="$(kubectl -n starfleet get deployment shuttle -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)" \
+  || fail "Deployment shuttle is missing in namespace starfleet"
+[ "$SHUTTLE_IMAGE" = "curlimages/curl:8.23.0" ] || fail "shuttle image changed to '$SHUTTLE_IMAGE'"
+
+for name in cargo; do
+  REPLICAS="$(kubectl -n starfleet get deployment "$name" -o jsonpath='{.spec.replicas}' 2>/dev/null)" \
+    || fail "Deployment $name is missing in namespace starfleet"
+  [ "$REPLICAS" = "1" ] || fail "Deployment $name has $REPLICAS replicas, expected 1 (do not scale a workload to zero)"
+  kubectl -n starfleet get service "$name" >/dev/null 2>&1 || fail "Service $name is missing in namespace starfleet"
+done
+
+CARGO_COMMAND="$(kubectl -n starfleet get deployment cargo -o jsonpath='{.spec.template.spec.containers[0].command[*]}' 2>/dev/null)"
+case "$CARGO_COMMAND" in *"Buffer.alloc"*) ;; *) fail "the command of cargo was changed; size the memory limit instead";; esac
+
 IMAGE="$(kubectl -n starfleet get deployment cargo -o jsonpath='{.spec.template.spec.containers[?(@.name=="cargo")].image}' 2>/dev/null)" \
   || fail "Deployment cargo is missing in namespace starfleet (fix it, do not delete it)"
 [ "$IMAGE" = "node:22-alpine" ] || fail "cargo image is '$IMAGE', expected node:22-alpine"

@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The `cargo` Deployment in `starfleet` is unhealthy. The `shuttle` client and the Service `cargo` are available for testing.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the pod events and its last termination reason and memory limit. Identify the cause of the failure.
@@ -15,8 +13,5 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep `cargo`, its Service and `shuttle`, with one replica each. Keep the command and a memory limit of at least `256Mi` and below `1Gi`.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep `cargo`, its Service and `shuttle`, with one replica each.
+- Keep the command and a memory limit of at least `256Mi` and below `1Gi`.

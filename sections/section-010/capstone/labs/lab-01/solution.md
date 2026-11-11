@@ -193,7 +193,7 @@ Press Ctrl-C to stop the watch, then submit once:
 astrona submit -c sections/section-010/capstone/labs/lab-01
 ```
 
-All five checks pass. Some shortcuts fail on purpose. A fixed value such as `vector(0.2)` in the recording rule fails `design-intact`. Changing the port of the Service `alert-receiver` to `80` also fails `design-intact`. Widening the selectors of the Prometheus resource or deleting an object fails it too. Clean up:
+All four checks pass. Some shortcuts fail on purpose. The check `target-up` first checks that the design is unchanged. A fixed value such as `vector(0.2)` in the recording rule fails it. Changing the port of the Service `alert-receiver` to `80` also fails it. Widening the selectors of the Prometheus resource or deleting an object fails it too. Clean up:
 
 ```sh
 astrona destroy ats-020-capstone-010

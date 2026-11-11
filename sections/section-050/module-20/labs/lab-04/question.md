@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The `scout` Application reports a comparison error after its source path changed. The last successfully deployed workload still runs.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the Application conditions and distinguish source comparison from workload health.
@@ -15,8 +13,5 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep the original repository URL, `main` revision, destination namespace and automated sync. Do not replace the Application or repair only the live Deployment.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep the original repository URL, `main` revision, destination namespace and automated sync.
+- Do not replace the Application or repair only the live Deployment.

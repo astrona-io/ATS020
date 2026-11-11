@@ -55,12 +55,8 @@ testing:
     source: testing/wait-for-rules.sh
 validation:
   scripts:
-  - name: rules-intact
-    description: The PrometheusRule scout-queries keeps both recording rules, and they read the real metrics
-    type: file
-    source: validation/validate-rules-intact.sh
   - name: error-ratio
-    description: scout:error_ratio:rate5m returns one series that matches the real error ratio
+    description: scout:error_ratio:rate5m returns one series that matches the real error ratio, and both recording rules keep their design
     type: file
     source: validation/validate-error-ratio.sh
 teardown:

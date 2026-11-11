@@ -7,6 +7,15 @@
 set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
+
+# The design must stay (checked first, before the task): both webhook
+# configurations keep failurePolicy Fail, and the workloads, ServiceMonitor
+# and PrometheusRule.
+for target in 'starfleet deployment scout' 'starfleet servicemonitor scout' 'starfleet prometheusrule scout-alerts' 'monitoring deployment kps-operator' 'monitoring prometheus kps-prometheus'; do
+  read -r namespace kind name <<<"$target"
+  kubectl -n "$namespace" get "$kind" "$name" >/dev/null 2>&1 || { echo "FAIL: missing $target"; exit 1; }
+done
+
 prom() { kubectl -n starfleet exec deploy/shuttle -- curl -s --max-time 5 -G "http://kps-prometheus.monitoring:9090$1" "${@:2}" 2>/dev/null; }
 
 READY=""

@@ -58,12 +58,8 @@ testing:
     source: testing/wait-for-prometheus.sh
 validation:
   scripts:
-  - name: dashboard-provisioned
-    description: The Scout Overview dashboard is loaded from a labelled ConfigMap and Grafana reports it as provisioned
-    type: file
-    source: validation/validate-dashboard-provisioned.sh
   - name: panels-return-data
-    description: All three panels exist and every panel query returns data through its own data source
+    description: The provisioned dashboard keeps all three panels and every panel query returns data through its own data source
     type: file
     source: validation/validate-panels-data.sh
   - name: data-source-as-code

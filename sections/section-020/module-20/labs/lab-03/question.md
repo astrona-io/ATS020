@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The `logs` Collector has working permissions and a scrape target, but its file receiver watches the wrong directory.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the Collector hostPath mount and receiver include pattern.
@@ -15,8 +13,5 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep the DaemonSet, read-only host log mount, container parser, metadata processor and count connector. Keep the Collector logs excluded to avoid collecting its own output.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep the DaemonSet, read-only host log mount, container parser, metadata processor and count connector.
+- Keep the Collector logs excluded to avoid collecting its own output.

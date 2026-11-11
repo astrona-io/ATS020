@@ -26,6 +26,14 @@ for _ in $(seq 1 36); do
 done
 [[ -n "$dashboard" ]] || fail "Grafana has no dashboard with the UID scout-overview"
 
+# The dashboard must stay provisioned from a ConfigMap with the sidecar label.
+# A copy saved in the Grafana database does not survive a pod replacement.
+holder=$(kubectl get configmap -A -l grafana_dashboard=1 -o json |
+  jq -r '[.items[] | select([.data[]? | try (fromjson | .uid) catch empty] | index("scout-overview")) | .metadata.name] | join(",")')
+[[ -n "$holder" ]] || fail "no ConfigMap with the label grafana_dashboard=1 holds the dashboard scout-overview; keep the dashboard in its labelled ConfigMap"
+[[ "$(echo "$dashboard" | jq -r '.meta.provisioned // empty')" == "true" ]] ||
+  fail "Grafana does not report the dashboard scout-overview as provisioned; fix the ConfigMap instead of saving the dashboard in Grafana"
+
 for title in "Request rate" "Error ratio" "Latency"; do
   echo "$dashboard" | jq -e --arg t "$title" '[.dashboard.panels[] | select(.title==$t)] | length == 1' >/dev/null ||
     fail "the panel '$title' is missing; fix the dashboard, do not delete panels"

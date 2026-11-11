@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The `probe` Deployment in `starfleet` is unhealthy. The `shuttle` client and the Service `probe` are available for testing.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the pod events and its liveness probe port and container port. Identify the cause of the failure.
@@ -15,8 +13,6 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep `probe`, its Service and `shuttle`, with one replica each. Keep a liveness probe. Do not disable health checks or change the image.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep `probe`, its Service and `shuttle`, with one replica each.
+- Keep a liveness probe.
+- Do not disable health checks or change the image.

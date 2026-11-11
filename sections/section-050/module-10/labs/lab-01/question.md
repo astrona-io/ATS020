@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The `scout` Deployment in `starfleet` is unhealthy. The `shuttle` client and the Service `scout` are available for testing.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Inspect the pod events and its node selector and node labels. Identify the cause of the failure.
@@ -15,8 +13,5 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep `scout`, its Service and `shuttle`, with one replica each. Keep the original image and resource settings.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep `scout`, its Service and `shuttle`, with one replica each.
+- Keep the original image and resource settings.

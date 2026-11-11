@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The `scout` Deployment in `starfleet` has a resource request that does not match its usage. The other workload starts with suitable requests.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Measure the peak CPU and memory usage of `scout` in Prometheus.
@@ -15,8 +13,8 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep `scout` at two replicas and `probe` at one. Keep the traffic loop and memory limits. Memory requests must cover the measured peak and be no higher than four times the peak or `100Mi`, whichever is larger. CPU requests must be positive and no higher than four times the peak or `20m`, whichever is larger. Limits must cover requests and peak usage.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep `scout` at two replicas and `probe` at one.
+- Keep the traffic loop and memory limits.
+- Memory requests must cover the measured peak and be no higher than four times the peak or `100Mi`, whichever is larger.
+- CPU requests must be positive and no higher than four times the peak or `20m`, whichever is larger.
+- Limits must cover requests and peak usage.

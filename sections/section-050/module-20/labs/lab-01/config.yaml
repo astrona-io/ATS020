@@ -34,13 +34,8 @@ testing:
 validation:
   scripts:
   - name: starfleet-creates
-    description: A Deployment can be created in starfleet, and the starfleet-policy webhook answered the request
+    description: A Deployment can be created in starfleet, and the starfleet-policy webhook answered the request; both webhook configurations keep failurePolicy Fail, and the workloads, ServiceMonitor and PrometheusRule
     type: file
     source: validation/validate-starfleet-webhook.sh
-  - name: design-intact
-    description: Both webhook configurations keep failurePolicy Fail, and the workloads, ServiceMonitor and PrometheusRule
-      are still in place
-    type: file
-    source: validation/validate-design-intact.sh
 teardown:
   keepCluster: false

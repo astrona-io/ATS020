@@ -6,8 +6,6 @@ Some requests to `relay` in `starfleet` take about a second. Each request calls 
 
 Find the downstream operation that explains a slow request. The tracing setup works; your task is to diagnose the delay and preserve the evidence.
 
-Allow about 15 minutes for the four tasks, plus cluster startup and span export time.
-
 ## Tasks
 
 1. Find a slow trace with the complete parent chain from the incoming `relay` request, through its outgoing request, to the `scout` request and its internal handler.
@@ -30,9 +28,3 @@ Choose the internal operation doing the delayed work, rather than an enclosing r
 - Inspect the existing workloads and traces. Do not change the applications, traffic generator, instrumentation, Collector, or Jaeger.
 - Export a trace from this lab, not the playground or a course example. Include exactly one trace and both services.
 - Keep Jaeger running until you submit. It uses in-memory storage, and the grader compares your evidence with that stored trace.
-
-## How the answer is checked
-
-The first check compares the saved spans with Jaeger and verifies the complete parent chain across both services. The second checks that your finding identifies the slow internal operation in that evidence and gives its measured duration, within one millisecond for rounding.
-
-Spans arrive in batches. If a result is incomplete, allow more time and search again before saving your evidence.

@@ -119,7 +119,7 @@ The grader accepts either span name, as long as it is spelled exactly as Jaeger 
 kubectl -n starfleet create configmap slow-call --from-literal=service=scout --from-literal=operation="<span name from Jaeger>"
 ```
 
-The watch terminal shows all five checks passing. Press Ctrl-C to stop the watch, then submit once:
+The watch terminal shows all four checks passing. Press Ctrl-C to stop the watch, then submit once:
 
 ```sh
 astrona submit -c sections/section-030/capstone/labs/lab-01

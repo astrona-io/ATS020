@@ -39,13 +39,9 @@ testing:
 validation:
   scripts:
   - name: cargo-limit
-    description: cargo keeps a memory limit that fits its use (256Mi to 1Gi), has no OOMKilled restart and answers
+    description: cargo keeps a memory limit that fits its use (256Mi to 1Gi), has no OOMKilled restart and answers; the workload keeps one replica and its Service, and shuttle keeps its image
       200
     type: file
     source: validation/validate-cargo.sh
-  - name: design-intact
-    description: The workload keeps one replica and its Service, and shuttle keeps its image
-    type: file
-    source: validation/validate-design-intact.sh
 teardown:
   keepCluster: false

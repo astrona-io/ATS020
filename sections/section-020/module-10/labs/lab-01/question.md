@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 The team stores `Scout Overview` (UID `scout-overview`) in `monitoring/dashboard-scout-overview`. Grafana uses the provisioned Prometheus data source (UID `prometheus`).
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Find the dashboard ConfigMap and inspect the sidecar label selector.
@@ -15,8 +13,6 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep all three panels and their queries. Keep the dashboard and data source provisioned from ConfigMaps. Do not save the dashboard in the Grafana database or create a second data source.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep all three panels and their queries.
+- Keep the dashboard and data source provisioned from ConfigMaps.
+- Do not save the dashboard in the Grafana database or create a second data source.

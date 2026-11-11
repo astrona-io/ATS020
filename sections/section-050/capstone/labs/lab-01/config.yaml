@@ -38,6 +38,10 @@ bootstrap:
 
 testing:
   init:
+    - name: verify-start
+      description: Proves nothing is solved at the start and every grader fails
+      type: file
+      source: testing/verify-start.sh
     - name: solution
       description: Reference solution applied by `astrona test`
       type: file
@@ -50,7 +54,7 @@ testing:
 validation:
   scripts:
     - name: cargo-limit
-      description: cargo keeps a memory limit that fits its use (256Mi to 1Gi), has no OOMKilled restart and answers 200
+      description: cargo keeps a memory limit that fits its use (256Mi to 1Gi), has no OOMKilled restart and answers 200; the workloads, the webhook configuration, the webhook server and shuttle are still in place
       type: file
       source: validation/validate-cargo.sh
     - name: beacon-image
@@ -65,10 +69,6 @@ validation:
       description: A Deployment can be created in starfleet and the webhook server logs the request
       type: file
       source: validation/validate-webhook.sh
-    - name: design-intact
-      description: The workloads, the webhook configuration, the webhook server and shuttle are still in place
-      type: file
-      source: validation/validate-design-intact.sh
 
 teardown:
   keepCluster: false

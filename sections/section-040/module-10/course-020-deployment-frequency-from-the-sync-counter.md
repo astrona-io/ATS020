@@ -31,7 +31,7 @@ promql 'argocd_app_sync_total{name="scout"}'
 {"metric":{"__name__":"argocd_app_sync_total","name":"scout","phase":"Succeeded"},"value":"10"}
 ```
 
-There is one series, with `phase="Succeeded"`. The `phase` label says how the sync operation ended. Argo CD records `Succeeded` when it applied the manifests to the cluster without an error. It records `Failed` or `Error` when the apply itself failed, for example when a manifest is not valid. The counter reads `10`, the number of deployments in the Application history.
+There is one series, with `phase="Succeeded"`. The `phase` label says how the sync operation ended. Argo CD records `Succeeded` when it applied the manifests to the cluster without an error. Sync operations can also fail on invalid manifests or failed hooks; their phase is separate from the later health of the application. The counter reads `10`, the number of deployments in the Application history.
 
 ## Count the deployments in a window
 

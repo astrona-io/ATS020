@@ -24,7 +24,7 @@ curl -s "http://127.0.0.1:3000/api/v1/repos/starfleet/starfleet-deploy/raw/scout
 21:          image: ghcr.io/stefanprodan/podinfo:6.17.0-missing
 ```
 
-The tag `6.17.0-missing` does not exist in the image registry. When this commit is deployed, the kubelet cannot pull the image, and the new pods stay in `ImagePullBackOff`. Argo CD does not care: it applied the manifest exactly as Git describes it, so the sync operation ends with the phase `Succeeded`. Ask Prometheus for syncs that ended in `Failed` or `Error`. Define the `promql` helper first, if your shell is new:
+The tag `6.17.0-missing` does not exist in the image registry. When this commit is deployed, the kubelet cannot pull the image, and the new pods stay in `ImagePullBackOff`. In this fixture the sync operation completes with phase `Succeeded`, even though the resulting workload later becomes unhealthy. Ask Prometheus for syncs that ended in `Failed` or `Error`. Define the `promql` helper first, if your shell is new:
 
 ```sh
 promql() {
@@ -59,7 +59,7 @@ The Application was `Degraded` for 3 scrapes. The health status is the signal th
 
 A series for `health_status="Degraded"` exists only while the Application is degraded. Outside those moments the query returns nothing, and a function such as `changes()` has nothing to count. The fix is to build a flag that is always present: `1` while the Application is `Degraded` and `0` otherwise. The second part of the expression below takes any `argocd_app_info` series of the Application and multiplies it by `0`. The `or` operator uses it when the first part has no series. Both sides use `max by (name)` to leave one series.
 
-The flag is `0` while the Application is healthy. Each failed deployment flips the flag from `0` to `1` when the health goes `Degraded` and back to `0` when it recovers. That is two changes for each failure. The function `changes()` counts how often a value changed in a range. A subquery `[6h:15s]` evaluates the flag every 15 seconds over the last 6 hours, so `changes()` can run on it. Divide the number of changes by two:
+The flag is `0` while the Application is healthy. In this seeded history, each known failed deployment produces one complete `0` to `1` to `0` episode. That is two changes for each failure. The function `changes()` counts how often a value changed in a range. A subquery `[6h:15s]` evaluates the flag every 15 seconds over the last 6 hours, so `changes()` can run on it. Divide the number of changes by two:
 
 ```sh
 promql 'sum(changes((max by (name) (argocd_app_info{name="scout",health_status="Degraded"}) or max by (name) (argocd_app_info{name="scout"}) * 0)[6h:15s])) / 2'
@@ -111,13 +111,17 @@ promql 'dora:change_failure_rate:ratio6h'
 
 The change failure rate is `0.22`: two failures out of nine counted deployments. The count is nine and not ten because `increase()` sees the counter grow from `1` to `10`, and it has no sample at `0`. If a scrape was late and the counter started at `2`, the count is eight and the rate is `0.25`. Both values are correct for the samples Prometheus holds, so read the rate as about `0.2` to `0.25`. A rate near `0.33` or higher means a third deployment went `Degraded`, and that is a different problem: the seed history has exactly two bad commits. If the query returns nothing, wait another minute.
 
+## Limits of the estimate
+
+The seeded history has two complete, observed degraded episodes and no unrelated incidents. Outside this fixture, an episode can cross the query boundary, a scrape can miss a transition, or a runtime incident can degrade the service without a deployment. Several failed changes can also occur during one degraded episode. Treat `changes() / 2` as a teaching estimate under these assumptions; use deployment and incident records for a defensible change failure rate.
+
 ## Common pitfalls
 
 > [!WARNING]
-> - **Counting `phase=~"Failed|Error"`.** Argo CD records a failed sync only when it cannot apply the manifest. A bad image tag, a failing probe or a crash loop still ends in `Succeeded`. The query returns nothing and the rate is `0`.
+> - **Counting only `phase=~"Failed|Error"`.** Sync operations can fail on application errors or hooks. A successfully applied change can also leave an unhealthy workload. This fixture has successful syncs and two subsequent degraded episodes.
 > - **Running `changes()` on the bare `Degraded` series.** The series exists only while the Application is degraded, so there is no flip to count. Build the always-present flag with `or ... * 0`.
 > - **Skipping `max by (name)` before `or`.** Without it the `or` branch keeps one series for each health and sync status combination, and the result has several series instead of one.
-> - **Forgetting to divide by two.** One failure flips the flag twice.
+> - **Treating health transitions as a universal failure count.** Division by two assumes complete sampled episodes with healthy values at both window boundaries. Correlate health incidents with deployment records before treating them as failed changes.
 > - **A hard-coded number.** A rule such as `vector(2)` shows the right value today and the wrong one after the next failure.
 
 ## Your mission: Repair The Change Failure Rate Rule

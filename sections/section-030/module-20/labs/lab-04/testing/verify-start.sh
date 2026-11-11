@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
-# Confirm the intended fault and prove the injection grader rejects it.
+# Confirm the intended fault and prove that every grader rejects it.
 set -euo pipefail
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GRADER=""
-for candidate in "$SCRIPT_DIR/../validation/validate-injection.sh" "./validation/validate-injection.sh"; do
-  [ -f "$candidate" ] && { GRADER="$candidate"; break; }
-done
-[ -n "$GRADER" ] || { echo "FAIL: injection grader not found" >&2; exit 1; }
+lab_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pod=$(kubectl -n starfleet get pods -l app=relay -o json | jq '.items[] | select(.metadata.deletionTimestamp == null)')
 kubectl -n starfleet get instrumentation nodejs -o json | jq -e '.spec.propagators == ["baggage"]' >/dev/null
 printf '%s' "$pod" | jq -e '.spec.initContainers | any(.name == "opentelemetry-auto-instrumentation-nodejs")' >/dev/null
 printf '%s' "$pod" | jq -e '.spec.containers[0].env | any(.name == "OTEL_PROPAGATORS" and .value == "baggage")' >/dev/null
-if bash "$GRADER"; then
-  echo "FAIL: the unfinished starting state passed the injection grader" >&2
-  exit 1
-fi
-echo "PASS: the intended starting fault is present and the grader rejects it"
+# Nothing is solved at the start: every grader must fail on the untouched lab
+# with an explicit grading failure. Retry delays are skipped, because this
+# check only needs the failure.
+output=$(mktemp)
+trap 'rm -f "$output"' EXIT
+problems=0
+for grader in "$lab_dir"/validation/validate-*.sh; do
+  if (sleep() { :; }; export -f sleep; bash "$grader") >"$output" 2>&1; then
+    cat "$output"; echo "FAIL: $(basename "$grader") passed on the untouched lab"; problems=1
+  elif ! grep -q '^FAIL:' "$output"; then
+    cat "$output"; echo "FAIL: $(basename "$grader") gave no explicit grading failure"; problems=1
+  fi
+done
+[ "$problems" = 0 ] || exit 1
+echo 'PASS: the intended fault is present, and every grader fails on the untouched lab'

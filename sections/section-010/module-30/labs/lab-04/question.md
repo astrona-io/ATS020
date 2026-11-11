@@ -4,8 +4,6 @@ Solve this question on: `terminal`
 
 Two diagnostic alerts fire: `ScoutUnavailable` is critical and `ScoutLatency` is warning. The team wants the critical alert to suppress the related warning automatically.
 
-Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection add time.
-
 ## Tasks
 
 1. Read both firing diagnostic alerts and their labels.
@@ -15,8 +13,6 @@ Allow 10–15 minutes for the tasks. Cluster startup and telemetry collection ad
 
 ## Constraints
 
-Keep both diagnostic rules and the existing route. Match the critical source and warning target by `team=scout-inhibit`, and require equal `namespace` and `team`. Do not create a silence or remove an alert.
-
-## Verification
-
-The grader checks the running system. Submit after the rollout and any telemetry updates have finished.
+- Keep both diagnostic rules and the existing route.
+- Match the critical source and warning target by `team=scout-inhibit`, and require equal `namespace` and `team`.
+- Do not create a silence or remove an alert.

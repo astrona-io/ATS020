@@ -7,12 +7,18 @@ kubectl -n webhook-system get secret outpost-policy-tls -o jsonpath='{.data.tls\
 if openssl x509 -in "$cert" -checkend 0 -noout; then rm -f "$cert"; fail 'the serving certificate is not expired'; fi
 rm -f "$cert"
 
+# Nothing is solved at the start: every grader must fail on the untouched lab
+# with an explicit grading failure. Retry delays are skipped, because this
+# check only needs the failure.
 output=$(mktemp)
 trap 'rm -f "$output"' EXIT
-# The fault was checked above. Skip retry delays only for this negative check.
-if (sleep() { :; }; export -f sleep; bash "$lab_dir/validation/validate-outpost-webhook.sh") >"$output" 2>&1; then
-  cat "$output"
-  fail "the unfinished lab passed its grader"
-fi
-grep -q '^FAIL:' "$output" || { cat "$output"; fail "grader failed without a grading result"; }
-echo 'PASS: intended fault is present and the unfinished lab fails grading'
+problems=0
+for grader in "$lab_dir"/validation/validate-*.sh; do
+  if (sleep() { :; }; export -f sleep; bash "$grader") >"$output" 2>&1; then
+    cat "$output"; echo "FAIL: $(basename "$grader") passed on the untouched lab"; problems=1
+  elif ! grep -q '^FAIL:' "$output"; then
+    cat "$output"; echo "FAIL: $(basename "$grader") gave no explicit grading failure"; problems=1
+  fi
+done
+[ "$problems" = 0 ] || exit 1
+echo 'PASS: the intended fault is present, and every grader fails on the untouched lab'

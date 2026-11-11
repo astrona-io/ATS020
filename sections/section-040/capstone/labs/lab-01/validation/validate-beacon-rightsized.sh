@@ -13,6 +13,35 @@ set -uo pipefail
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
+# The design must stay (checked first, before the task): the Application scout
+# is healthy with its history, scout and beacon are ready, and nothing was
+# replaced.
+APP="$(kubectl -n argocd get application scout -o json 2>/dev/null)" || fail "the Argo CD Application scout is missing (do not delete it)"
+HISTORY="$(printf '%s' "$APP" | jq '.status.history | length')"
+[ "$HISTORY" -ge 10 ] || fail "the Application scout has $HISTORY history entries, expected at least 10 (do not recreate it)"
+HEALTH="$(printf '%s' "$APP" | jq -r '.status.health.status')"
+[ "$HEALTH" = "Healthy" ] || fail "the Application scout is $HEALTH, expected Healthy"
+
+check_deployment() {
+  local name="$1" want="$2" json spec ready
+  json="$(kubectl -n starfleet get deployment "$name" -o json 2>/dev/null)" || fail "Deployment $name is missing"
+  spec="$(printf '%s' "$json" | jq '.spec.replicas')"
+  ready="$(printf '%s' "$json" | jq '.status.readyReplicas // 0')"
+  [ "$spec" = "$want" ] || fail "Deployment $name has $spec replicas, expected $want"
+  [ "$ready" = "$want" ] || fail "Deployment $name has $ready ready replicas, expected $want"
+}
+check_deployment scout 3
+check_deployment beacon 1
+check_deployment shuttle 1
+
+CODE=""
+for attempt in $(seq 1 12); do
+  CODE="$(kubectl -n starfleet exec deploy/shuttle -- curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://scout.starfleet.svc.cluster.local:9898/ 2>/dev/null)"
+  [ "$CODE" = "200" ] && break
+  sleep 5
+done
+[ "$CODE" = "200" ] || fail "shuttle gets '${CODE:-no answer}' from scout, expected 200"
+
 prom() {
   kubectl get --raw "/api/v1/namespaces/monitoring/services/kps-prometheus:9090/proxy/api/v1/query?query=$1" 2>/dev/null \
     | jq -r '.data.result[0].value[1] // empty' 2>/dev/null
