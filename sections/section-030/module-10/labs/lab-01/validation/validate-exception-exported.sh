@@ -26,14 +26,24 @@ check_design_kept() {
 
 check_design_kept
 
-export_file="${ATS_EXCEPTION_FILE:-/tmp/ats-020-exception.json}"
-[ -s "$export_file" ] || fail "$export_file does not exist or is empty"
+# The learner saves the file in /workspace of `astrona shell`, which is
+# ~/.astrona/runtime/<lab>/work on the host where graders run. The reference
+# solution writes /tmp on the host.
+export_file="${ATS_EXCEPTION_FILE:-}"
+if [ -z "$export_file" ]; then
+  for candidate in "$HOME"/.astrona/runtime/*ats-020-lab-030-01*/work/ats-020-exception.json /tmp/ats-020-exception.json; do
+    [ -s "$candidate" ] && { export_file="$candidate"; break; }
+  done
+fi
+[ -n "$export_file" ] && [ -s "$export_file" ] || fail "/workspace/ats-020-exception.json does not exist or is empty"
+# One event object is the answer; an array of events is accepted too.
+events="$(jq -c 'if type == "object" then [.] else . end' "$export_file" 2>/dev/null)"
 jq -e '
   type == "array" and length >= 1 and
   all(.[]; type == "object" and .name == "exception" and
     ([.attributes[]?.key] | (index("exception.type") != null and index("exception.message") != null and index("exception.stacktrace") != null)))
-' "$export_file" >/dev/null 2>&1 \
-  || fail "$export_file must be a JSON array of span events named exception, each with exception.type, exception.message and exception.stacktrace, as /api/v3/traces returns them"
+' <<<"${events:-null}" >/dev/null 2>&1 \
+  || fail "$export_file must be the exception span event as /api/v3/traces/<TRACE_ID> returns it: a JSON object named exception with exception.type, exception.message and exception.stacktrace"
 
 # pair: one "type|message" string for an exception event.
 pair='(([.attributes[] | select(.key == "exception.type") | .value.stringValue] | first // "") + "|" + ([.attributes[] | select(.key == "exception.message") | .value.stringValue] | first // ""))'
@@ -48,6 +58,6 @@ for attempt in 1 2 3; do
   sleep 2
 done
 [ -n "$live" ] || fail "the running Jaeger returns no exception event for probe; send its spans to Jaeger first, then export them"
-jq -e --argjson live "$live" "all(.[]; ($pair) as \$event | \$live | index(\$event) != null)" "$export_file" >/dev/null 2>&1 \
+jq -e --argjson live "$live" "all(.[]; ($pair) as \$event | \$live | index(\$event) != null)" <<<"$events" >/dev/null 2>&1 \
   || fail "an event in $export_file does not match any exception of probe in the running Jaeger; copy the events from the API response, do not write them by hand"
-echo "PASS: $export_file holds $(jq length "$export_file") exception events of probe that Jaeger also holds"
+echo "PASS: $export_file holds $(jq length <<<"$events") exception events of probe that Jaeger also holds"

@@ -157,6 +157,8 @@ data:
                     response.read()
             except Exception as error:  # noqa: BLE001 - a bad endpoint must not stop the loop
                 print(f"Span export to {endpoint}/v1/traces failed: {error}", flush=True)
+            else:
+                print(f"Span sent: trace_id={span['traceId']}", flush=True)
         time.sleep(2)
 ---
 apiVersion: apps/v1
