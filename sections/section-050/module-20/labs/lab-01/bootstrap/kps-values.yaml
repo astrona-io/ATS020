@@ -1,4 +1,4 @@
-# Trimmed kube-prometheus-stack 92.22.0 for the platform-faults playground: the
+# Trimmed kube-prometheus-stack 93.3.0 for the platform-faults playground: the
 # Prometheus Operator and one Prometheus. Alertmanager, Grafana, node-exporter,
 # kube-state-metrics, the default rules and the scrape jobs for Kubernetes
 # components are off to save memory. The chart's own admission webhook is off,

@@ -6,7 +6,7 @@
 - **Type:** Astrona playground — clean environment, no task, no grading
 
 A single-node kind cluster (`kindest/node:v1.35.8`) with a trimmed
-kube-prometheus-stack 92.22.0 (Prometheus Operator v0.94.1, one Prometheus
+kube-prometheus-stack 93.3.0 (Prometheus Operator v0.94.1, one Prometheus
 v3.15.0, one Alertmanager v0.34.1 with the chart's default configuration) in
 `monitoring`, installed by `bootstrap/prepare.sh` with Helm 4.3.2. `scout`
 (podinfo 6.17.0) in `starfleet` with a ServiceMonitor, `shuttle` sending one

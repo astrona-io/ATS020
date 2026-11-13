@@ -24,7 +24,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install Helm if missing, Grafana 13.2.3 from a trimmed kube-prometheus-stack 92.22.0, and the starting dashboard"
+      description: "Install Helm if missing, Grafana 13.2.3 from a trimmed kube-prometheus-stack 93.3.0, and the starting dashboard"
       type: file
       source: bootstrap/prepare.sh
   manifests:

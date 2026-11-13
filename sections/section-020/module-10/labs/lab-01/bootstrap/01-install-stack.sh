@@ -4,7 +4,7 @@
 #
 # Installs the stack only; the broken dashboard comes from manifests/. This script:
 #   1. puts Helm 4.3.2 on the PATH if it is missing,
-#   2. installs a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator and
+#   2. installs a trimmed kube-prometheus-stack 93.3.0 (Prometheus Operator and
 #      one Prometheus and Grafana) into the `monitoring` namespace,
 #   3. waits until Prometheus and Grafana are ready.
 # The Starfleet workloads, their ServiceMonitors and the traffic loop come from
@@ -12,7 +12,7 @@
 set -euo pipefail
 
 HELM_VERSION="v4.3.2"
-CHART_VERSION="92.22.0"
+CHART_VERSION="93.3.0"
 
 BIN_DIR="$HOME/.astrona/tools/ats020"
 mkdir -p "$BIN_DIR"

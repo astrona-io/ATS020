@@ -7,7 +7,7 @@
 #      its webhook certificate) and waits for it,
 #   2. installs the OpenTelemetry Operator 0.162.0 and waits for its webhook,
 #   3. puts Helm 4.3.2 on the PATH if it is missing and installs a trimmed
-#      kube-prometheus-stack 92.22.0 (Prometheus Operator and one Prometheus)
+#      kube-prometheus-stack 93.3.0 (Prometheus Operator and one Prometheus)
 #      into the `monitoring` namespace.
 # No OpenTelemetryCollector is created: the reader writes it.
 set -euo pipefail
@@ -15,7 +15,7 @@ set -euo pipefail
 CERT_MANAGER_VERSION="v1.21.3"
 OTEL_OPERATOR_VERSION="v0.162.0"
 HELM_VERSION="v4.3.2"
-CHART_VERSION="92.22.0"
+CHART_VERSION="93.3.0"
 
 BIN_DIR="$HOME/.astrona/tools/ats020"
 mkdir -p "$BIN_DIR"

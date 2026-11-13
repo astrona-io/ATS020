@@ -4,7 +4,7 @@ This playground gives you a cluster in which three parts of the platform are bro
 
 ## What's in the box
 
-The cluster runs Kubernetes 1.35.8 on one node. A trimmed kube-prometheus-stack 92.22.0 is installed in the namespace `monitoring`: the Prometheus Operator and one Prometheus. Alertmanager, Grafana, node-exporter and kube-state-metrics are not installed. The bootstrap changes no fault: every fault is still there when you get the terminal.
+The cluster runs Kubernetes 1.35.8 on one node. A trimmed kube-prometheus-stack 93.3.0 is installed in the namespace `monitoring`: the Prometheus Operator and one Prometheus. Alertmanager, Grafana, node-exporter and kube-state-metrics are not installed. The bootstrap changes no fault: every fault is still there when you get the terminal.
 
 | Object | Namespace | What it is |
 | --- | --- | --- |
