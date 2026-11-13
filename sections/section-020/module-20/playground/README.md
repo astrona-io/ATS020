@@ -6,7 +6,7 @@
 - **Type:** Astrona playground — no grading
 
 A single-node kind cluster running Kubernetes 1.35.8, with cert-manager 1.21.3,
-the OpenTelemetry Operator 0.162.0 and a trimmed Prometheus stack (the
+the OpenTelemetry Operator 0.163.0 and a trimmed Prometheus stack (the
 Prometheus Operator and one Prometheus) in `monitoring`. `scout` runs in
 `starfleet`, `probe` runs in `outpost`, and a `shuttle` pod sends steady
 requests, including a `500` response every fourth second. No Collector exists
