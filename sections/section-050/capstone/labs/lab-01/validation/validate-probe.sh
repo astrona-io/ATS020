@@ -9,7 +9,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 
 IMAGE="$(kubectl -n starfleet get deployment probe -o jsonpath='{.spec.template.spec.containers[?(@.name=="probe")].image}' 2>/dev/null)" \
   || fail "Deployment probe is missing in namespace starfleet (fix it, do not delete it)"
-[ "$IMAGE" = "mccutchen/go-httpbin:2.25.0" ] || fail "probe image is '$IMAGE', expected mccutchen/go-httpbin:2.25.0"
+[ "$IMAGE" = "mccutchen/go-httpbin:2.26.0" ] || fail "probe image is '$IMAGE', expected mccutchen/go-httpbin:2.26.0"
 
 PROBE="$(kubectl -n starfleet get deployment probe -o jsonpath='{.spec.template.spec.containers[?(@.name=="probe")].livenessProbe}' 2>/dev/null)"
 [ -n "$PROBE" ] || fail "probe has no livenessProbe. Do not remove the probe: point it at a port and path that the server serves"
