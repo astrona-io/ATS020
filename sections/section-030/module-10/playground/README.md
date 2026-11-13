@@ -6,7 +6,7 @@
 - **Type:** Astrona playground — no grading
 
 A single-node kind cluster running Kubernetes 1.35.8, with cert-manager
-1.21.3, the OpenTelemetry Operator 0.162.0 and Jaeger 2.23.0 (in
+1.21.3, the OpenTelemetry Operator 0.163.0 and Jaeger 2.23.0 (in
 `observability`). The `scout` workload in `starfleet` creates spans and tries
 to send them to a Collector Service that does not exist yet: the reader
 creates the Collector. The `probe` workload is a small Python trace emitter
