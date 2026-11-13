@@ -1,4 +1,4 @@
-# Trimmed kube-prometheus-stack 92.22.0 for the dashboards playground: the
+# Trimmed kube-prometheus-stack 93.3.0 for the dashboards playground: the
 # Prometheus Operator, one Prometheus and Grafana. Grafana's default dashboards
 # and its default Prometheus data source are off, so the reader provisions
 # both from labelled ConfigMaps. Alertmanager, node-exporter,

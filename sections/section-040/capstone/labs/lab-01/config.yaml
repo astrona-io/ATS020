@@ -27,7 +27,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install a trimmed kube-prometheus-stack 92.22.0 with kube-state-metrics, Gitea 28.3.0 and Argo CD 3.6.1, then make the delivery history of the Application scout"
+      description: "Install a trimmed kube-prometheus-stack 93.3.0 with kube-state-metrics, Gitea 28.3.0 and Argo CD 3.6.1, then make the delivery history of the Application scout"
       type: file
       source: bootstrap/01-prepare.sh
   manifests:

@@ -9,7 +9,7 @@ The cluster runs Kubernetes 1.35.8 and takes a few minutes to start.
 | Where | Contents |
 | --- | --- |
 | `kube-system` | metrics-server 0.9.0, installed by the `metricsServer` addon of the `kind` runtime. It serves the Metrics API, so `kubectl top` works. It reads the kubelet every 15 seconds |
-| `monitoring` | A trimmed kube-prometheus-stack 92.22.0: the Prometheus Operator, one Prometheus, kube-state-metrics and the kubelet scrape job (it reads cAdvisor). No Alertmanager, no Grafana, no node exporter. The Service `kps-prometheus` serves port `9090`. Prometheus scrapes every 15 seconds and keeps 6 hours of data. Alerts show in the Prometheus web interface and in `/api/v1/alerts` |
+| `monitoring` | A trimmed kube-prometheus-stack 93.3.0: the Prometheus Operator, one Prometheus, kube-state-metrics and the kubelet scrape job (it reads cAdvisor). No Alertmanager, no Grafana, no node exporter. The Service `kps-prometheus` serves port `9090`. Prometheus scrapes every 15 seconds and keeps 6 hours of data. Alerts show in the Prometheus web interface and in `/api/v1/alerts` |
 | `starfleet` | `scout` (two replicas of `podinfo` 6.17.0, requests `250m` CPU and `256Mi` memory), `probe` (one replica of `go-httpbin` 2.25.0, requests `1m` CPU and `4Mi` memory) and `shuttle` (a client pod that sends traffic in a loop) |
 
 A ServiceMonitor with the label `release: kps` makes Prometheus scrape `scout`. The label is what the Prometheus resource selects. A PrometheusRule needs the same label.

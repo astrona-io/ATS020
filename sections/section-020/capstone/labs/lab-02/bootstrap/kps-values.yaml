@@ -1,4 +1,4 @@
-# Trimmed kube-prometheus-stack 92.22.0 for the incident capstone: the Prometheus
+# Trimmed kube-prometheus-stack 93.3.0 for the incident capstone: the Prometheus
 # Operator, one Prometheus and Grafana. Grafana's default dashboards and default
 # data source are off. Alertmanager, node-exporter, kube-state-metrics, the default
 # rules and the scrape jobs for Kubernetes components are off to save memory.

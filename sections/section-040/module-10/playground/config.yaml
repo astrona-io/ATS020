@@ -29,7 +29,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install Helm if missing, a trimmed kube-prometheus-stack 92.22.0, Gitea 28.3.0 and Argo CD 3.6.1, then make the delivery history of the Application scout"
+      description: "Install Helm if missing, a trimmed kube-prometheus-stack 93.3.0, Gitea 28.3.0 and Argo CD 3.6.1, then make the delivery history of the Application scout"
       type: file
       source: bootstrap/prepare.sh
   manifests:

@@ -1,4 +1,4 @@
-# Trimmed kube-prometheus-stack 92.22.0: only Grafana 13.2.3 and its sidecars.
+# Trimmed kube-prometheus-stack 93.3.0: only Grafana 13.2.3 and its sidecars.
 # Prometheus, the Operator, Alertmanager and the exporters are off to save
 # memory. Grafana's default dashboards and default data source are off too.
 fullnameOverride: kps

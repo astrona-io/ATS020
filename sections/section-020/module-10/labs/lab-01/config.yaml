@@ -22,7 +22,7 @@ runtime:
 bootstrap:
   init:
   - name: install-stack
-    description: Install a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator, one Prometheus and Grafana
+    description: Install a trimmed kube-prometheus-stack 93.3.0 (Prometheus Operator, one Prometheus and Grafana
       13.2.3) in `monitoring`
     type: file
     source: bootstrap/01-install-stack.sh
