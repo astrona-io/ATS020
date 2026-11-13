@@ -9,7 +9,7 @@ The cluster runs Kubernetes 1.35.8. The `monitoring` namespace holds Prometheus 
 | Namespace | Contents |
 | --- | --- |
 | `starfleet` | `scout` (one pod of `podinfo` 6.17.0) and the `shuttle` traffic client |
-| `outpost` | `probe` (one pod of `go-httpbin` 2.25.0), which logs one line per request |
+| `outpost` | `probe` (one pod of `go-httpbin` 2.26.0), which logs one line per request |
 
 Every second `shuttle` sends one request to `scout` and one to `probe`. Every fourth second it also asks `probe` for `/status/500`, so `probe` logs both normal lines and lines with `level=ERROR`. Prometheus selects a ServiceMonitor or PodMonitor only when it carries the label `release: kps`.
 

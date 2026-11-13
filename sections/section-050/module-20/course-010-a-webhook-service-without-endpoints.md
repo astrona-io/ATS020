@@ -32,7 +32,7 @@ Try to create a Deployment in `starfleet`. The command is correct, so the failur
 <!-- astrona:playground:renew -->
 
 ```sh
-kubectl -n starfleet create deployment probe --image=mccutchen/go-httpbin:2.25.0
+kubectl -n starfleet create deployment probe --image=mccutchen/go-httpbin:2.26.0
 ```
 
 ```text
@@ -99,7 +99,7 @@ starfleet-policy-8ktwf   IPv4          8443    10.244.0.10   31s
 The EndpointSlice has an address and port `8443` now. The proof is the behaviour the platform lost. Create the Deployment again, and read the log of the webhook server to see that the API server really called it:
 
 ```sh
-kubectl -n starfleet create deployment probe --image=mccutchen/go-httpbin:2.25.0
+kubectl -n starfleet create deployment probe --image=mccutchen/go-httpbin:2.26.0
 kubectl -n webhook-system logs deploy/starfleet-policy
 ```
 

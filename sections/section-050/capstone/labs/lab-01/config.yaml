@@ -15,7 +15,7 @@ runtime:
       metricsServer: true
     preloadImages:
       - ghcr.io/stefanprodan/podinfo:6.17.0
-      - mccutchen/go-httpbin:2.25.0
+      - mccutchen/go-httpbin:2.26.0
       - node:22-alpine
       - curlimages/curl:8.23.0
 
