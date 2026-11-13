@@ -7,7 +7,7 @@ set -euo pipefail
 
 rm -f /tmp/ats-020-incident-service.txt /tmp/ats-020-incident-path.txt
 
-HELM_VERSION="v4.3.1"
+HELM_VERSION="v4.3.2"
 CHART_VERSION="92.22.0"
 
 BIN_DIR="$HOME/.astrona/tools/ats020"

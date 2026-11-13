@@ -5,7 +5,7 @@
 # manifests/lab-start.yaml.
 set -euo pipefail
 
-HELM_VERSION="v4.3.1"
+HELM_VERSION="v4.3.2"
 CHART_VERSION="92.22.0"
 
 BIN_DIR="$HOME/.astrona/tools/ats020"

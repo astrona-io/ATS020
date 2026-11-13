@@ -3,7 +3,7 @@
 # (`ats-020-capstone-010`).
 #
 # This script:
-#   1. puts Helm 4.3.1 on the PATH if it is missing,
+#   1. puts Helm 4.3.2 on the PATH if it is missing,
 #   2. installs a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator, one
 #      Prometheus and one Alertmanager) into the `monitoring` namespace,
 #   3. waits until Prometheus and Alertmanager are ready.
@@ -12,7 +12,7 @@
 # manifests/monitoring-start.yaml (the faults are the material).
 set -euo pipefail
 
-HELM_VERSION="v4.3.1"
+HELM_VERSION="v4.3.2"
 CHART_VERSION="92.22.0"
 
 BIN_DIR="/usr/local/bin"
