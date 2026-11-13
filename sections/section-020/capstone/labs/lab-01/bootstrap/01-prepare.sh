@@ -6,7 +6,7 @@
 #   1. installs cert-manager 1.21.3 (the OpenTelemetry Operator needs it for
 #      its webhook certificate) and waits for it,
 #   2. installs the OpenTelemetry Operator 0.162.0 and waits for its webhook,
-#   3. puts Helm 4.3.1 on the PATH if it is missing and installs a trimmed
+#   3. puts Helm 4.3.2 on the PATH if it is missing and installs a trimmed
 #      kube-prometheus-stack 92.22.0 (Prometheus Operator, one Prometheus and Grafana)
 #      into the `monitoring` namespace.
 # No OpenTelemetryCollector is created: the learner writes it.
@@ -14,7 +14,7 @@ set -euo pipefail
 
 CERT_MANAGER_VERSION="v1.21.3"
 OTEL_OPERATOR_VERSION="v0.162.0"
-HELM_VERSION="v4.3.1"
+HELM_VERSION="v4.3.2"
 CHART_VERSION="92.22.0"
 
 BIN_DIR="$HOME/.astrona/tools/ats020"
@@ -63,7 +63,7 @@ YAML
   sleep 5
 done
 
-if ! command -v helm >/dev/null 2>&1 || ! helm version --short | grep -q "^v4.3.1"; then
+if ! command -v helm >/dev/null 2>&1 || ! helm version --short | grep -q "^v4.3.2"; then
   WORK="$(mktemp -d)"
   trap 'python3 -c "import shutil,sys; shutil.rmtree(sys.argv[1])" "$WORK"' EXIT
   OS="$(uname -s | tr '[:upper:]' '[:lower:]')"

@@ -3,7 +3,7 @@
 # (`ats-020-playground-040-01`).
 #
 # Environment preparation only; there is no task and no grading. This script:
-#   1. puts Helm 4.3.1 on the PATH if it is missing,
+#   1. puts Helm 4.3.2 on the PATH if it is missing,
 #   2. installs a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator
 #      and one Prometheus) into `monitoring`,
 #   3. installs Gitea 28.3.0 (plumbing: the Git server) into `gitea`,
@@ -18,7 +18,7 @@
 # whole history.
 set -euo pipefail
 
-HELM_VERSION="v4.3.1"
+HELM_VERSION="v4.3.2"
 CHART_VERSION="92.22.0"
 ARGOCD_VERSION="v3.6.1"
 
