@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://astrona.io/courses/certified-cloud-native-platform-engineer-cnpe">
+    <img src="https://astrona.io/courses/certified-cloud-native-platform-engineer-cnpe/domains/ATS020.svg" alt="ATS020: Observability and Operations, part of the Certified Cloud Native Platform Engineer course on Astrona" width="100%">
+  </a>
+</p>
+
 # ATS020 — Observability and Operations (Certified Cloud Native Platform Engineer)
 
 [![Liberapay](https://img.shields.io/badge/Liberapay-Support_Astrona.io-F6C915?logo=liberapay&logoColor=black&style=for-the-badge)](https://liberapay.com/Astrona.io)
