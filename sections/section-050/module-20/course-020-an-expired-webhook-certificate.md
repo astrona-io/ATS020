@@ -17,7 +17,7 @@ Create a Deployment in `outpost`. The Service of this webhook is healthy, so the
 <!-- astrona:playground:renew -->
 
 ```sh
-kubectl -n outpost create deployment probe --image=mccutchen/go-httpbin:2.25.0
+kubectl -n outpost create deployment probe --image=mccutchen/go-httpbin:2.26.0
 ```
 
 ```text
@@ -87,7 +87,7 @@ Write the certificate and key into the Secret `outpost-policy-tls`. The pipe cre
 
 ```sh
 kubectl -n webhook-system create secret tls outpost-policy-tls --cert=tls.crt --key=tls.key --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n outpost create deployment probe --image=mccutchen/go-httpbin:2.25.0
+kubectl -n outpost create deployment probe --image=mccutchen/go-httpbin:2.26.0
 ```
 
 ```text
@@ -116,7 +116,7 @@ outpost-policy-7c95fc9cf7-4425f   1/1     Running       0          1s
 The rollout reports success while the old pod is still `Terminating`. A create in this moment can still reach the old pod and fail with the same `x509` error. Wait about ten seconds, then create the Deployment and read the log of the new server:
 
 ```sh
-kubectl -n outpost create deployment probe --image=mccutchen/go-httpbin:2.25.0
+kubectl -n outpost create deployment probe --image=mccutchen/go-httpbin:2.26.0
 kubectl -n webhook-system logs -l app=outpost-policy
 ```
 

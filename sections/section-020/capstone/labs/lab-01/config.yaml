@@ -11,7 +11,7 @@ runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.8
-    # mccutchen/go-httpbin:2.25.0 is not preloaded; the node pulls it. With
+    # mccutchen/go-httpbin:2.26.0 is not preloaded; the node pulls it. With
     # the containerd image store of Docker 29, go-httpbin and the cert-manager
     # images conflict: whichever is pulled second fails
     # `docker save --platform linux/amd64`, so the preload stops (checked
