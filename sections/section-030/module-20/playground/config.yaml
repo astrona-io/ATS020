@@ -19,7 +19,7 @@ runtime:
       - quay.io/jetstack/cert-manager-controller:v1.21.3
       - quay.io/jetstack/cert-manager-webhook:v1.21.3
       - quay.io/jetstack/cert-manager-cainjector:v1.21.3
-      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.162.0
+      - ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator:0.163.0
       - ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.78.0
       - otel/opentelemetry-collector-contrib:0.165.0
       - jaegertracing/jaeger:2.23.0
@@ -30,7 +30,7 @@ runtime:
 bootstrap:
   init:
     - name: prepare
-      description: "Install cert-manager 1.21.3 and the OpenTelemetry Operator 0.162.0 and wait for their webhooks"
+      description: "Install cert-manager 1.21.3 and the OpenTelemetry Operator 0.163.0 and wait for their webhooks"
       type: file
       source: bootstrap/prepare.sh
   manifests:
