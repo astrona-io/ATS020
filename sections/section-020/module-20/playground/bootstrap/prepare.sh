@@ -5,7 +5,7 @@
 # Environment preparation only; there is no task and no grading. This script:
 #   1. installs cert-manager 1.21.3 (the OpenTelemetry Operator needs it for
 #      its webhook certificate) and waits for it,
-#   2. installs the OpenTelemetry Operator 0.162.0 and waits for its webhook,
+#   2. installs the OpenTelemetry Operator 0.163.0 and waits for its webhook,
 #   3. puts Helm 4.3.2 on the PATH if it is missing and installs a trimmed
 #      kube-prometheus-stack 92.22.0 (Prometheus Operator and one Prometheus)
 #      into the `monitoring` namespace.
@@ -13,7 +13,7 @@
 set -euo pipefail
 
 CERT_MANAGER_VERSION="v1.21.3"
-OTEL_OPERATOR_VERSION="v0.162.0"
+OTEL_OPERATOR_VERSION="v0.163.0"
 HELM_VERSION="v4.3.2"
 CHART_VERSION="92.22.0"
 
