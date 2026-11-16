@@ -1,6 +1,6 @@
 # Explore Logs With Loki And LogQL
 
-Loki stores log lines and indexes only their labels. This playground has Kubernetes 1.35.8, Grafana 13.2.3 and Loki 3.7.9. An OpenTelemetry Collector sends the logs of `outpost` and `starfleet` to Loki with the labels `namespace`, `pod` and `container`. There is no grading.
+Loki stores log lines and indexes only their labels. This playground has Kubernetes 1.35.8, Grafana 13.2.3 and Loki 3.7.10. An OpenTelemetry Collector sends the logs of `outpost` and `starfleet` to Loki with the labels `namespace`, `pod` and `container`. There is no grading.
 
 | Namespace | Contents |
 | --- | --- |

@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://cli.astrona.io/schema/lab-config.schema.json
 #
 # Query Logs With Loki And LogQL (PLAYGROUND).
-# A clean sandbox: Grafana, Loki 3.7.9, a Collector DaemonSet and workloads that
+# A clean sandbox: Grafana, Loki 3.7.10, a Collector DaemonSet and workloads that
 # write log lines. No task, no grading, no `astrona submit`.
 apiVersion: astrona.io/v1
 metadata:
@@ -16,7 +16,7 @@ runtime:
     preloadImages:
       - docker.io/grafana/grafana:13.2.3-distroless
       - quay.io/kiwigrid/k8s-sidecar:2.14.1
-      - grafana/loki:3.7.9
+      - grafana/loki:3.7.10
       - otel/opentelemetry-collector-contrib:0.165.0
       - mccutchen/go-httpbin:2.25.0
       - curlimages/curl:8.23.0
