@@ -18,7 +18,7 @@ runtime:
       - ghcr.io/jkroepke/kube-webhook-certgen:1.8.9
       - docker.io/grafana/grafana:13.2.3-distroless
       - quay.io/kiwigrid/k8s-sidecar:2.14.1
-      - grafana/loki:3.7.9
+      - grafana/loki:3.7.10
       - otel/opentelemetry-collector-contrib:0.165.0
       - python:3.13.18-alpine3.24
       - curlimages/curl:8.23.0

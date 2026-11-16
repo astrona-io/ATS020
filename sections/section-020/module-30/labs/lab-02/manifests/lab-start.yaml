@@ -1,4 +1,4 @@
-# Plumbing: Loki 3.7.9 in single-binary mode and an OpenTelemetry Collector
+# Plumbing: Loki 3.7.10 in single-binary mode and an OpenTelemetry Collector
 # DaemonSet in `logging`. The Collector ships container logs from `outpost` and
 # `starfleet` to Loki over OTLP, with the labels namespace, pod and container.
 apiVersion: v1
@@ -87,7 +87,7 @@ spec:
         fsGroup: 10001
       containers:
         - name: loki
-          image: grafana/loki:3.7.9
+          image: grafana/loki:3.7.10
           args:
             - -config.file=/etc/loki-config/loki.yaml
             - -target=all
