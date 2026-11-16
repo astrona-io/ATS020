@@ -11,7 +11,7 @@ runtime:
   kind:
     image: kindest/node:v1.35.8
     preloadImages:
-    - mccutchen/go-httpbin:2.25.0
+    - mccutchen/go-httpbin:2.26.0
     - curlimages/curl:8.23.0
 bootstrap:
   manifests:

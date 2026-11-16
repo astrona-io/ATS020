@@ -15,7 +15,7 @@ runtime:
     - quay.io/kiwigrid/k8s-sidecar:2.14.1
     - grafana/loki:3.7.9
     - otel/opentelemetry-collector-contrib:0.165.0
-    - mccutchen/go-httpbin:2.25.0
+    - mccutchen/go-httpbin:2.26.0
     - curlimages/curl:8.23.0
 bootstrap:
   init:

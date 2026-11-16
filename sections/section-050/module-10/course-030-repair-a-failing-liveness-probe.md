@@ -25,7 +25,7 @@ Events:
   Type     Reason     Age                From               Message
   ----     ------     ----               ----               -------
   Normal   Scheduled  59s                default-scheduler  Successfully assigned starfleet/probe-5589b495bc-nbt6g to astro-ats-020-playground-050-01-control-plane
-  Normal   Pulled     28s (x4 over 58s)  kubelet            spec.containers{probe}: Container image "mccutchen/go-httpbin:2.25.0" already present on machine and can be accessed by the pod
+  Normal   Pulled     28s (x4 over 58s)  kubelet            spec.containers{probe}: Container image "mccutchen/go-httpbin:2.26.0" already present on machine and can be accessed by the pod
   Normal   Created    28s (x4 over 58s)  kubelet            spec.containers{probe}: Container created
   Normal   Started    28s (x4 over 58s)  kubelet            spec.containers{probe}: Container started
   Warning  Unhealthy  18s (x8 over 53s)  kubelet            spec.containers{probe}: Liveness probe failed: HTTP probe failed with statuscode: 404
