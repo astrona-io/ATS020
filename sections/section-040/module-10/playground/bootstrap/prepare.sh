@@ -7,7 +7,7 @@
 #   2. installs a trimmed kube-prometheus-stack 92.22.0 (Prometheus Operator
 #      and one Prometheus) into `monitoring`,
 #   3. installs Gitea 28.3.0 (plumbing: the Git server) into `gitea`,
-#   4. installs Argo CD 3.6.1 into `argocd` and scales down the parts that
+#   4. installs Argo CD 3.6.3 into `argocd` and scales down the parts that
 #      this module does not use,
 #   5. tells Prometheus to scrape the Argo CD application controller,
 #   6. creates the project `default`, the repository `starfleet-deploy` and the Application `scout`,
@@ -20,7 +20,7 @@ set -euo pipefail
 
 HELM_VERSION="v4.3.2"
 CHART_VERSION="92.22.0"
-ARGOCD_VERSION="v3.6.1"
+ARGOCD_VERSION="v3.6.3"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 find_file() {
